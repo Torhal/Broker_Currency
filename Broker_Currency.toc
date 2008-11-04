@@ -1,9 +1,21 @@
-## Interface: 30000
+﻿## Interface: 30000
 ## Title: Broker: Currency
-## Notes: LDB display of currencies, gold totals and money rate for all characters on a server.
 ## Author: Toadkiller
 ## Version: v3.00.02.00 beta
+## Notes: LDB display of currencies, gold totals and money rate for all characters on a server.
+## Notes-deDE: LDB display of currencies, gold totals and money rate for all characters on a server.
+## Notes-esES: LDB display of currencies, gold totals and money rate for all characters on a server.
+## Notes-esES: LDB display of currencies, gold totals and money rate for all characters on a server.
+## Notes-koKR: 자동으로LDB display of currencies, gold totals and money rate for all characters on a server..
+## Notes-ruRU: Динамические LDB display of currencies, gold totals and money rate for all characters on a server.
+## Notes-zhCN: 一组LDB display of currencies, gold totals and money rate for all characters on a server.。
+## Notes-zhTW: 一組LDB display of currencies, gold totals and money rate for all characters on a server.。
+## DefaultState: enabled
+## UIType: 动作条
+## UIType-zhTW: 動作條
 ## X-Category: Interface Enhancements
+## X-Website: http://www.wowace.com/projects/broker-currency
+## X-Credits: MoneyFu for getting me hooked on seeing my precious gold and soon the periodic calculations.
 ## OptionalDeps: Ace3, LibDataBroker-1.1
 ## SavedVariablesPerCharacter: Broker_CurrencyCharDB
 ## SavedVariables: Broker_CurrencyDB

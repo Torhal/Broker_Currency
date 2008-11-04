@@ -3,6 +3,7 @@
 -- Copyright 2008+ Toadkiller of Proudmoore.
 --
 -- LDB display of currencies, totals and money rate for all characters on a server.
+-- I plan on incorporating some FuBar_MoneyFu style gold tracking so credit to ckknight in advance
 -- http://code.google.com/p/autobar/
 --
 
