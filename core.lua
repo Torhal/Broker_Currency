@@ -350,6 +350,9 @@ function Broker_Currency:InitializeSettings()
 	Broker_Currency:RegisterEvent("TRADE_MONEY_CHANGED", "Update")
 	Broker_Currency:RegisterEvent("SEND_MAIL_MONEY_CHANGED", "Update")
 	Broker_Currency:RegisterEvent("SEND_MAIL_COD_CHANGED", "Update")
+
+	Broker_Currency:UnregisterEvent("PLAYER_ENTERING_WORLD")
 end
 
-Broker_Currency:InitializeSettings()
+Broker_Currency:SetScript("OnEvent", Broker_Currency.InitializeSettings)
+Broker_Currency:RegisterEvent("PLAYER_ENTERING_WORLD")
