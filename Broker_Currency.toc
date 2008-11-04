@@ -1,0 +1,14 @@
+## Interface: 30000
+## Title: Broker: Currency
+## Notes: LDB display of currencies, gold totals and money rate for all characters on a server.
+## Author: Toadkiller
+## Version: v3.00.02.00 beta
+## X-Category: Interface Enhancements
+## OptionalDeps: Ace3, LibDataBroker-1.1
+## SavedVariablesPerCharacter: Broker_CurrencyCharDB
+## SavedVariables: Broker_CurrencyDB
+
+# Libraries
+embeds.xml
+
+core.lua
