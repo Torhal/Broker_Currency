@@ -11,6 +11,7 @@ local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 
 local iconSize = 20
 
+-- The localization goal is to only use existing Blizzard strings and localized Title strings from the toc
 local iconGold = GOLD_AMOUNT_TEXTURE
 local iconSilver = SILVER_AMOUNT_TEXTURE
 local iconCopper = COPPER_AMOUNT_TEXTURE
@@ -57,8 +58,12 @@ do
 end
 
 local sCurrency = CURRENCY
+local sVersion = GetAddOnMetadata("Broker_Currency", "Version")
+
 local sDisplay = DISPLAY
 local sSummary = ACHIEVEMENT_SUMMARY_CATEGORY
+
+local sStatistics = STATISTICS
 local sToday = HONOR_TODAY
 local sYesterday = HONOR_YESTERDAY
 local sLastWeek = HONOR_LASTWEEK
@@ -67,17 +72,22 @@ local playerName = UnitName("player")
 local realmName = GetRealmName()
 
 
-
 local Broker_Currency = CreateFrame("frame", "Broker_CurrencyFrame")
---LibStub("AceEvent-3.0"):Embed(Broker_Currency)
 
-
+-- Data is saved per realm/character in Broker_CurrencyDB
+-- Options are saved per character in Broker_CurrencyCharDB
+-- There is separate settings for display of the broker, and the summary display on the tooltip
 local name, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("Broker_Currency")
 local options = {
 	type = "group",
-	name = sCurrency,
 	args = {
-		header = {
+		header1 = {
+			type = "description",
+			order = 5,
+			name = sVersion,
+			cmdHidden = true
+		},
+		header2 = {
 			type = "description",
 			order = 10,
 			name = sNotes,
@@ -97,7 +107,7 @@ local options = {
 					width = "half",
 					get = function() return Broker_CurrencyCharDB.showSilver end,
 					set = function(_, value)
-						Broker_CurrencyCharDB.showSilver = value
+						Broker_CurrencyCharDB.showSilver = true and value or nil
 						Broker_Currency:Update()
 					end,
 				},
@@ -108,7 +118,7 @@ local options = {
 					width = "half",
 					get = function() return Broker_CurrencyCharDB.showCopper end,
 					set = function(_, value)
-						Broker_CurrencyCharDB.showCopper = value
+						Broker_CurrencyCharDB.showCopper = true and value or nil
 						Broker_Currency:Update()
 					end,
 				},
@@ -128,7 +138,7 @@ local options = {
 					width = "half",
 					get = function() return Broker_CurrencyCharDB.summarySilver end,
 					set = function(_, value)
-						Broker_CurrencyCharDB.summarySilver = value
+						Broker_CurrencyCharDB.summarySilver = true and value or nil
 						Broker_Currency:Update()
 					end,
 				},
@@ -139,7 +149,7 @@ local options = {
 					width = "half",
 					get = function() return Broker_CurrencyCharDB.summaryCopper end,
 					set = function(_, value)
-						Broker_CurrencyCharDB.summaryCopper = value
+						Broker_CurrencyCharDB.summaryCopper = true and value or nil
 						Broker_Currency:Update()
 					end,
 				},
@@ -172,7 +182,8 @@ local function SetOptions(brokerArgs, summaryArgs, tokenInfo, index)
 				return Broker_CurrencyCharDB[key]
 			end,
 			set = function(_, value)
-				local key = brokerName; Broker_CurrencyCharDB[key] = value
+				local key = brokerName
+				Broker_CurrencyCharDB[key] = true and value or nil
 				Broker_Currency:Update()
 			end,
 		}
@@ -187,8 +198,8 @@ local function SetOptions(brokerArgs, summaryArgs, tokenInfo, index)
 				return Broker_CurrencyCharDB[key]
 			end,
 			set = function(_, value)
-				local key = summaryName;
-				Broker_CurrencyCharDB[key] = value
+				local key = summaryName
+				Broker_CurrencyCharDB[key] = true and value or nil
 				Broker_Currency:Update()
 			end,
 		}
@@ -208,16 +219,20 @@ LibStub("AceConfig-3.0"):RegisterOptionsTable("Broker Currency", options)
 Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker Currency", "Broker Currency")
 
 
-local concatList = {}
-function Broker_Currency:CreateMoneyString(money, broker, playerInfo)
-	local copper = money % 100
-	money = (money - copper) / 100
-	local silver = money % 100
-	local gold = floor(money / 100)
-
-	for index in pairs(concatList) do
-		concatList[index] = nil
+local function scrub(t)
+	for i, v in pairs(t) do
+		t[i] = nil
 	end
+end
+
+local concatList = {}
+-- Create the display string for a single line
+-- money is the gold.silver.copper amount
+-- broker is true if it is the broker string, nil if it is the tooltip summary string
+-- playerInfo contains the relevant information
+function Broker_Currency:CreateMoneyString(money, broker, playerInfo)
+	-- Create Strings for the various currencies
+	scrub(concatList)
 
 	if (playerInfo) then
 		for index, tokenInfo in pairs(currencyInfo) do
@@ -231,6 +246,12 @@ function Broker_Currency:CreateMoneyString(money, broker, playerInfo)
 			end
 		end
 	end
+
+	-- Create Strings for gold, silver, copper
+	local copper = money % 100
+	money = (money - copper) / 100
+	local silver = money % 100
+	local gold = floor(money / 100)
 
 	if (gold > 0) then
 		concatList[# concatList + 1] = string.format(iconGold, gold, iconSize, iconSize)
@@ -252,9 +273,10 @@ end
 
 
 function Broker_Currency:Update()
-	local money = GetMoney()
-
 	local playerInfo = Broker_CurrencyDB.realm[realmName][playerName]
+
+	-- Update the current player info
+	local money = GetMoney()
 	playerInfo.money = money
 
 	for index, tokenInfo in pairs(currencyInfo) do
@@ -264,12 +286,28 @@ function Broker_Currency:Update()
 		end
 	end
 
+	-- Display the money string according to the broker settings
 	Broker_Currency.ldb.text = Broker_Currency:CreateMoneyString(money, true, playerInfo)
 end
 
 
+-- Add counts from playerInfo to totalList according to the summary settings this character is interested in
+local function TotalCurrencies(totalList, playerInfo)
+	for summaryName in pairs(Broker_CurrencyCharDB) do
+		local countKey = tonumber(string.match(summaryName, "summary(%d+)"))
+		local count = playerInfo[countKey]
+		if (count) then
+			totalList[countKey] = (totalList[countKey] or 0) + count
+		end
+	end
+end
+-- /dump Broker_CurrencyDB.realm["Proudmoore"]["Bliksem"]
 
+local totalList = {}
+
+-- Handle mouse enter event in our button
 local function OnEnter(button)
+	-- Display tooltip towards the center of the screen from the current quadrant we are in
  	GameTooltip:SetOwner(button, "ANCHOR_NONE")
 	local x, y = button:GetCenter()
 	if (x >= (GetScreenWidth() / 2)) then
@@ -286,23 +324,27 @@ local function OnEnter(button)
 		end
 	end
 
+	-- Display the money string according to the summary settings
 	GameTooltip:AddLine(sCurrency)
 
 	local totalMoney = 0
+	scrub(totalList)
 	for playerName, playerInfo in pairs(Broker_CurrencyDB.realm[realmName]) do
 		local money = playerInfo.money
 		local moneyString = Broker_Currency:CreateMoneyString(money, nil, playerInfo)
 		GameTooltip:AddDoubleLine(string.format("%s: ", playerName), moneyString, nil, nil, nil, 1, 1, 1)
 		totalMoney = totalMoney + money
+		TotalCurrencies(totalList, playerInfo)
 	end
 
 	GameTooltip:AddLine(" ")
-	GameTooltip:AddDoubleLine(sSummary, Broker_Currency:CreateMoneyString(totalMoney), nil, nil, nil, 1, 1, 1)
+	GameTooltip:AddDoubleLine(sSummary, Broker_Currency:CreateMoneyString(totalMoney, nil ,totalList), nil, nil, nil, 1, 1, 1)
 
 	GameTooltip:Show()
 end
 
 
+-- Set up as a LibBroker data source
 Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
 	type = "data source",
 	label = sCurrency,
@@ -321,6 +363,7 @@ Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
 
 
 function Broker_Currency:InitializeSettings()
+-- Set defaults
 	if (not Broker_CurrencyCharDB) then
 		Broker_CurrencyCharDB = {
 			showCopper = true,
@@ -343,16 +386,20 @@ function Broker_Currency:InitializeSettings()
 		realmInfo[playerName] = {}
 	end
 
+	-- Force first update
 	Broker_Currency:Update()
 
+	-- Register for update events
 	Broker_Currency:RegisterEvent("PLAYER_MONEY", "Update")
 	Broker_Currency:RegisterEvent("PLAYER_TRADE_MONEY", "Update")
 	Broker_Currency:RegisterEvent("TRADE_MONEY_CHANGED", "Update")
 	Broker_Currency:RegisterEvent("SEND_MAIL_MONEY_CHANGED", "Update")
 	Broker_Currency:RegisterEvent("SEND_MAIL_COD_CHANGED", "Update")
 
+	-- Done initializing
 	Broker_Currency:UnregisterEvent("PLAYER_ENTERING_WORLD")
 end
 
+-- Initialize on the PLAYER_ENTERING_WORLD event
 Broker_Currency:SetScript("OnEvent", Broker_Currency.InitializeSettings)
 Broker_Currency:RegisterEvent("PLAYER_ENTERING_WORLD")
