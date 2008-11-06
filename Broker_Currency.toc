@@ -5,8 +5,8 @@
 ## Notes: LDB display of currencies, gold totals and money rate for all characters on a server.
 ## Notes-deDE: LDB display of currencies, gold totals and money rate for all characters on a server.
 ## Notes-esES: LDB display of currencies, gold totals and money rate for all characters on a server.
-## Notes-esES: LDB display of currencies, gold totals and money rate for all characters on a server.
-## Notes-koKR: 자동으로LDB display of currencies, gold totals and money rate for all characters on a server..
+## Notes-frFR: LDB display of currencies, gold totals and money rate for all characters on a server.
+## Notes-koKR: 자동으로LDB display of currencies, gold totals and money rate for all characters on a server.
 ## Notes-ruRU: Динамические LDB display of currencies, gold totals and money rate for all characters on a server.
 ## Notes-zhCN: 一组LDB display of currencies, gold totals and money rate for all characters on a server.。
 ## Notes-zhTW: 一組LDB display of currencies, gold totals and money rate for all characters on a server.。
