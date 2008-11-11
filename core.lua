@@ -219,12 +219,6 @@ LibStub("AceConfig-3.0"):RegisterOptionsTable("Broker Currency", options)
 Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker Currency", "Broker Currency")
 
 
-local function scrub(t)
-	for i, v in pairs(t) do
-		t[i] = nil
-	end
-end
-
 local concatList = {}
 -- Create the display string for a single line
 -- money is the gold.silver.copper amount
@@ -232,7 +226,7 @@ local concatList = {}
 -- playerInfo contains the relevant information
 function Broker_Currency:CreateMoneyString(money, broker, playerInfo)
 	-- Create Strings for the various currencies
-	scrub(concatList)
+	wipe(concatList)
 
 	if (playerInfo) then
 		for index, tokenInfo in pairs(currencyInfo) do
@@ -328,7 +322,7 @@ local function OnEnter(button)
 	GameTooltip:AddLine(sCurrency)
 
 	local totalMoney = 0
-	scrub(totalList)
+	wipe(totalList)
 	for playerName, playerInfo in pairs(Broker_CurrencyDB.realm[realmName]) do
 		local money = playerInfo.money
 		local moneyString = Broker_Currency:CreateMoneyString(money, nil, playerInfo)
