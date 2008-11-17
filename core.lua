@@ -1,10 +1,11 @@
 --
 -- Broker_Currency
--- Copyright 2008+ Toadkiller of Proudmoore.
+-- Copyright 2008+ Toadkiller of Proudmoore for the non-statistics code.
+-- The statistics code is 100% ckknight
 --
 -- LDB display of currencies, totals and money rate for all characters on a server.
--- I plan on incorporating some FuBar_MoneyFu style gold tracking so credit to ckknight in advance
--- http://code.google.com/p/autobar/
+-- The statistics stuff (total money today, yesterday, last week) is 100% from FuBar_MoneyFu, credit to ckknight
+-- http://www.wowace.com/projects/broker-currency/
 --
 
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
@@ -16,6 +17,7 @@ local iconGold = GOLD_AMOUNT_TEXTURE
 local iconSilver = SILVER_AMOUNT_TEXTURE
 local iconCopper = COPPER_AMOUNT_TEXTURE
 
+local settingGold = "\124TInterface\\MoneyFrame\\UI-GoldIcon:32:32:2:0\124t"
 local settingSilver = "\124TInterface\\MoneyFrame\\UI-SilverIcon:32:32:2:0\124t"
 local settingCopper = "\124TInterface\\MoneyFrame\\UI-CopperIcon:32:32:2:0\124t"
 
@@ -23,6 +25,7 @@ local SETTING_ICON_STRING = "\124T%s:32:32:2:0\124t"
 local DISPLAY_ICON_STRING1 = "%d\124T"
 local DISPLAY_ICON_STRING2 = ":%d:%d:2:0\124t"
 local currencyInfo = {
+	{},
 	{},
 	{},
 	{itemId = 43307,},
@@ -57,6 +60,9 @@ do
 	end
 end
 
+local playerName = UnitName("player")
+local realmName = GetRealmName()
+
 local sCurrency = CURRENCY
 local sVersion = GetAddOnMetadata("Broker_Currency", "Version")
 
@@ -64,15 +70,31 @@ local sDisplay = DISPLAY
 local sSummary = ACHIEVEMENT_SUMMARY_CATEGORY
 
 local sStatistics = STATISTICS
+local sSession = playerName
 local sToday = HONOR_TODAY
 local sYesterday = HONOR_YESTERDAY
+local sThisWeek = ARENA_THIS_WEEK
 local sLastWeek = HONOR_LASTWEEK
+
+local sPlus = "+"
+local sMinus = "-"
+local sTotal = "="
 
 local playerName = UnitName("player")
 local realmName = GetRealmName()
 
 
-local Broker_Currency = CreateFrame("frame", "Broker_CurrencyFrame")
+Broker_Currency = CreateFrame("frame", "Broker_CurrencyFrame")
+
+
+local function getValue(info)
+	return Broker_CurrencyCharDB[info[# info]]
+end
+
+local function setValue(info, value)
+	Broker_CurrencyCharDB[info[# info]] = true and value or nil
+	Broker_Currency:Update()
+end
 
 -- Data is saved per realm/character in Broker_CurrencyDB
 -- Options are saved per character in Broker_CurrencyCharDB
@@ -80,6 +102,8 @@ local Broker_Currency = CreateFrame("frame", "Broker_CurrencyFrame")
 local name, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("Broker_Currency")
 local options = {
 	type = "group",
+	get = getValue,
+	set = setValue,
 	args = {
 		header1 = {
 			type = "description",
@@ -100,34 +124,71 @@ local options = {
 			inline = true,
 			childGroups = "tree",
 			args = {
+				showGold = {
+					type = "toggle",
+					name = settingGold,
+					order = 1,
+					width = "half",
+					get = getValue,
+					set = setValue,
+				},
 				showSilver = {
 					type = "toggle",
 					name = settingSilver,
 					order = 1,
 					width = "half",
-					get = function() return Broker_CurrencyCharDB.showSilver end,
-					set = function(_, value)
-						Broker_CurrencyCharDB.showSilver = true and value or nil
-						Broker_Currency:Update()
-					end,
 				},
 				showCopper = {
 					type = "toggle",
 					name = settingCopper,
 					order = 2,
 					width = "half",
-					get = function() return Broker_CurrencyCharDB.showCopper end,
-					set = function(_, value)
-						Broker_CurrencyCharDB.showCopper = true and value or nil
-						Broker_Currency:Update()
-					end,
+				},
+			},
+		},
+		statisticsDisplay = {
+			type = "group",
+			name = sStatistics,
+			order = 30,
+			inline = true,
+			childGroups = "tree",
+			args = {
+				summaryPlayerSession = {
+					type = "toggle",
+					name = sSession,
+					order = 1,
+					width = "full",
+				},
+				summaryRealmToday = {
+					type = "toggle",
+					name = sToday,
+					order = 2,
+					width = "full",
+				},
+				summaryRealmYesterday = {
+					type = "toggle",
+					name = sYesterday,
+					order = 3,
+					width = "full",
+				},
+				summaryRealmThisWeek = {
+					type = "toggle",
+					name = sThisWeek,
+					order = 4,
+					width = "full",
+				},
+				summaryRealmLastWeek = {
+					type = "toggle",
+					name = sLastWeek,
+					order = 5,
+					width = "full",
 				},
 			},
 		},
 		summaryDisplay = {
 			type = "group",
 			name = sSummary,
-			order = 30,
+			order = 40,
 			inline = true,
 			childGroups = "tree",
 			args = {
@@ -136,22 +197,12 @@ local options = {
 					name = settingSilver,
 					order = 1,
 					width = "half",
-					get = function() return Broker_CurrencyCharDB.summarySilver end,
-					set = function(_, value)
-						Broker_CurrencyCharDB.summarySilver = true and value or nil
-						Broker_Currency:Update()
-					end,
 				},
 				summaryCopper = {
 					type = "toggle",
 					name = settingCopper,
 					order = 2,
 					width = "half",
-					get = function() return Broker_CurrencyCharDB.summaryCopper end,
-					set = function(_, value)
-						Broker_CurrencyCharDB.summaryCopper = true and value or nil
-						Broker_Currency:Update()
-					end,
 				},
 			},
 		},
@@ -247,7 +298,7 @@ function Broker_Currency:CreateMoneyString(money, broker, playerInfo)
 	local silver = money % 100
 	local gold = floor(money / 100)
 
-	if (gold > 0) then
+	if ((gold > 0) and (Broker_CurrencyCharDB.showGold and broker or not broker)) then
 		concatList[# concatList + 1] = string.format(iconGold, gold, iconSize, iconSize)
 		concatList[# concatList + 1] = " "
 	end
@@ -266,13 +317,41 @@ function Broker_Currency:CreateMoneyString(money, broker, playerInfo)
 end
 
 
-function Broker_Currency:Update()
+local offset
+function Broker_Currency:GetServerOffset()
+	if offset then
+		return offset
+	end
+	local serverHour, serverMinute = GetGameTime()
+	local utcHour = tonumber(date("!%H"))
+	local utcMinute = tonumber(date("!%M"))
+	local ser = serverHour + serverMinute / 60
+	local utc = utcHour + utcMinute / 60
+	offset = floor((ser - utc) * 2 + 0.5) / 2
+	if offset >= 12 then
+		offset = offset - 24
+	elseif offset < -12 then
+		offset = offset + 24
+	end
+	return offset
+end
+
+local function GetToday(self)
+	return floor((time() / 60 / 60 + self:GetServerOffset()) / 24)
+end
+
+function Broker_Currency:Update(event)
+	if (event == "PLAYER_ENTERING_WORLD") then
+		self:InitializeSettings()
+	end
+	local realmInfo = Broker_CurrencyDB.realmInfo[realmName]
 	local playerInfo = Broker_CurrencyDB.realm[realmName][playerName]
+	local money = GetMoney()
 
 	-- Update the current player info
-	local money = GetMoney()
 	playerInfo.money = money
 
+	-- Update Tokens
 	for index, tokenInfo in pairs(currencyInfo) do
 		if (tokenInfo.brokerIcon) then
 			local count = GetItemCount(tokenInfo.itemName)
@@ -282,6 +361,45 @@ function Broker_Currency:Update()
 
 	-- Display the money string according to the broker settings
 	Broker_Currency.ldb.text = Broker_Currency:CreateMoneyString(money, true, playerInfo)
+
+	-- Update Statistics
+	local today = GetToday(self)
+	if not self.lastTime then
+		self.lastTime = today
+	end
+	local cutoffDay = today - 14
+	if (today > self.lastTime) then
+		playerInfo.gained[cutoffDay] = nil
+		playerInfo.spent[cutoffDay] = nil
+		playerInfo.time[cutoffDay] = nil
+		realmInfo.gained[cutoffDay] = nil
+		realmInfo.spent[cutoffDay] = nil
+		realmInfo.time[cutoffDay] = nil
+		playerInfo.gained[today] = playerInfo.gained[today] or {money = 0}
+		playerInfo.spent[today] = playerInfo.spent[today] or {money = 0}
+		playerInfo.time[today] = playerInfo.time[today] or 0
+		realmInfo.gained[today] = realmInfo.gained[today] or {money = 0}
+		realmInfo.spent[today] = realmInfo.spent[today] or {money = 0}
+		realmInfo.time[today] = realmInfo.time[today] or 0
+		self.lastTime = today
+	end
+	if (self.lastMoney < money) then
+		self.gained.money = (self.gained.money or 0) + money - self.lastMoney
+		playerInfo.gained[today].money = (playerInfo.gained[today].money or 0) + money - self.lastMoney
+		realmInfo.gained[today].money = (realmInfo.gained[today].money or 0) + money - self.lastMoney
+	elseif (self.lastMoney > money) then
+		self.spent.money = (self.spent.money or 0) + self.lastMoney - money
+		playerInfo.spent[today].money = (playerInfo.spent[today].money or 0) + self.lastMoney - money
+		realmInfo.spent[today].money = (realmInfo.spent[today].money or 0) + self.lastMoney - money
+	end
+	self.lastMoney = money
+	local now = time()
+	if (not self.savedTime) then
+		self.savedTime = now
+	end
+	playerInfo.time[today] = playerInfo.time[today] + now - self.savedTime
+	realmInfo.time[today] = realmInfo.time[today] + now - self.savedTime
+	self.savedTime = now
 end
 
 
@@ -324,19 +442,124 @@ local function OnEnter(button)
 	local totalMoney = 0
 	wipe(totalList)
 	for playerName, playerInfo in pairs(Broker_CurrencyDB.realm[realmName]) do
-		local money = playerInfo.money
+		local money = playerInfo.money or 0
 		local moneyString = Broker_Currency:CreateMoneyString(money, nil, playerInfo)
 		GameTooltip:AddDoubleLine(string.format("%s: ", playerName), moneyString, nil, nil, nil, 1, 1, 1)
 		totalMoney = totalMoney + money
 		TotalCurrencies(totalList, playerInfo)
 	end
 
+	-- Statistics
+	local charDB = Broker_CurrencyCharDB
+	if (charDB.summaryPlayerSession or charDB.summaryRealmToday or charDB.summaryRealmYesterday or charDB.summaryRealmLastWeek) then
+		GameTooltip:AddLine(" ")
+		GameTooltip:AddLine(sStatistics)
+	end
+
+	-- Session totals
+	local self = Broker_Currency
+	if (charDB.summaryPlayerSession) then
+		GameTooltip:AddLine(" ")
+		GameTooltip:AddLine(playerName)
+
+		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(self.gained.money, nil, nil), nil, nil, nil, 1, 1, 1)
+		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(self.spent.money, nil, nil), nil, nil, nil, 1, 0, 0)
+		local profit = self.gained.money - self.spent.money
+		if (profit >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
+		else
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit, nil, nil), nil, nil, nil, 1, 0, 0)
+		end
+	end
+
+	-- Today totals
+	local realmInfo = Broker_CurrencyDB.realmInfo[realmName]
+	local gained = realmInfo.gained
+	local spent = realmInfo.spent
+	local time = realmInfo.time
+	if (charDB.summaryRealmToday) then
+		GameTooltip:AddLine(" ")
+		GameTooltip:AddLine(sToday)
+
+		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained[self.lastTime].money, nil, nil), nil, nil, nil, 1, 1, 1)
+		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent[self.lastTime].money, nil, nil), nil, nil, nil, 1, 0, 0)
+		local profit = gained[self.lastTime].money - spent[self.lastTime].money
+		if (profit >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
+		else
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit, nil, nil), nil, nil, nil, 1, 0, 0)
+		end
+	end
+
+	-- Yesterday totals
+	if (charDB.summaryRealmYesterday) then
+		GameTooltip:AddLine(" ")
+		GameTooltip:AddLine(sYesterday)
+
+		local yesterday = self.lastTime - 1
+		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained[yesterday].money, nil, nil), nil, nil, nil, 1, 1, 1)
+		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent[yesterday].money, nil, nil), nil, nil, nil, 1, 0, 0)
+		local profit = gained[yesterday].money - spent[yesterday].money
+		if (profit >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
+		else
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit, nil, nil), nil, nil, nil, 1, 0, 0)
+		end
+	end
+
+	-- This Week totals
+	local weekGained = 0
+	local weekSpent = 0
+	local weekTime = 0
+	if (charDB.summaryRealmThisWeek) then
+		for i = self.lastTime - 6, self.lastTime do
+			weekGained = weekGained + gained[i].money or 0
+			weekSpent = weekSpent + spent[i].money or 0
+			weekTime = weekTime + time[i]
+		end
+		GameTooltip:AddLine(" ")
+		GameTooltip:AddLine(sThisWeek)
+
+		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(weekGained, nil, nil), nil, nil, nil, 1, 1, 1)
+		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(weekSpent, nil, nil), nil, nil, nil, 1, 0, 0)
+		local profit = weekGained - weekSpent
+		if (profit >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
+		else
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit, nil, nil), nil, nil, nil, 1, 0, 0)
+		end
+	end
+
+	-- Last Week totals
+	if (charDB.summaryRealmLastWeek) then
+		weekGained = 0
+		weekSpent = 0
+		weekTime = 0
+		for i = self.lastTime - 13, self.lastTime - 7 do
+			weekGained = weekGained + gained[i].money or 0
+			weekSpent = weekSpent + spent[i].money or 0
+			weekTime = weekTime + time[i]
+		end
+		GameTooltip:AddLine(" ")
+		GameTooltip:AddLine(sLastWeek)
+
+		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(weekGained, nil, nil), nil, nil, nil, 1, 1, 1)
+		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(weekSpent, nil, nil), nil, nil, nil, 1, 0, 0)
+		local profit = weekGained - weekSpent
+		if (profit >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
+		else
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit, nil, nil), nil, nil, nil, 1, 0, 0)
+		end
+	end
+
+	-- Totals
 	GameTooltip:AddLine(" ")
-	GameTooltip:AddDoubleLine(sSummary, Broker_Currency:CreateMoneyString(totalMoney, nil ,totalList), nil, nil, nil, 1, 1, 1)
+	GameTooltip:AddDoubleLine(sSummary, Broker_Currency:CreateMoneyString(totalMoney, nil, totalList), nil, nil, nil, 1, 1, 1)
 
 	GameTooltip:Show()
 end
-
+--/dump Broker_CurrencyDB.realm.Proudmoore.Bigudder
 
 -- Set up as a LibBroker data source
 Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
@@ -357,11 +580,15 @@ Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
 
 
 function Broker_Currency:InitializeSettings()
--- Set defaults
+	-- Set defaults
 	if (not Broker_CurrencyCharDB) then
 		Broker_CurrencyCharDB = {
 			showCopper = true,
 			showSilver = true,
+			showGold = true,
+			showToday = true,
+			showYesterday = true,
+			showLastWeek = true,
         }
   	end
 
@@ -371,14 +598,101 @@ function Broker_Currency:InitializeSettings()
 	if (not Broker_CurrencyDB.realm) then
 		Broker_CurrencyDB.realm = {}
 	end
-	local realmInfo = Broker_CurrencyDB.realm[realmName]
-	if (not realmInfo) then
-		realmInfo = {}
-		Broker_CurrencyDB.realm[realmName] = realmInfo
+	if (not Broker_CurrencyDB.realmInfo) then
+		Broker_CurrencyDB.realmInfo = {}
 	end
-	if (not realmInfo[playerName]) then
-		realmInfo[playerName] = {}
+	if (not Broker_CurrencyDB.realmInfo[realmName]) then
+		Broker_CurrencyDB.realmInfo[realmName] = {}
 	end
+
+	if (not Broker_CurrencyDB.realm[realmName]) then
+		Broker_CurrencyDB.realm[realmName] = {}
+	end
+	if (not Broker_CurrencyDB.realm[realmName][playerName]) then
+		Broker_CurrencyDB.realm[realmName][playerName] = {}
+	end
+
+	local realmInfo = Broker_CurrencyDB.realmInfo[realmName]
+	if (not realmInfo.gained or type(realmInfo.gained) ~= "table") then
+		realmInfo.gained = {}
+	end
+	if (not realmInfo.spent or type(realmInfo.spent) ~= "table") then
+		realmInfo.spent = {}
+	end
+	if (not realmInfo.time) then
+		realmInfo.time = {}
+	end
+
+	local playerInfo = Broker_CurrencyDB.realm[realmName][playerName]
+	if (not playerInfo.gained or type(playerInfo.gained) ~= "table") then
+		playerInfo.gained = {}
+	end
+	if (not playerInfo.spent or type(playerInfo.spent) ~= "table") then
+		playerInfo.spent = {}
+	end
+	if (not playerInfo.time) then
+		playerInfo.time = {}
+	end
+
+	-- Initialize statistics
+	self.initialMoney = GetMoney()
+	self.lastMoney = self.initialMoney
+	self.lastTime = GetToday(self)
+	local lastWeek = self.lastTime - 13
+	for day in pairs(playerInfo.gained) do
+		if (day < lastWeek) then
+			playerInfo.gained[day] = nil
+		end
+	end
+	for day in pairs(playerInfo.spent) do
+		if (day < lastWeek) then
+			playerInfo.spent[day] = nil
+		end
+	end
+	for day in pairs(playerInfo.time) do
+		if (day < lastWeek) then
+			playerInfo.time[day] = nil
+		end
+	end
+	for day in pairs(realmInfo.gained) do
+		if (day < lastWeek) then
+			realmInfo.gained[day] = nil
+		end
+	end
+	for day in pairs(realmInfo.spent) do
+		if (day < lastWeek) then
+			realmInfo.spent[day] = nil
+		end
+	end
+	for day in pairs(realmInfo.time) do
+		if (day < lastWeek) then
+			realmInfo.time[day] = nil
+		end
+	end
+	for i = self.lastTime - 13, self.lastTime do
+		if (not playerInfo.gained[i] or type(playerInfo.gained[i]) ~= "table") then
+			playerInfo.gained[i] = {money = 0}
+		end
+		if (not playerInfo.spent[i] or type(playerInfo.spent[i]) ~= "table") then
+			playerInfo.spent[i] = {money = 0}
+		end
+		if (not playerInfo.time[i]) then
+			playerInfo.time[i] = 0
+		end
+		if (not realmInfo.gained[i] or type(realmInfo.gained[i]) ~= "table") then
+			realmInfo.gained[i] = {money = 0}
+		end
+		if (not realmInfo.spent[i] or type(realmInfo.spent[i]) ~= "table") then
+			realmInfo.spent[i] = {money = 0}
+		end
+		if (not realmInfo.time[i]) then
+			realmInfo.time[i] = 0
+		end
+	end
+	self.gained = {money = 0}
+	self.spent = {money = 0}
+	self.sessionTime = time()
+	self.savedTime = time()
 
 	-- Force first update
 	Broker_Currency:Update()
@@ -395,5 +709,5 @@ function Broker_Currency:InitializeSettings()
 end
 
 -- Initialize on the PLAYER_ENTERING_WORLD event
-Broker_Currency:SetScript("OnEvent", Broker_Currency.InitializeSettings)
 Broker_Currency:RegisterEvent("PLAYER_ENTERING_WORLD")
+Broker_Currency:SetScript("OnEvent", Broker_Currency.Update)
