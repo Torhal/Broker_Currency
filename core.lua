@@ -10,8 +10,6 @@
 
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 
-local iconSize = 20
-
 -- The localization goal is to only use existing Blizzard strings and localized Title strings from the toc
 local iconGold = GOLD_AMOUNT_TEXTURE
 local iconSilver = SILVER_AMOUNT_TEXTURE
@@ -59,6 +57,7 @@ do
 		end
 	end
 end
+local settingsSliderIcon = currencyInfo[4].brokerIcon
 
 local playerName = UnitName("player")
 local realmName = GetRealmName()
@@ -96,11 +95,25 @@ local function setValue(info, value)
 	Broker_Currency:Update()
 end
 
+local function setIconSize(info, value)
+	Broker_CurrencyCharDB[info[# info]] = true and value or nil
+	local iconSize = Broker_CurrencyCharDB.iconSize
+	Broker_Currency.options.args.iconSize.name = string.format(settingsSliderIcon, 8, iconSize, iconSize)
+	Broker_Currency:Update()
+end
+
+local function setIconSizeGold(info, value)
+	Broker_CurrencyCharDB[info[# info]] = true and value or nil
+	local iconSize = Broker_CurrencyCharDB.iconSizeGold
+	Broker_Currency.options.args.iconSizeGold.name = string.format(iconGold, 8, iconSize, iconSize)
+	Broker_Currency:Update()
+end
+
 -- Data is saved per realm/character in Broker_CurrencyDB
 -- Options are saved per character in Broker_CurrencyCharDB
 -- There is separate settings for display of the broker, and the summary display on the tooltip
 local name, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("Broker_Currency")
-local options = {
+Broker_Currency.options = {
 	type = "group",
 	get = getValue,
 	set = setValue,
@@ -117,6 +130,20 @@ local options = {
 			name = sNotes,
 			cmdHidden = true
 		},
+		iconSize = {
+			type = "range",
+			order = 10,
+			name = string.format(settingsSliderIcon, 8, 16, 16),
+			min = 1, max = 32, step = 1, bigStep = 1,
+			set = setIconSize,
+		},
+		iconSizeGold = {
+			type = "range",
+			order = 10,
+			name = string.format(iconGold, 8, 16, 16),
+			min = 1, max = 32, step = 1, bigStep = 1,
+			set = setIconSizeGold,
+		},
 		brokerDisplay = {
 			type = "group",
 			name = sDisplay,
@@ -129,8 +156,6 @@ local options = {
 					name = settingGold,
 					order = 1,
 					width = "half",
-					get = getValue,
-					set = setValue,
 				},
 				showSilver = {
 					type = "toggle",
@@ -259,14 +284,14 @@ end
 
 -- Add settings for the various currencies
 do
-	local brokerDisplay = options.args.brokerDisplay.args
-	local summaryDisplay = options.args.summaryDisplay.args
+	local brokerDisplay = Broker_Currency.options.args.brokerDisplay.args
+	local summaryDisplay = Broker_Currency.options.args.summaryDisplay.args
 	for index = 1, # currencyInfo, 1 do
 		SetOptions(brokerDisplay, summaryDisplay, currencyInfo[index], index)
 	end
 end
 
-LibStub("AceConfig-3.0"):RegisterOptionsTable("Broker Currency", options)
+LibStub("AceConfig-3.0"):RegisterOptionsTable("Broker Currency", Broker_Currency.options)
 Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker Currency", "Broker Currency")
 
 
@@ -285,7 +310,7 @@ function Broker_Currency:CreateMoneyString(money, broker, playerInfo)
 				local key = GetKey(tokenInfo.itemId, broker)
 				local count = playerInfo[tokenInfo.itemId] or 0
 				if ((count > 0) and (Broker_CurrencyCharDB[key])) then
-					concatList[# concatList + 1] = string.format(tokenInfo.brokerIcon, count, iconSize, iconSize)
+					concatList[# concatList + 1] = string.format(tokenInfo.brokerIcon, count, Broker_CurrencyCharDB.iconSize, Broker_CurrencyCharDB.iconSize)
 					concatList[# concatList + 1] = " "
 				end
 			end
@@ -299,17 +324,17 @@ function Broker_Currency:CreateMoneyString(money, broker, playerInfo)
 	local gold = floor(money / 100)
 
 	if ((gold > 0) and (Broker_CurrencyCharDB.showGold and broker or not broker)) then
-		concatList[# concatList + 1] = string.format(iconGold, gold, iconSize, iconSize)
+		concatList[# concatList + 1] = string.format(iconGold, gold, Broker_CurrencyCharDB.iconSizeGold, Broker_CurrencyCharDB.iconSizeGold)
 		concatList[# concatList + 1] = " "
 	end
 
 	if ((gold + silver > 0) and (Broker_CurrencyCharDB.showSilver and broker or Broker_CurrencyCharDB.summarySilver and not broker)) then
-		concatList[# concatList + 1] = string.format(iconSilver, silver, iconSize, iconSize)
+		concatList[# concatList + 1] = string.format(iconSilver, silver, Broker_CurrencyCharDB.iconSizeGold, Broker_CurrencyCharDB.iconSizeGold)
 		concatList[# concatList + 1] = " "
 	end
 
 	if ((gold + silver + copper > 0) and (Broker_CurrencyCharDB.showCopper and broker or Broker_CurrencyCharDB.summaryCopper and not broker)) then
-		concatList[# concatList + 1] = string.format(iconCopper, copper, iconSize, iconSize)
+		concatList[# concatList + 1] = string.format(iconCopper, copper, Broker_CurrencyCharDB.iconSizeGold, Broker_CurrencyCharDB.iconSizeGold)
 		concatList[# concatList + 1] = " "
 	end
 
@@ -591,6 +616,13 @@ function Broker_Currency:InitializeSettings()
 			showLastWeek = true,
         }
   	end
+
+	if (not Broker_CurrencyCharDB.iconSize) then
+		Broker_CurrencyCharDB.iconSize = 16
+	end
+	if (not Broker_CurrencyCharDB.iconSizeGold) then
+		Broker_CurrencyCharDB.iconSizeGold = 16
+	end
 
 	if (not Broker_CurrencyDB) then
 		Broker_CurrencyDB = {}
