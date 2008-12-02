@@ -39,6 +39,7 @@ local currencyInfo = {
 	{itemId = 20558,},
 	{itemId = 43589,},
 
+	{itemId = 43228,},
 	{itemId = 43016,},
 	{itemId = 41596,},
 	{itemId = 43228,},
