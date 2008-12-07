@@ -22,28 +22,29 @@ local settingCopper = "\124TInterface\\MoneyFrame\\UI-CopperIcon:32:32:2:0\124t"
 local SETTING_ICON_STRING = "\124T%s:32:32:2:0\124t"
 local DISPLAY_ICON_STRING1 = "%d\124T"
 local DISPLAY_ICON_STRING2 = ":%d:%d:2:0\124t"
+
 local currencyInfo = {
 	{},
 	{},
 	{},
-	{itemId = 43307,},
-	{itemId = 43308,},
-	{itemId = 40753,},
-	{itemId = 40752,},
-	{itemId = 29434,},
+	{itemId = 43307, countFunc = GetHonorCurrency},
+	{itemId = 43308, countFunc = GetArenaCurrency},
+	{itemId = 40753, countFunc = GetItemCount},
+	{itemId = 40752, countFunc = GetItemCount},
+	{itemId = 29434, countFunc = GetItemCount},
 
-	{itemId = 20560,},
-	{itemId = 20559,},
-	{itemId = 29024,},
-	{itemId = 42425,},
-	{itemId = 20558,},
-	{itemId = 43589,},
+	{itemId = 20560, countFunc = GetItemCount},
+	{itemId = 20559, countFunc = GetItemCount},
+	{itemId = 29024, countFunc = GetItemCount},
+	{itemId = 42425, countFunc = GetItemCount},
+	{itemId = 20558, countFunc = GetItemCount},
+	{itemId = 43589, countFunc = GetItemCount},
 
-	{itemId = 43228,},
-	{itemId = 43016,},
-	{itemId = 41596,},
-	{itemId = 43228,},
-	{itemId = 37836,},
+	{itemId = 43228, countFunc = GetItemCount},
+	{itemId = 43016, countFunc = GetItemCount},
+	{itemId = 41596, countFunc = GetItemCount},
+	{itemId = 43228, countFunc = GetItemCount},
+	{itemId = 37836, countFunc = GetItemCount},
 }
 do
 	for index, tokenInfo in pairs(currencyInfo) do
@@ -283,14 +284,6 @@ local function SetOptions(brokerArgs, summaryArgs, tokenInfo, index)
 	end
 end
 
--- Add settings for the various currencies
-do
-	local brokerDisplay = Broker_Currency.options.args.brokerDisplay.args
-	local summaryDisplay = Broker_Currency.options.args.summaryDisplay.args
-	for index = 1, # currencyInfo, 1 do
-		SetOptions(brokerDisplay, summaryDisplay, currencyInfo[index], index)
-	end
-end
 
 LibStub("AceConfig-3.0"):RegisterOptionsTable("Broker Currency", Broker_Currency.options)
 Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker Currency", "Broker Currency")
@@ -312,7 +305,7 @@ function Broker_Currency:CreateMoneyString(money, broker, playerInfo)
 				local count = playerInfo[tokenInfo.itemId] or 0
 				if ((count > 0) and (Broker_CurrencyCharDB[key])) then
 					concatList[# concatList + 1] = string.format(tokenInfo.brokerIcon, count, Broker_CurrencyCharDB.iconSize, Broker_CurrencyCharDB.iconSize)
-					concatList[# concatList + 1] = " "
+					concatList[# concatList + 1] = "  "
 				end
 			end
 		end
@@ -380,7 +373,8 @@ function Broker_Currency:Update(event)
 	-- Update Tokens
 	for index, tokenInfo in pairs(currencyInfo) do
 		if (tokenInfo.brokerIcon) then
-			local count = GetItemCount(tokenInfo.itemName)
+			local count = tokenInfo.countFunc(tokenInfo.itemId)
+--				count = GetItemCount(tokenInfo.itemName)
 			playerInfo[tokenInfo.itemId] = count
 		end
 	end
@@ -727,10 +721,34 @@ function Broker_Currency:InitializeSettings()
 	self.sessionTime = time()
 	self.savedTime = time()
 
+	-- Add faction honor and arena icons
+	local faction = UnitFactionGroup("player")
+	local honorTexture
+	if faction == "Horde" then
+		honorTexture = "Interface\\Icons\\INV_BannerPVP_01"
+	else
+		honorTexture = "Interface\\Icons\\INV_BannerPVP_02"
+	end
+	local tokenInfo = currencyInfo[5]
+	tokenInfo.settingIcon = "\124T" .. honorTexture .. ":32:32:2:0\124t"
+	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. honorTexture .. DISPLAY_ICON_STRING2
+	tokenInfo = currencyInfo[4]
+	tokenInfo.settingIcon = "\124TInterface\\Icons\\Ability_DualWield:32:32:2:0\124t"
+	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\Ability_DualWield" .. DISPLAY_ICON_STRING2
+
+	-- Add settings for the various currencies
+	local brokerDisplay = Broker_Currency.options.args.brokerDisplay.args
+	local summaryDisplay = Broker_Currency.options.args.summaryDisplay.args
+	for index = 1, # currencyInfo, 1 do
+		SetOptions(brokerDisplay, summaryDisplay, currencyInfo[index], index)
+	end
+
 	-- Force first update
 	Broker_Currency:Update()
 
 	-- Register for update events
+	Broker_Currency:RegisterEvent("HONOR_CURRENCY_UPDATE", "Update")
+	Broker_Currency:RegisterEvent("MERCHANT_CLOSED", "Update")
 	Broker_Currency:RegisterEvent("PLAYER_MONEY", "Update")
 	Broker_Currency:RegisterEvent("PLAYER_TRADE_MONEY", "Update")
 	Broker_Currency:RegisterEvent("TRADE_MONEY_CHANGED", "Update")
