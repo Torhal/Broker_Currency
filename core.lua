@@ -729,12 +729,13 @@ function Broker_Currency:InitializeSettings()
 	else
 		honorTexture = "Interface\\Icons\\INV_BannerPVP_02"
 	end
-	local tokenInfo = currencyInfo[5]
+	local tokenInfo = currencyInfo[4]
 	tokenInfo.settingIcon = "\124T" .. honorTexture .. ":32:32:2:0\124t"
 	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. honorTexture .. DISPLAY_ICON_STRING2
-	tokenInfo = currencyInfo[4]
-	tokenInfo.settingIcon = "\124TInterface\\Icons\\Ability_DualWield:32:32:2:0\124t"
-	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\Ability_DualWield" .. DISPLAY_ICON_STRING2
+	local arenaTexture = [[Interface\PVPFrame\PVP-ArenaPoints-Icon]]
+	tokenInfo = currencyInfo[5]
+	tokenInfo.settingIcon = "\124T" .. arenaTexture .. ":32:32:2:0\124t"
+	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. arenaTexture .. DISPLAY_ICON_STRING2
 
 	-- Add settings for the various currencies
 	local brokerDisplay = Broker_Currency.options.args.brokerDisplay.args
