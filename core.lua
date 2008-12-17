@@ -15,9 +15,9 @@ local iconGold = GOLD_AMOUNT_TEXTURE
 local iconSilver = SILVER_AMOUNT_TEXTURE
 local iconCopper = COPPER_AMOUNT_TEXTURE
 
-local settingGold = "\124TInterface\\MoneyFrame\\UI-GoldIcon:32:32:2:0\124t"
-local settingSilver = "\124TInterface\\MoneyFrame\\UI-SilverIcon:32:32:2:0\124t"
-local settingCopper = "\124TInterface\\MoneyFrame\\UI-CopperIcon:32:32:2:0\124t"
+local settingGold = "\124TInterface\\MoneyFrame\\UI-GoldIcon:32:32:1:0\124t"
+local settingSilver = "\124TInterface\\MoneyFrame\\UI-SilverIcon:32:32:1:0\124t"
+local settingCopper = "\124TInterface\\MoneyFrame\\UI-CopperIcon:32:32:1:0\124t"
 
 local SETTING_ICON_STRING = "\124T%s:32:32:2:0\124t"
 local DISPLAY_ICON_STRING1 = "%d\124T"
@@ -40,12 +40,13 @@ local currencyInfo = {
 	{itemId = 20558, countFunc = GetItemCount},
 	{itemId = 43589, countFunc = GetItemCount},
 
-	{itemId = 43228, countFunc = GetItemCount},
 	{itemId = 43016, countFunc = GetItemCount},
 	{itemId = 41596, countFunc = GetItemCount},
 	{itemId = 43228, countFunc = GetItemCount},
 	{itemId = 37836, countFunc = GetItemCount},
 }
+local arenaTexture = [[Interface\PVPFrame\PVP-ArenaPoints-Icon]]
+local settingsSliderIcon
 do
 	for index, tokenInfo in pairs(currencyInfo) do
 		local itemId = tokenInfo.itemId
@@ -53,13 +54,18 @@ do
 			local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture = GetItemInfo(itemId)
 			if (itemTexture) then
 				tokenInfo.itemName = itemName
-				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":32:32:2:0\124t"
+				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":32:32:1:0\124t"
 				tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
 			end
 		end
 	end
+
+	-- Use the arena icon instead of a boj clone
+	local tokenInfo = currencyInfo[5]
+	tokenInfo.settingIcon = "\124T" .. arenaTexture .. ":32:32:1:0\124t"
+	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. arenaTexture .. DISPLAY_ICON_STRING2
+	settingsSliderIcon = tokenInfo.brokerIcon
 end
-local settingsSliderIcon = currencyInfo[4].brokerIcon
 
 local playerName = UnitName("player")
 local realmName = GetRealmName()
@@ -721,21 +727,17 @@ function Broker_Currency:InitializeSettings()
 	self.sessionTime = time()
 	self.savedTime = time()
 
-	-- Add faction honor and arena icons
+	-- Add faction honor icons
 	local faction = UnitFactionGroup("player")
 	local honorTexture
 	if faction == "Horde" then
-		honorTexture = "Interface\\Icons\\INV_BannerPVP_01"
+		honorTexture = [[Interface\PVPFrame\PVP-Currency-Horde]]
 	else
-		honorTexture = "Interface\\Icons\\INV_BannerPVP_02"
+		honorTexture = [[Interface\PVPFrame\PVP-Currency-Alliance]]
 	end
 	local tokenInfo = currencyInfo[4]
-	tokenInfo.settingIcon = "\124T" .. honorTexture .. ":32:32:2:0\124t"
+	tokenInfo.settingIcon = "\124T" .. honorTexture .. ":32:32:1:0\124t"
 	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. honorTexture .. DISPLAY_ICON_STRING2
-	local arenaTexture = [[Interface\PVPFrame\PVP-ArenaPoints-Icon]]
-	tokenInfo = currencyInfo[5]
-	tokenInfo.settingIcon = "\124T" .. arenaTexture .. ":32:32:2:0\124t"
-	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. arenaTexture .. DISPLAY_ICON_STRING2
 
 	-- Add settings for the various currencies
 	local brokerDisplay = Broker_Currency.options.args.brokerDisplay.args
