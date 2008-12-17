@@ -120,9 +120,11 @@ end
 -- Data is saved per realm/character in Broker_CurrencyDB
 -- Options are saved per character in Broker_CurrencyCharDB
 -- There is separate settings for display of the broker, and the summary display on the tooltip
-local name, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("Broker_Currency")
+local sName, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("Broker_Currency")
+local sName = GetAddOnMetadata("Broker_Currency", "X-BrokerName")
 Broker_Currency.options = {
 	type = "group",
+	name = sName,
 	get = getValue,
 	set = setValue,
 	args = {
@@ -290,9 +292,23 @@ local function SetOptions(brokerArgs, summaryArgs, tokenInfo, index)
 	end
 end
 
+local AceCfgReg = LibStub("AceConfigRegistry-3.0")
+local AceCfg = LibStub("AceConfig-3.0")
+local brokerOptions = AceCfgReg:GetOptionsTable("Broker", "dialog", "LibDataBroker-1.1")
+if (not brokerOptions) then
+	brokerOptions = {
+		type = "group",
+		name = "Broker",
+		childGroups = "tree",
+		args = {
+		}
+	}
+	AceCfg:RegisterOptionsTable("Broker", brokerOptions)
+end
 
-LibStub("AceConfig-3.0"):RegisterOptionsTable("Broker Currency", Broker_Currency.options)
-Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker Currency", "Broker Currency")
+brokerOptions.args.Broker_Currency = Broker_Currency.options
+AceCfgReg:NotifyChange("Broker")
+Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker", "Broker")
 
 
 local concatList = {}
