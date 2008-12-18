@@ -15,11 +15,11 @@ local iconGold = GOLD_AMOUNT_TEXTURE
 local iconSilver = SILVER_AMOUNT_TEXTURE
 local iconCopper = COPPER_AMOUNT_TEXTURE
 
-local settingGold = "\124TInterface\\MoneyFrame\\UI-GoldIcon:32:32:1:0\124t"
-local settingSilver = "\124TInterface\\MoneyFrame\\UI-SilverIcon:32:32:1:0\124t"
-local settingCopper = "\124TInterface\\MoneyFrame\\UI-CopperIcon:32:32:1:0\124t"
+local settingGold = "\124TInterface\\MoneyFrame\\UI-GoldIcon:24:24:1:0\124t"
+local settingSilver = "\124TInterface\\MoneyFrame\\UI-SilverIcon:24:24:1:0\124t"
+local settingCopper = "\124TInterface\\MoneyFrame\\UI-CopperIcon:24:24:1:0\124t"
 
-local SETTING_ICON_STRING = "\124T%s:32:32:2:0\124t"
+local SETTING_ICON_STRING = "\124T%s:24:24:1:0\124t"
 local DISPLAY_ICON_STRING1 = "%d\124T"
 local DISPLAY_ICON_STRING2 = ":%d:%d:2:0\124t"
 
@@ -54,7 +54,7 @@ do
 			local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture = GetItemInfo(itemId)
 			if (itemTexture) then
 				tokenInfo.itemName = itemName
-				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":32:32:1:0\124t"
+				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24:1:0\124t"
 				tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
 			end
 		end
@@ -62,7 +62,7 @@ do
 
 	-- Use the arena icon instead of a boj clone
 	local tokenInfo = currencyInfo[5]
-	tokenInfo.settingIcon = "\124T" .. arenaTexture .. ":32:32:1:0\124t"
+	tokenInfo.settingIcon = "\124T" .. arenaTexture .. ":24:24:1:0\124t"
 	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. arenaTexture .. DISPLAY_ICON_STRING2
 	settingsSliderIcon = tokenInfo.brokerIcon
 end
@@ -127,6 +127,7 @@ Broker_Currency.options = {
 	name = sName,
 	get = getValue,
 	set = setValue,
+	childGroups = "tree",
 	args = {
 		header1 = {
 			type = "description",
@@ -752,7 +753,7 @@ function Broker_Currency:InitializeSettings()
 		honorTexture = [[Interface\PVPFrame\PVP-Currency-Alliance]]
 	end
 	local tokenInfo = currencyInfo[4]
-	tokenInfo.settingIcon = "\124T" .. honorTexture .. ":32:32:1:0\124t"
+	tokenInfo.settingIcon = "\124T" .. honorTexture .. ":24:24:1:0\124t"
 	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. honorTexture .. DISPLAY_ICON_STRING2
 
 	-- Add settings for the various currencies
