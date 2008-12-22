@@ -2,7 +2,7 @@
 ## Title: Broker: Currency
 ## X-BrokerName: Currency
 ## Author: Toadkiller
-## Version: v3.00.03.09
+## Version: v3.00.03.10
 ## Notes: LDB display of currencies, gold totals and money rate for all characters on a server.
 ## Notes-deDE: LDB display of currencies, gold totals and money rate for all characters on a server.
 ## Notes-esES: LDB display of currencies, gold totals and money rate for all characters on a server.

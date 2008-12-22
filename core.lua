@@ -300,17 +300,15 @@ if (not brokerOptions) then
 	brokerOptions = {
 		type = "group",
 		name = "Broker",
-		childGroups = "tree",
 		args = {
 		}
 	}
 	AceCfg:RegisterOptionsTable("Broker", brokerOptions)
+	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker", "Broker")
 end
 
-brokerOptions.args.Broker_Currency = Broker_Currency.options
-AceCfgReg:NotifyChange("Broker")
-Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker", "Broker")
-
+AceCfg:RegisterOptionsTable("Broker_Currency", Broker_Currency.options)
+Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency", sName, "Broker")
 
 local concatList = {}
 -- Create the display string for a single line
