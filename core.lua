@@ -384,6 +384,14 @@ function Broker_Currency:Update(event)
 	if (event == "PLAYER_ENTERING_WORLD") then
 		self:InitializeSettings()
 	end
+	if (event == "PLAYER_REGEN_ENABLED") then
+		Broker_Currency:RegisterEvent("BAG_UPDATE", "Update")
+	end
+	if (event == "PLAYER_REGEN_DISABLED") then
+		Broker_Currency:UnregisterEvent("BAG_UPDATE")
+		return
+	end
+
 	local realmInfo = Broker_CurrencyDB.realmInfo[realmName]
 	local playerInfo = Broker_CurrencyDB.realm[realmName][playerName]
 	local money = GetMoney()
@@ -773,6 +781,9 @@ function Broker_Currency:InitializeSettings()
 	Broker_Currency:RegisterEvent("SEND_MAIL_MONEY_CHANGED", "Update")
 	Broker_Currency:RegisterEvent("SEND_MAIL_COD_CHANGED", "Update")
 
+	Broker_Currency:RegisterEvent("PLAYER_REGEN_ENABLED", "Update")
+	Broker_Currency:RegisterEvent("PLAYER_REGEN_DISABLED", "Update")
+	Broker_Currency:RegisterEvent("BAG_UPDATE", "Update")
 	-- Done initializing
 	Broker_Currency:UnregisterEvent("PLAYER_ENTERING_WORLD")
 end
