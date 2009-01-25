@@ -24,7 +24,7 @@ local DISPLAY_ICON_STRING1 = "%d\124T"
 local DISPLAY_ICON_STRING2 = ":%d:%d:2:0\124t"
 
 local currencyInfo = {
-	{},
+	{itemId = "money"},
 	{},
 	{},
 	{itemId = 43307, countFunc = GetHonorCurrency},
@@ -44,6 +44,8 @@ local currencyInfo = {
 	{itemId = 41596, countFunc = GetItemCount},
 	{itemId = 43228, countFunc = GetItemCount},
 	{itemId = 37836, countFunc = GetItemCount},
+
+	{itemId = 21100, countFunc = GetItemCount},
 }
 local arenaTexture = [[Interface\PVPFrame\PVP-ArenaPoints-Icon]]
 local settingsSliderIcon
@@ -399,18 +401,6 @@ function Broker_Currency:Update(event)
 	-- Update the current player info
 	playerInfo.money = money
 
-	-- Update Tokens
-	for index, tokenInfo in pairs(currencyInfo) do
-		if (tokenInfo.brokerIcon) then
-			local count = tokenInfo.countFunc(tokenInfo.itemId)
---				count = GetItemCount(tokenInfo.itemName)
-			playerInfo[tokenInfo.itemId] = count
-		end
-	end
-
-	-- Display the money string according to the broker settings
-	Broker_Currency.ldb.text = Broker_Currency:CreateMoneyString(money, true, playerInfo)
-
 	-- Update Statistics
 	local today = GetToday(self)
 	if not self.lastTime then
@@ -432,16 +422,40 @@ function Broker_Currency:Update(event)
 		realmInfo.time[today] = realmInfo.time[today] or 0
 		self.lastTime = today
 	end
-	if (self.lastMoney < money) then
-		self.gained.money = (self.gained.money or 0) + money - self.lastMoney
-		playerInfo.gained[today].money = (playerInfo.gained[today].money or 0) + money - self.lastMoney
-		realmInfo.gained[today].money = (realmInfo.gained[today].money or 0) + money - self.lastMoney
-	elseif (self.lastMoney > money) then
-		self.spent.money = (self.spent.money or 0) + self.lastMoney - money
-		playerInfo.spent[today].money = (playerInfo.spent[today].money or 0) + self.lastMoney - money
-		realmInfo.spent[today].money = (realmInfo.spent[today].money or 0) + self.lastMoney - money
+	if (self.last.money < money) then
+		self.gained.money = (self.gained.money or 0) + money - self.last.money
+		playerInfo.gained[today].money = (playerInfo.gained[today].money or 0) + money - self.last.money
+		realmInfo.gained[today].money = (realmInfo.gained[today].money or 0) + money - self.last.money
+	elseif (self.last.money > money) then
+		self.spent.money = (self.spent.money or 0) + self.last.money - money
+		playerInfo.spent[today].money = (playerInfo.spent[today].money or 0) + self.last.money - money
+		realmInfo.spent[today].money = (realmInfo.spent[today].money or 0) + self.last.money - money
 	end
-	self.lastMoney = money
+	self.last.money = money
+
+	-- Update Tokens
+	for index, tokenInfo in pairs(currencyInfo) do
+		if (tokenInfo.brokerIcon) then
+			local itemId = tokenInfo.itemId
+			local count = tokenInfo.countFunc(itemId)
+			playerInfo[tokenInfo.itemId] = count
+
+			if (self.last[itemId] < count) then
+				self.gained[itemId] = (self.gained[itemId] or 0) + count - self.last[itemId]
+				playerInfo.gained[today][itemId] = (playerInfo.gained[today][itemId] or 0) + count - self.last[itemId]
+				realmInfo.gained[today][itemId] = (realmInfo.gained[today][itemId] or 0) + count - self.last[itemId]
+			elseif (self.last[itemId] > count) then
+				self.spent[itemId] = (self.spent[itemId] or 0) + self.last[itemId] - count
+				playerInfo.spent[today][itemId] = (playerInfo.spent[today][itemId] or 0) + self.last[itemId] - count
+				realmInfo.spent[today][itemId] = (realmInfo.spent[today][itemId] or 0) + self.last[itemId] - count
+			end
+			self.last[itemId] = count
+		end
+	end
+
+	-- Display the money string according to the broker settings
+	Broker_Currency.ldb.text = Broker_Currency:CreateMoneyString(money, true, playerInfo)
+
 	local now = time()
 	if (not self.savedTime) then
 		self.savedTime = now
@@ -465,6 +479,9 @@ end
 -- /dump Broker_CurrencyDB.realm["Proudmoore"]["Bliksem"]
 
 local totalList = {}
+local weekGained = {}
+local weekSpent = {}
+local weekProfit = {}
 
 -- Handle mouse enter event in our button
 local function OnEnter(button)
@@ -500,7 +517,7 @@ local function OnEnter(button)
 
 	-- Statistics
 	local charDB = Broker_CurrencyCharDB
-	if (charDB.summaryPlayerSession or charDB.summaryRealmToday or charDB.summaryRealmYesterday or charDB.summaryRealmLastWeek) then
+	if (charDB.summaryPlayerSession or charDB.summaryRealmToday or charDB.summaryRealmYesterday or charDB.summaryRealmThisWeek or charDB.summaryRealmLastWeek) then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(sStatistics)
 	end
@@ -525,13 +542,12 @@ local function OnEnter(button)
 	local realmInfo = Broker_CurrencyDB.realmInfo[realmName]
 	local gained = realmInfo.gained
 	local spent = realmInfo.spent
-	local time = realmInfo.time
 	if (charDB.summaryRealmToday) then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(sToday)
 
-		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained[self.lastTime].money, nil, nil), nil, nil, nil, 1, 1, 1)
-		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent[self.lastTime].money, nil, nil), nil, nil, nil, 1, 0, 0)
+		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained[self.lastTime].money, nil, gained[self.lastTime]), nil, nil, nil, 1, 1, 1)
+		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent[self.lastTime].money, nil, spent[self.lastTime]), nil, nil, nil, 1, 0, 0)
 		local profit = gained[self.lastTime].money - spent[self.lastTime].money
 		if (profit >= 0) then
 			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
@@ -546,8 +562,8 @@ local function OnEnter(button)
 		GameTooltip:AddLine(sYesterday)
 
 		local yesterday = self.lastTime - 1
-		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained[yesterday].money, nil, nil), nil, nil, nil, 1, 1, 1)
-		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent[yesterday].money, nil, nil), nil, nil, nil, 1, 0, 0)
+		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained[yesterday].money, nil, gained[yesterday]), nil, nil, nil, 1, 1, 1)
+		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent[yesterday].money, nil, spent[yesterday]), nil, nil, nil, 1, 0, 0)
 		local profit = gained[yesterday].money - spent[yesterday].money
 		if (profit >= 0) then
 			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
@@ -557,48 +573,66 @@ local function OnEnter(button)
 	end
 
 	-- This Week totals
-	local weekGained = 0
-	local weekSpent = 0
-	local weekTime = 0
 	if (charDB.summaryRealmThisWeek) then
+		wipe(weekGained)
+		wipe(weekSpent)
+		wipe(weekProfit)
 		for i = self.lastTime - 6, self.lastTime do
-			weekGained = weekGained + gained[i].money or 0
-			weekSpent = weekSpent + spent[i].money or 0
-			weekTime = weekTime + time[i]
+			for index, tokenInfo in pairs(currencyInfo) do
+				local itemId = tokenInfo.itemId
+				if (itemId) then
+					weekGained[itemId] = (weekGained[itemId] or 0) + (gained[i] and gained[i][itemId] or 0)
+					weekSpent[itemId] = (weekSpent[itemId] or 0) + (spent[i] and spent[i][itemId] or 0)
+				end
+			end
+		end
+		for index, tokenInfo in pairs(currencyInfo) do
+			local itemId = tokenInfo.itemId
+			if (itemId) then
+				weekProfit[itemId] = weekGained[itemId] - weekSpent[itemId]
+			end
 		end
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(sThisWeek)
 
-		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(weekGained, nil, nil), nil, nil, nil, 1, 1, 1)
-		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(weekSpent, nil, nil), nil, nil, nil, 1, 0, 0)
-		local profit = weekGained - weekSpent
-		if (profit >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
+		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(weekGained.money, nil, weekGained), nil, nil, nil, 1, 1, 1)
+		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(weekSpent.money, nil, weekSpent), nil, nil, nil, 1, 0, 0)
+		if (weekProfit.money >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(weekProfit.money, nil, weekProfit), nil, nil, nil, 0, 1, 0)
 		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit, nil, nil), nil, nil, nil, 1, 0, 0)
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-weekProfit.money, nil, weekProfit), nil, nil, nil, 1, 0, 0)
 		end
 	end
 
 	-- Last Week totals
 	if (charDB.summaryRealmLastWeek) then
-		weekGained = 0
-		weekSpent = 0
-		weekTime = 0
+		wipe(weekGained)
+		wipe(weekSpent)
+		wipe(weekProfit)
 		for i = self.lastTime - 13, self.lastTime - 7 do
-			weekGained = weekGained + gained[i].money or 0
-			weekSpent = weekSpent + spent[i].money or 0
-			weekTime = weekTime + time[i]
+			for index, tokenInfo in pairs(currencyInfo) do
+				local itemId = tokenInfo.itemId
+				if (itemId) then
+					weekGained[itemId] = (weekGained[itemId] or 0) + (gained[i] and gained[i][itemId] or 0)
+					weekSpent[itemId] = (weekSpent[itemId] or 0) + (spent[i] and spent[i][itemId] or 0)
+				end
+			end
+		end
+		for index, tokenInfo in pairs(currencyInfo) do
+			local itemId = tokenInfo.itemId
+			if (itemId) then
+				weekProfit[itemId] = weekGained[itemId] - weekSpent[itemId]
+			end
 		end
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(sLastWeek)
 
-		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(weekGained, nil, nil), nil, nil, nil, 1, 1, 1)
-		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(weekSpent, nil, nil), nil, nil, nil, 1, 0, 0)
-		local profit = weekGained - weekSpent
-		if (profit >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
+		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(weekGained.money, nil, weekGained), nil, nil, nil, 1, 1, 1)
+		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(weekSpent.money, nil, weekSpent), nil, nil, nil, 1, 0, 0)
+		if (weekProfit.money >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(weekProfit.money, nil, weekProfit), nil, nil, nil, 0, 1, 0)
 		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit, nil, nil), nil, nil, nil, 1, 0, 0)
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-weekProfit.money, nil, weekProfit), nil, nil, nil, 1, 0, 0)
 		end
 	end
 
@@ -608,7 +642,8 @@ local function OnEnter(button)
 
 	GameTooltip:Show()
 end
---/dump Broker_CurrencyDB.realm.Proudmoore.Bigudder
+--/dump Broker_CurrencyDB.realmInfo.Proudmoore.gained
+--/dump Broker_CurrencyDB.realmInfo.Proudmoore.spent
 
 -- Set up as a LibBroker data source
 Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
@@ -690,9 +725,22 @@ function Broker_Currency:InitializeSettings()
 		playerInfo.time = {}
 	end
 
+	if (not self.last) then
+		self.last = {}
+	end
+	local last = self.last
+	for index, tokenInfo in pairs(currencyInfo) do
+		if (tokenInfo.brokerIcon) then
+			local itemId = tokenInfo.itemId
+			local count = tokenInfo.countFunc(itemId)
+			playerInfo[tokenInfo.itemId] = count
+
+			last[itemId] = count
+		end
+	end
+
 	-- Initialize statistics
-	self.initialMoney = GetMoney()
-	self.lastMoney = self.initialMoney
+	self.last.money = GetMoney()
 	self.lastTime = GetToday(self)
 	local lastWeek = self.lastTime - 13
 	for day in pairs(playerInfo.gained) do
