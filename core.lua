@@ -524,12 +524,14 @@ local function OnEnter(button)
 
 	-- Session totals
 	local self = Broker_Currency
+	local gained = self.gained
+	local spent = self.spent
 	if (charDB.summaryPlayerSession) then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(playerName)
 
-		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(self.gained.money, nil, nil), nil, nil, nil, 1, 1, 1)
-		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(self.spent.money, nil, nil), nil, nil, nil, 1, 0, 0)
+		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained.money, nil, gained), nil, nil, nil, 1, 1, 1)
+		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent.money, nil, spent), nil, nil, nil, 1, 0, 0)
 		local profit = self.gained.money - self.spent.money
 		if (profit >= 0) then
 			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
@@ -540,8 +542,8 @@ local function OnEnter(button)
 
 	-- Today totals
 	local realmInfo = Broker_CurrencyDB.realmInfo[realmName]
-	local gained = realmInfo.gained
-	local spent = realmInfo.spent
+	gained = realmInfo.gained
+	spent = realmInfo.spent
 	if (charDB.summaryRealmToday) then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(sToday)
