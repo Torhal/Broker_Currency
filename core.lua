@@ -481,7 +481,7 @@ end
 local totalList = {}
 local weekGained = {}
 local weekSpent = {}
-local weekProfit = {}
+local profit = {}
 
 -- Handle mouse enter event in our button
 local function OnEnter(button)
@@ -530,13 +530,20 @@ local function OnEnter(button)
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(playerName)
 
+		wipe(profit)
+		for index, tokenInfo in pairs(currencyInfo) do
+			local itemId = tokenInfo.itemId
+			if (itemId) then
+				profit[itemId] = (gained[itemId] or 0) - (spent[itemId] or 0)
+			end
+		end
+
 		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained.money, nil, gained), nil, nil, nil, 1, 1, 1)
 		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent.money, nil, spent), nil, nil, nil, 1, 0, 0)
-		local profit = self.gained.money - self.spent.money
-		if (profit >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
+		if (profit.money >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit.money, nil, profit), nil, nil, nil, 0, 1, 0)
 		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit, nil, nil), nil, nil, nil, 1, 0, 0)
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit.money, nil, profit), nil, nil, nil, 1, 0, 0)
 		end
 	end
 
@@ -548,13 +555,20 @@ local function OnEnter(button)
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(sToday)
 
+		wipe(profit)
+		for index, tokenInfo in pairs(currencyInfo) do
+			local itemId = tokenInfo.itemId
+			if (itemId) then
+				profit[itemId] = (gained[self.lastTime][itemId] or 0) - (spent[self.lastTime][itemId] or 0)
+			end
+		end
+
 		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained[self.lastTime].money, nil, gained[self.lastTime]), nil, nil, nil, 1, 1, 1)
 		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent[self.lastTime].money, nil, spent[self.lastTime]), nil, nil, nil, 1, 0, 0)
-		local profit = gained[self.lastTime].money - spent[self.lastTime].money
-		if (profit >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
+		if (profit.money >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit.money, nil, profit), nil, nil, nil, 0, 1, 0)
 		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit, nil, nil), nil, nil, nil, 1, 0, 0)
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit.money, nil, profit), nil, nil, nil, 1, 0, 0)
 		end
 	end
 
@@ -564,13 +578,20 @@ local function OnEnter(button)
 		GameTooltip:AddLine(sYesterday)
 
 		local yesterday = self.lastTime - 1
+		wipe(profit)
+		for index, tokenInfo in pairs(currencyInfo) do
+			local itemId = tokenInfo.itemId
+			if (itemId) then
+				profit[itemId] = (gained[yesterday][itemId] or 0) - (spent[yesterday][itemId] or 0)
+			end
+		end
+
 		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained[yesterday].money, nil, gained[yesterday]), nil, nil, nil, 1, 1, 1)
 		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent[yesterday].money, nil, spent[yesterday]), nil, nil, nil, 1, 0, 0)
-		local profit = gained[yesterday].money - spent[yesterday].money
-		if (profit >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit, nil, nil), nil, nil, nil, 0, 1, 0)
+		if (profit.money >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit.money, nil, nil), nil, nil, nil, 0, 1, 0)
 		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit, nil, nil), nil, nil, nil, 1, 0, 0)
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit.money, nil, nil), nil, nil, nil, 1, 0, 0)
 		end
 	end
 
@@ -578,7 +599,7 @@ local function OnEnter(button)
 	if (charDB.summaryRealmThisWeek) then
 		wipe(weekGained)
 		wipe(weekSpent)
-		wipe(weekProfit)
+		wipe(profit)
 		for i = self.lastTime - 6, self.lastTime do
 			for index, tokenInfo in pairs(currencyInfo) do
 				local itemId = tokenInfo.itemId
@@ -591,7 +612,7 @@ local function OnEnter(button)
 		for index, tokenInfo in pairs(currencyInfo) do
 			local itemId = tokenInfo.itemId
 			if (itemId) then
-				weekProfit[itemId] = weekGained[itemId] - weekSpent[itemId]
+				profit[itemId] = weekGained[itemId] - weekSpent[itemId]
 			end
 		end
 		GameTooltip:AddLine(" ")
@@ -599,10 +620,10 @@ local function OnEnter(button)
 
 		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(weekGained.money, nil, weekGained), nil, nil, nil, 1, 1, 1)
 		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(weekSpent.money, nil, weekSpent), nil, nil, nil, 1, 0, 0)
-		if (weekProfit.money >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(weekProfit.money, nil, weekProfit), nil, nil, nil, 0, 1, 0)
+		if (profit.money >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit.money, nil, profit), nil, nil, nil, 0, 1, 0)
 		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-weekProfit.money, nil, weekProfit), nil, nil, nil, 1, 0, 0)
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit.money, nil, profit), nil, nil, nil, 1, 0, 0)
 		end
 	end
 
@@ -610,7 +631,7 @@ local function OnEnter(button)
 	if (charDB.summaryRealmLastWeek) then
 		wipe(weekGained)
 		wipe(weekSpent)
-		wipe(weekProfit)
+		wipe(profit)
 		for i = self.lastTime - 13, self.lastTime - 7 do
 			for index, tokenInfo in pairs(currencyInfo) do
 				local itemId = tokenInfo.itemId
@@ -623,7 +644,7 @@ local function OnEnter(button)
 		for index, tokenInfo in pairs(currencyInfo) do
 			local itemId = tokenInfo.itemId
 			if (itemId) then
-				weekProfit[itemId] = weekGained[itemId] - weekSpent[itemId]
+				profit[itemId] = weekGained[itemId] - weekSpent[itemId]
 			end
 		end
 		GameTooltip:AddLine(" ")
@@ -631,10 +652,10 @@ local function OnEnter(button)
 
 		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(weekGained.money, nil, weekGained), nil, nil, nil, 1, 1, 1)
 		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(weekSpent.money, nil, weekSpent), nil, nil, nil, 1, 0, 0)
-		if (weekProfit.money >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(weekProfit.money, nil, weekProfit), nil, nil, nil, 0, 1, 0)
+		if (profit.money >= 0) then
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit.money, nil, profit), nil, nil, nil, 0, 1, 0)
 		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-weekProfit.money, nil, weekProfit), nil, nil, nil, 1, 0, 0)
+			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit.money, nil, profit), nil, nil, nil, 1, 0, 0)
 		end
 	end
 
