@@ -9,6 +9,7 @@
 --
 
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
+local LibQTip = LibStub('LibQTip-1.0')
 
 -- The localization goal is to only use existing Blizzard strings and localized Title strings from the toc
 local iconGold = GOLD_AMOUNT_TEXTURE
@@ -88,6 +89,8 @@ local sLastWeek = HONOR_LASTWEEK
 local sPlus = "+"
 local sMinus = "-"
 local sTotal = "="
+
+local sDelete = DELETE
 
 local playerName = UnitName("player")
 local realmName = GetRealmName()
@@ -244,6 +247,15 @@ Broker_Currency.options = {
 				},
 			},
 		},
+		deleteCharacter = {
+			type = "group",
+			name = sDelete,
+			order = 50,
+			inline = true,
+			childGroups = "tree",
+			args = {
+			},
+		},
 	}
 }
 
@@ -262,9 +274,9 @@ local function SetOptions(brokerArgs, summaryArgs, tokenInfo, index)
 		local summaryName = GetKey(tokenInfo.itemId, nil)
 		brokerArgs[brokerName] = {
 			type = "toggle",
+			order = index,
 			name = tokenInfo.settingIcon,
 			desc = tokenInfo.itemName,
-			order = index,
 			width = "half",
 			get = function()
 				local key = brokerName
@@ -278,9 +290,9 @@ local function SetOptions(brokerArgs, summaryArgs, tokenInfo, index)
 		}
 		summaryArgs[summaryName] = {
 			type = "toggle",
+			order = index,
 			name = tokenInfo.settingIcon,
 			desc = tokenInfo.itemName,
-			order = index,
 			width = "half",
 			get = function()
 				local key = summaryName
@@ -291,6 +303,38 @@ local function SetOptions(brokerArgs, summaryArgs, tokenInfo, index)
 				Broker_CurrencyCharDB[key] = true and value or nil
 				Broker_Currency:Update()
 			end,
+		}
+	end
+end
+
+local function DeletePlayer(info)
+	local playerName = info[# info]
+	local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
+	deleteOptions[playerName] = nil
+	deleteOptions[playerName .. "Name"] = nil
+	deleteOptions[playerName .. "Spacer"] = nil
+	Broker_CurrencyDB.realm[realmName][playerName] = nil
+end
+
+-- Provide settings options for tokenInfo
+local function DeleteOptions(playerName, playerInfoList, index)
+	local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
+	if (not deleteOptions[playerName]) then
+		deleteOptions[playerName .. "Name"] = {
+			type = "description",
+			order = index * 3,
+			name = playerName,
+		}
+		deleteOptions[playerName] = {
+			type = "execute",
+			order = index * 3 + 1,
+			name = sDelete,
+			func = DeletePlayer,
+		}
+		deleteOptions[playerName .. "Spacer"] = {
+			type = "header",
+			order = index * 3 + 2,
+			name = "",
 		}
 	end
 end
@@ -838,6 +882,13 @@ function Broker_Currency:InitializeSettings()
 	local summaryDisplay = Broker_Currency.options.args.summaryDisplay.args
 	for index = 1, # currencyInfo, 1 do
 		SetOptions(brokerDisplay, summaryDisplay, currencyInfo[index], index)
+	end
+
+	-- Add delete settings so deleted characters can be removed
+	local index = 1
+	for playerName in pairs(Broker_CurrencyDB.realm[realmName]) do
+		DeleteOptions(playerName, Broker_CurrencyDB.realm[realmName], index)
+		index = index + 1
 	end
 
 	-- Force first update
