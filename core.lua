@@ -24,6 +24,10 @@ local SETTING_ICON_STRING = "\124T%s:24:24:1:0\124t"
 local DISPLAY_ICON_STRING1 = "%d\124T"
 local DISPLAY_ICON_STRING2 = ":%d:%d:2:0\124t"
 
+local fontPlus = CreateFont("Broker_CurrencyFontPlus")
+local fontMinus = CreateFont("Broker_CurrencyFontMinus")
+local fontLabel = CreateFont("Broker_CurrencyFontLabel")
+
 local currencyInfo = {
 	{itemId = "money"},
 	{},
@@ -97,6 +101,7 @@ local realmName = GetRealmName()
 
 
 Broker_Currency = CreateFrame("frame", "Broker_CurrencyFrame")
+local Broker_Currency = Broker_Currency
 
 
 local function getValue(info)
@@ -233,6 +238,12 @@ Broker_Currency.options = {
 			inline = true,
 			childGroups = "tree",
 			args = {
+				summaryGold = {
+					type = "toggle",
+					name = settingGold,
+					order = 1,
+					width = "half",
+				},
 				summarySilver = {
 					type = "toggle",
 					name = settingSilver,
@@ -360,16 +371,17 @@ local concatList = {}
 -- Create the display string for a single line
 -- money is the gold.silver.copper amount
 -- broker is true if it is the broker string, nil if it is the tooltip summary string
--- playerInfo contains the relevant information
-function Broker_Currency:CreateMoneyString(money, broker, playerInfo)
+-- currencyList contains totals for the set of currencies
+function Broker_Currency:CreateMoneyString(currencyList)
+	local money = currencyList.money
+
 	-- Create Strings for the various currencies
 	wipe(concatList)
-
-	if (playerInfo) then
+	if (currencyList) then
 		for index, tokenInfo in pairs(currencyInfo) do
 			if (tokenInfo.brokerIcon) then
-				local key = GetKey(tokenInfo.itemId, broker)
-				local count = playerInfo[tokenInfo.itemId] or 0
+				local key = GetKey(tokenInfo.itemId, true)
+				local count = currencyList[tokenInfo.itemId] or 0
 				if ((count > 0) and (Broker_CurrencyCharDB[key])) then
 					concatList[# concatList + 1] = string.format(tokenInfo.brokerIcon, count, Broker_CurrencyCharDB.iconSize, Broker_CurrencyCharDB.iconSize)
 					concatList[# concatList + 1] = "  "
@@ -384,22 +396,150 @@ function Broker_Currency:CreateMoneyString(money, broker, playerInfo)
 	local silver = money % 100
 	local gold = floor(money / 100)
 
-	if ((gold > 0) and (Broker_CurrencyCharDB.showGold and broker or not broker)) then
+	if ((gold > 0) and Broker_CurrencyCharDB.showGold) then
 		concatList[# concatList + 1] = string.format(iconGold, gold, Broker_CurrencyCharDB.iconSizeGold, Broker_CurrencyCharDB.iconSizeGold)
 		concatList[# concatList + 1] = " "
 	end
 
-	if ((gold + silver > 0) and (Broker_CurrencyCharDB.showSilver and broker or Broker_CurrencyCharDB.summarySilver and not broker)) then
+	if ((gold + silver > 0) and Broker_CurrencyCharDB.showSilver) then
 		concatList[# concatList + 1] = string.format(iconSilver, silver, Broker_CurrencyCharDB.iconSizeGold, Broker_CurrencyCharDB.iconSizeGold)
 		concatList[# concatList + 1] = " "
 	end
 
-	if ((gold + silver + copper > 0) and (Broker_CurrencyCharDB.showCopper and broker or Broker_CurrencyCharDB.summaryCopper and not broker)) then
+	if ((gold + silver + copper > 0) and Broker_CurrencyCharDB.showCopper) then
 		concatList[# concatList + 1] = string.format(iconCopper, copper, Broker_CurrencyCharDB.iconSizeGold, Broker_CurrencyCharDB.iconSizeGold)
 		concatList[# concatList + 1] = " "
 	end
 
 	return table.concat(concatList)
+end
+
+local tooltipLines = {}
+local tooltipLinesRecycle = {}
+local tooltipAlignment = {}
+local tooltipHeader = {}
+local temp = {}
+function Broker_Currency:ShowTooltip(button)
+	local maxColumns = 0
+	for index, rowList in pairs(tooltipLines) do
+		local columns = 0
+		for i in pairs(rowList) do
+			columns = columns + 1
+		end
+		maxColumns = max(maxColumns, columns)
+	end
+
+	if (maxColumns > 0) then
+		tooltipAlignment[1] = "LEFT"
+		for index = 2, maxColumns + 1 do
+			tooltipAlignment[index] = "RIGHT"
+		end
+		for index = # tooltipAlignment, maxColumns + 2, -1 do
+			tooltipAlignment[index] = nil
+		end
+
+		wipe(tooltipHeader)
+		tooltipHeader[1] = " "
+		for index, tokenInfo in pairs(currencyInfo) do
+			if (tokenInfo.brokerIcon) then
+				local key = GetKey(tokenInfo.itemId, false)
+				if (Broker_CurrencyCharDB[key]) then
+					tooltipHeader[# tooltipHeader + 1] = tokenInfo.settingIcon
+				end
+			end
+		end
+		if (Broker_CurrencyCharDB.summaryGold) then
+			tooltipHeader[# tooltipHeader + 1] = settingGold
+		end
+		if (Broker_CurrencyCharDB.summarySilver) then
+			tooltipHeader[# tooltipHeader + 1] = settingSilver
+		end
+		if (Broker_CurrencyCharDB.summaryCopper) then
+			tooltipHeader[# tooltipHeader + 1] = settingCopper
+		end
+
+		local tooltip = LibQTip:Acquire("Broker_CurrencyTooltip", maxColumns, unpack(tooltipAlignment))
+		self.tooltip = tooltip
+
+		tooltip:AddHeader(unpack(tooltipHeader))
+
+		for index, rowList in pairs(tooltipLines) do
+			tooltip:AddLine(unpack(rowList))
+			local label = rowList[1]
+			local currentRow = index + 1
+			if (label == sPlus) then
+				for i, value in ipairs(rowList) do
+					tooltip:SetCell(currentRow, i, value, fontPlus)
+				end
+			elseif (label == sMinus) then
+				for i, value in ipairs(rowList) do
+					tooltip:SetCell(currentRow, i, value, fontMinus)
+				end
+			elseif (label == sTotal) then
+				for i, value in ipairs(rowList) do
+					if (value and type(value) == "number") then
+						if (value < 0) then
+							tooltip:SetCell(currentRow, i, -1 * value, fontMinus)
+						else
+							tooltip:SetCell(currentRow, i, value, fontPlus)
+						end
+					end
+				end
+			end
+			tooltip:SetCell(currentRow, 1, label, fontLabel)
+		end
+
+		tooltip:SmartAnchorTo(button)
+		tooltip:Show()
+	end
+end
+
+
+function Broker_Currency:AddLine(label, currencyList)
+	local newIndex = # tooltipLines + 1
+	if (not tooltipLinesRecycle[newIndex]) then
+		tooltipLinesRecycle[newIndex] = {}
+	end
+	tooltipLines[newIndex] = tooltipLinesRecycle[newIndex]
+	local line = tooltipLines[newIndex]
+	wipe(line)
+
+	line[1] = label
+	if (currencyList) then
+		-- Create Strings for the various currencies
+		for index, tokenInfo in pairs(currencyInfo) do
+			if (tokenInfo.brokerIcon) then
+				local key = GetKey(tokenInfo.itemId, false)
+				local count = currencyList[tokenInfo.itemId] or 0
+				if (Broker_CurrencyCharDB[key]) then
+					if (count ~= 0) then
+						line[# line + 1] = count
+					else
+						line[# line + 1] = " "
+					end
+				end
+			end
+		end
+
+		-- Create Strings for gold, silver, copper
+		local money = currencyList.money
+		local copper = money % 100
+		money = (money - copper) / 100
+		local silver = money % 100
+		local gold = floor(money / 100)
+
+		if ((gold ~= 0) and Broker_CurrencyCharDB.summaryGold) then
+			line[# line + 1] = gold
+		end
+
+		if ((gold + silver ~= 0) and Broker_CurrencyCharDB.summarySilver) then
+			line[# line + 1] = silver
+		end
+
+		if ((gold + silver + copper ~= 0) and Broker_CurrencyCharDB.summaryCopper) then
+			line[# line + 1] = copper
+		end
+	end
 end
 
 
@@ -498,7 +638,7 @@ function Broker_Currency:Update(event)
 	end
 
 	-- Display the money string according to the broker settings
-	Broker_Currency.ldb.text = Broker_Currency:CreateMoneyString(money, true, playerInfo)
+	Broker_Currency.ldb.text = Broker_Currency:CreateMoneyString(playerInfo)
 
 	local now = time()
 	if (not self.savedTime) then
@@ -519,6 +659,7 @@ local function TotalCurrencies(totalList, playerInfo)
 			totalList[countKey] = (totalList[countKey] or 0) + count
 		end
 	end
+	totalList.money = (totalList.money or 0) + (playerInfo.money or 0)
 end
 -- /dump Broker_CurrencyDB.realm["Proudmoore"]["Bliksem"]
 
@@ -529,41 +670,20 @@ local profit = {}
 
 -- Handle mouse enter event in our button
 local function OnEnter(button)
-	-- Display tooltip towards the center of the screen from the current quadrant we are in
- 	GameTooltip:SetOwner(button, "ANCHOR_NONE")
-	local x, y = button:GetCenter()
-	if (x >= (GetScreenWidth() / 2)) then
-		if (y >= (GetScreenHeight() / 2)) then
-			GameTooltip:SetPoint("TOPRIGHT", button, "BOTTOMRIGHT")
-		else
-			GameTooltip:SetPoint("BOTTOMRIGHT", button, "TOPRIGHT")
-		end
-	else
-		if (y >= (GetScreenHeight() / 2)) then
-			GameTooltip:SetPoint("TOPLEFT", button, "BOTTOMLEFT")
-		else
-			GameTooltip:SetPoint("BOTTOMLEFT", button, "TOPLEFT")
-		end
-	end
+	wipe(tooltipLines)
 
 	-- Display the money string according to the summary settings
-	GameTooltip:AddLine(sCurrency)
-
-	local totalMoney = 0
 	wipe(totalList)
 	for playerName, playerInfo in pairs(Broker_CurrencyDB.realm[realmName]) do
-		local money = playerInfo.money or 0
-		local moneyString = Broker_Currency:CreateMoneyString(money, nil, playerInfo)
-		GameTooltip:AddDoubleLine(string.format("%s: ", playerName), moneyString, nil, nil, nil, 1, 1, 1)
-		totalMoney = totalMoney + money
+		Broker_Currency:AddLine(string.format("%s: ", playerName), playerInfo, fontWhite)
 		TotalCurrencies(totalList, playerInfo)
 	end
 
 	-- Statistics
 	local charDB = Broker_CurrencyCharDB
 	if (charDB.summaryPlayerSession or charDB.summaryRealmToday or charDB.summaryRealmYesterday or charDB.summaryRealmThisWeek or charDB.summaryRealmLastWeek) then
-		GameTooltip:AddLine(" ")
-		GameTooltip:AddLine(sStatistics)
+		Broker_Currency:AddLine(" ")
+		Broker_Currency:AddLine(sStatistics)
 	end
 
 	-- Session totals
@@ -571,8 +691,8 @@ local function OnEnter(button)
 	local gained = self.gained
 	local spent = self.spent
 	if (charDB.summaryPlayerSession) then
-		GameTooltip:AddLine(" ")
-		GameTooltip:AddLine(playerName)
+		Broker_Currency:AddLine(" ")
+		Broker_Currency:AddLine(playerName)
 
 		wipe(profit)
 		for index, tokenInfo in pairs(currencyInfo) do
@@ -582,13 +702,9 @@ local function OnEnter(button)
 			end
 		end
 
-		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained.money, nil, gained), nil, nil, nil, 1, 1, 1)
-		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent.money, nil, spent), nil, nil, nil, 1, 0, 0)
-		if (profit.money >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit.money, nil, profit), nil, nil, nil, 0, 1, 0)
-		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit.money, nil, profit), nil, nil, nil, 1, 0, 0)
-		end
+		Broker_Currency:AddLine(sPlus, gained)
+		Broker_Currency:AddLine(sMinus, spent)
+		Broker_Currency:AddLine(sTotal, profit)
 	end
 
 	-- Today totals
@@ -596,8 +712,8 @@ local function OnEnter(button)
 	gained = realmInfo.gained
 	spent = realmInfo.spent
 	if (charDB.summaryRealmToday) then
-		GameTooltip:AddLine(" ")
-		GameTooltip:AddLine(sToday)
+		Broker_Currency:AddLine(" ")
+		Broker_Currency:AddLine(sToday)
 
 		wipe(profit)
 		for index, tokenInfo in pairs(currencyInfo) do
@@ -607,19 +723,15 @@ local function OnEnter(button)
 			end
 		end
 
-		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained[self.lastTime].money, nil, gained[self.lastTime]), nil, nil, nil, 1, 1, 1)
-		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent[self.lastTime].money, nil, spent[self.lastTime]), nil, nil, nil, 1, 0, 0)
-		if (profit.money >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit.money, nil, profit), nil, nil, nil, 0, 1, 0)
-		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit.money, nil, profit), nil, nil, nil, 1, 0, 0)
-		end
+		Broker_Currency:AddLine(sPlus, gained[self.lastTime])
+		Broker_Currency:AddLine(sMinus, spent[self.lastTime])
+		Broker_Currency:AddLine(sTotal, profit)
 	end
 
 	-- Yesterday totals
 	if (charDB.summaryRealmYesterday) then
-		GameTooltip:AddLine(" ")
-		GameTooltip:AddLine(sYesterday)
+		Broker_Currency:AddLine(" ")
+		Broker_Currency:AddLine(sYesterday)
 
 		local yesterday = self.lastTime - 1
 		wipe(profit)
@@ -630,13 +742,9 @@ local function OnEnter(button)
 			end
 		end
 
-		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(gained[yesterday].money, nil, gained[yesterday]), nil, nil, nil, 1, 1, 1)
-		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(spent[yesterday].money, nil, spent[yesterday]), nil, nil, nil, 1, 0, 0)
-		if (profit.money >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit.money, nil, nil), nil, nil, nil, 0, 1, 0)
-		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit.money, nil, nil), nil, nil, nil, 1, 0, 0)
-		end
+		Broker_Currency:AddLine(sPlus, gained[yesterday])
+		Broker_Currency:AddLine(sMinus, spent[yesterday])
+		Broker_Currency:AddLine(sTotal, profit)
 	end
 
 	-- This Week totals
@@ -659,16 +767,12 @@ local function OnEnter(button)
 				profit[itemId] = weekGained[itemId] - weekSpent[itemId]
 			end
 		end
-		GameTooltip:AddLine(" ")
-		GameTooltip:AddLine(sThisWeek)
+		Broker_Currency:AddLine(" ")
+		Broker_Currency:AddLine(sThisWeek)
 
-		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(weekGained.money, nil, weekGained), nil, nil, nil, 1, 1, 1)
-		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(weekSpent.money, nil, weekSpent), nil, nil, nil, 1, 0, 0)
-		if (profit.money >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit.money, nil, profit), nil, nil, nil, 0, 1, 0)
-		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit.money, nil, profit), nil, nil, nil, 1, 0, 0)
-		end
+		Broker_Currency:AddLine(sPlus, weekGained)
+		Broker_Currency:AddLine(sMinus, weekSpent)
+		Broker_Currency:AddLine(sTotal, profit)
 	end
 
 	-- Last Week totals
@@ -691,26 +795,30 @@ local function OnEnter(button)
 				profit[itemId] = weekGained[itemId] - weekSpent[itemId]
 			end
 		end
-		GameTooltip:AddLine(" ")
-		GameTooltip:AddLine(sLastWeek)
+		Broker_Currency:AddLine(" ")
+		Broker_Currency:AddLine(sLastWeek)
 
-		GameTooltip:AddDoubleLine(sPlus, Broker_Currency:CreateMoneyString(weekGained.money, nil, weekGained), nil, nil, nil, 1, 1, 1)
-		GameTooltip:AddDoubleLine(sMinus, Broker_Currency:CreateMoneyString(weekSpent.money, nil, weekSpent), nil, nil, nil, 1, 0, 0)
-		if (profit.money >= 0) then
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(profit.money, nil, profit), nil, nil, nil, 0, 1, 0)
-		else
-			GameTooltip:AddDoubleLine(sTotal, Broker_Currency:CreateMoneyString(-profit.money, nil, profit), nil, nil, nil, 1, 0, 0)
-		end
+		Broker_Currency:AddLine(sPlus, weekGained)
+		Broker_Currency:AddLine(sMinus, weekSpent)
+		Broker_Currency:AddLine(sTotal, profit)
 	end
 
 	-- Totals
-	GameTooltip:AddLine(" ")
-	GameTooltip:AddDoubleLine(sSummary, Broker_Currency:CreateMoneyString(totalMoney, nil, totalList), nil, nil, nil, 1, 1, 1)
+	Broker_Currency:AddLine(" ")
+	Broker_Currency:AddLine(sSummary, totalList)
 
-	GameTooltip:Show()
+	Broker_Currency:ShowTooltip(button)
 end
 --/dump Broker_CurrencyDB.realmInfo.Proudmoore.gained
 --/dump Broker_CurrencyDB.realmInfo.Proudmoore.spent
+
+
+function OnLeave()
+	LibQTip:Release(Broker_Currency.tooltip)
+	Broker_Currency.tooltip = nil
+--	GameTooltip:Hide()
+end
+
 
 -- Set up as a LibBroker data source
 Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
@@ -724,9 +832,7 @@ Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
 		end
 	end,
 	OnEnter = OnEnter,
-	OnLeave = function()
-		GameTooltip:Hide()
-	end,
+	OnLeave = OnLeave,
 })
 
 
@@ -890,6 +996,13 @@ function Broker_Currency:InitializeSettings()
 		DeleteOptions(playerName, Broker_CurrencyDB.realm[realmName], index)
 		index = index + 1
 	end
+
+	fontPlus:SetFont("Fonts\\FRIZQT__.TTF", 11, "OUTLINE, MONOCHROME")
+	fontPlus:SetTextColor(0, 1, 0)
+	fontMinus:CopyFontObject(fontPlus)
+	fontMinus:SetTextColor(1, 0, 0)
+	fontLabel:CopyFontObject(fontPlus)
+	fontLabel:SetTextColor(1, 1, 0.5)
 
 	-- Force first update
 	Broker_Currency:Update()
