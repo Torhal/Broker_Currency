@@ -846,6 +846,7 @@ function Broker_Currency:InitializeSettings()
 			showToday = true,
 			showYesterday = true,
 			showLastWeek = true,
+			summaryGold = true,
         }
   	end
 
