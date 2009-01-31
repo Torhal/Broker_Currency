@@ -469,16 +469,26 @@ function Broker_Currency:ShowTooltip(button)
 			local currentRow = index + 1
 			if (label == sPlus) then
 				for i, value in ipairs(rowList) do
-					tooltip:SetCell(currentRow, i, value, fontPlus)
+					if (value == 0) then
+						tooltip:SetCell(currentRow, i, " ", fontPlus)
+					else
+						tooltip:SetCell(currentRow, i, value, fontPlus)
+					end
 				end
 			elseif (label == sMinus) then
 				for i, value in ipairs(rowList) do
-					tooltip:SetCell(currentRow, i, value, fontMinus)
+					if (value == 0) then
+						tooltip:SetCell(currentRow, i, " ", fontMinus)
+					else
+						tooltip:SetCell(currentRow, i, value, fontMinus)
+					end
 				end
 			elseif (label == sTotal) then
 				for i, value in ipairs(rowList) do
 					if (value and type(value) == "number") then
-						if (value < 0) then
+						if (value == 0) then
+							tooltip:SetCell(currentRow, i, " ", fontMinus)
+						elseif (value < 0) then
 							tooltip:SetCell(currentRow, i, -1 * value, fontMinus)
 						else
 							tooltip:SetCell(currentRow, i, value, fontPlus)
@@ -523,21 +533,29 @@ function Broker_Currency:AddLine(label, currencyList)
 
 		-- Create Strings for gold, silver, copper
 		local money = currencyList.money
+		local moneySign = (money < 0) and -1 or 1
+		money = money * moneySign
 		local copper = money % 100
 		money = (money - copper) / 100
 		local silver = money % 100
 		local gold = floor(money / 100)
 
-		if ((gold ~= 0) and Broker_CurrencyCharDB.summaryGold) then
-			line[# line + 1] = gold
-		end
+		gold = gold * moneySign
+		silver = silver * moneySign
+		copper = copper * moneySign
 
-		if ((gold + silver ~= 0) and Broker_CurrencyCharDB.summarySilver) then
-			line[# line + 1] = silver
-		end
+		if (gold + silver + copper ~= 0) then
+			if (Broker_CurrencyCharDB.summaryGold) then
+				line[# line + 1] = gold
+			end
 
-		if ((gold + silver + copper ~= 0) and Broker_CurrencyCharDB.summaryCopper) then
-			line[# line + 1] = copper
+			if (Broker_CurrencyCharDB.summarySilver) then
+				line[# line + 1] = silver
+			end
+
+			if (Broker_CurrencyCharDB.summaryCopper) then
+				line[# line + 1] = copper
+			end
 		end
 	end
 end
