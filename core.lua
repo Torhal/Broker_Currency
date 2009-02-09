@@ -24,6 +24,7 @@ local SETTING_ICON_STRING = "\124T%s:24:24:1:0\124t"
 local DISPLAY_ICON_STRING1 = "%d\124T"
 local DISPLAY_ICON_STRING2 = ":%d:%d:2:0\124t"
 
+local fontWhite = CreateFont("Broker_CurrencyFontWhite")
 local fontPlus = CreateFont("Broker_CurrencyFontPlus")
 local fontMinus = CreateFont("Broker_CurrencyFontMinus")
 local fontLabel = CreateFont("Broker_CurrencyFontLabel")
@@ -429,6 +430,29 @@ function Broker_Currency:ShowTooltip(button)
 		maxColumns = max(maxColumns, columns)
 	end
 
+	local fontName, fontHeight, fontFlags = Tooltip_Small:GetFont()
+
+	fontPlus:SetFont(fontName, fontHeight, fontFlags)
+	fontPlus:SetTextColor(0, 1, 0)
+	fontPlus:SetJustifyH("RIGHT")
+	fontPlus:SetJustifyV("MIDDLE")
+
+	fontMinus:CopyFontObject(fontPlus)
+	fontMinus:SetTextColor(1, 0, 0)
+	fontMinus:SetJustifyH("RIGHT")
+	fontMinus:SetJustifyV("MIDDLE")
+
+	fontWhite:CopyFontObject(fontPlus)
+	fontWhite:SetTextColor(1, 1, 1)
+	fontWhite:SetJustifyH("RIGHT")
+	fontWhite:SetJustifyV("MIDDLE")
+
+	fontName, fontHeight, fontFlags = Tooltip_Med:GetFont()
+	fontLabel:SetFont(fontName, fontHeight, fontFlags)
+	fontLabel:SetTextColor(1, 1, 0.5)
+	fontLabel:SetJustifyH("LEFT")
+	fontLabel:SetJustifyV("MIDDLE")
+
 	if (maxColumns > 0) then
 		tooltipAlignment[1] = "LEFT"
 		for index = 2, maxColumns + 1 do
@@ -462,6 +486,7 @@ function Broker_Currency:ShowTooltip(button)
 		self.tooltip = tooltip
 
 		tooltip:AddHeader(unpack(tooltipHeader))
+		tooltip:SetFont(fontWhite)
 
 		for index, rowList in pairs(tooltipLines) do
 			tooltip:AddLine(unpack(rowList))
@@ -494,6 +519,10 @@ function Broker_Currency:ShowTooltip(button)
 							tooltip:SetCell(currentRow, i, value, fontPlus)
 						end
 					end
+				end
+			else
+				for i, value in ipairs(rowList) do
+					tooltip:SetCell(currentRow, i, value, fontWhite)
 				end
 			end
 			tooltip:SetCell(currentRow, 1, label, fontLabel)
@@ -685,6 +714,39 @@ local totalList = {}
 local weekGained = {}
 local weekSpent = {}
 local profit = {}
+local sortMoneyList = {}
+
+-- Sorting is in descending order of money
+local function SortByMoneyDescending(a, b)
+	if (a.playerInfo.money and b.playerInfo.money) then
+		return a.playerInfo.money > b.playerInfo.money
+	elseif (a.playerInfo.money) then
+		return true
+	elseif (b.playerInfo.money) then
+		return false
+	else
+		return true
+	end
+end
+
+local function GetSortedPlayerInfo()
+	local index = 1
+	for playerName, playerInfo in pairs(Broker_CurrencyDB.realm[realmName]) do
+		if (not sortMoneyList[index]) then
+			sortMoneyList[index] = {}
+		end
+		sortMoneyList[index].playerName = playerName
+		sortMoneyList[index].playerInfo = playerInfo
+		index = index + 1
+	end
+	for i = # sortMoneyList, index, -1 do
+		sortMoneyList[i] = nil
+	end
+
+	table.sort(sortMoneyList, SortByMoneyDescending)
+
+	return sortMoneyList
+end
 
 -- Handle mouse enter event in our button
 local function OnEnter(button)
@@ -692,9 +754,10 @@ local function OnEnter(button)
 
 	-- Display the money string according to the summary settings
 	wipe(totalList)
-	for playerName, playerInfo in pairs(Broker_CurrencyDB.realm[realmName]) do
-		Broker_Currency:AddLine(string.format("%s: ", playerName), playerInfo, fontWhite)
-		TotalCurrencies(totalList, playerInfo)
+	local sortedPlayerInfo = GetSortedPlayerInfo()
+	for i, data in ipairs(sortedPlayerInfo) do
+		Broker_Currency:AddLine(string.format("%s: ", data.playerName), data.playerInfo, fontWhite)
+		TotalCurrencies(totalList, data.playerInfo)
 	end
 
 	-- Statistics
@@ -1015,13 +1078,6 @@ function Broker_Currency:InitializeSettings()
 		DeleteOptions(playerName, Broker_CurrencyDB.realm[realmName], index)
 		index = index + 1
 	end
-
-	fontPlus:SetFont("Fonts\\FRIZQT__.TTF", 11, "OUTLINE, MONOCHROME")
-	fontPlus:SetTextColor(0, 1, 0)
-	fontMinus:CopyFontObject(fontPlus)
-	fontMinus:SetTextColor(1, 0, 0)
-	fontLabel:CopyFontObject(fontPlus)
-	fontLabel:SetTextColor(1, 1, 0.5)
 
 	-- Force first update
 	Broker_Currency:Update()
