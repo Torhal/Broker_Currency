@@ -437,12 +437,12 @@ function Broker_Currency:ShowTooltip(button)
 	fontPlus:SetJustifyH("RIGHT")
 	fontPlus:SetJustifyV("MIDDLE")
 
-	fontMinus:CopyFontObject(fontPlus)
+	fontMinus:SetFont(fontName, fontHeight, fontFlags)
 	fontMinus:SetTextColor(1, 0, 0)
 	fontMinus:SetJustifyH("RIGHT")
 	fontMinus:SetJustifyV("MIDDLE")
 
-	fontWhite:CopyFontObject(fontPlus)
+	fontWhite:SetFont(fontName, fontHeight, fontFlags)
 	fontWhite:SetTextColor(1, 1, 1)
 	fontWhite:SetJustifyH("RIGHT")
 	fontWhite:SetJustifyV("MIDDLE")
@@ -641,16 +641,12 @@ function Broker_Currency:Update(event)
 	if (today > self.lastTime) then
 		playerInfo.gained[cutoffDay] = nil
 		playerInfo.spent[cutoffDay] = nil
-		playerInfo.time[cutoffDay] = nil
 		realmInfo.gained[cutoffDay] = nil
 		realmInfo.spent[cutoffDay] = nil
-		realmInfo.time[cutoffDay] = nil
 		playerInfo.gained[today] = playerInfo.gained[today] or {money = 0}
 		playerInfo.spent[today] = playerInfo.spent[today] or {money = 0}
-		playerInfo.time[today] = playerInfo.time[today] or 0
 		realmInfo.gained[today] = realmInfo.gained[today] or {money = 0}
 		realmInfo.spent[today] = realmInfo.spent[today] or {money = 0}
-		realmInfo.time[today] = realmInfo.time[today] or 0
 		self.lastTime = today
 	end
 	if (self.last.money < money) then
@@ -691,8 +687,6 @@ function Broker_Currency:Update(event)
 	if (not self.savedTime) then
 		self.savedTime = now
 	end
-	playerInfo.time[today] = playerInfo.time[today] + now - self.savedTime
-	realmInfo.time[today] = realmInfo.time[today] + now - self.savedTime
 	self.savedTime = now
 end
 
@@ -965,9 +959,6 @@ function Broker_Currency:InitializeSettings()
 	if (not realmInfo.spent or type(realmInfo.spent) ~= "table") then
 		realmInfo.spent = {}
 	end
-	if (not realmInfo.time) then
-		realmInfo.time = {}
-	end
 
 	local playerInfo = Broker_CurrencyDB.realm[realmName][playerName]
 	if (not playerInfo.gained or type(playerInfo.gained) ~= "table") then
@@ -975,9 +966,6 @@ function Broker_Currency:InitializeSettings()
 	end
 	if (not playerInfo.spent or type(playerInfo.spent) ~= "table") then
 		playerInfo.spent = {}
-	end
-	if (not playerInfo.time) then
-		playerInfo.time = {}
 	end
 
 	if (not self.last) then
@@ -1008,11 +996,6 @@ function Broker_Currency:InitializeSettings()
 			playerInfo.spent[day] = nil
 		end
 	end
-	for day in pairs(playerInfo.time) do
-		if (day < lastWeek) then
-			playerInfo.time[day] = nil
-		end
-	end
 	for day in pairs(realmInfo.gained) do
 		if (day < lastWeek) then
 			realmInfo.gained[day] = nil
@@ -1023,11 +1006,6 @@ function Broker_Currency:InitializeSettings()
 			realmInfo.spent[day] = nil
 		end
 	end
-	for day in pairs(realmInfo.time) do
-		if (day < lastWeek) then
-			realmInfo.time[day] = nil
-		end
-	end
 	for i = self.lastTime - 13, self.lastTime do
 		if (not playerInfo.gained[i] or type(playerInfo.gained[i]) ~= "table") then
 			playerInfo.gained[i] = {money = 0}
@@ -1035,17 +1013,11 @@ function Broker_Currency:InitializeSettings()
 		if (not playerInfo.spent[i] or type(playerInfo.spent[i]) ~= "table") then
 			playerInfo.spent[i] = {money = 0}
 		end
-		if (not playerInfo.time[i]) then
-			playerInfo.time[i] = 0
-		end
 		if (not realmInfo.gained[i] or type(realmInfo.gained[i]) ~= "table") then
 			realmInfo.gained[i] = {money = 0}
 		end
 		if (not realmInfo.spent[i] or type(realmInfo.spent[i]) ~= "table") then
 			realmInfo.spent[i] = {money = 0}
-		end
-		if (not realmInfo.time[i]) then
-			realmInfo.time[i] = 0
 		end
 	end
 	self.gained = {money = 0}
