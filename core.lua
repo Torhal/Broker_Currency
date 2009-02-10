@@ -520,10 +520,6 @@ function Broker_Currency:ShowTooltip(button)
 						end
 					end
 				end
-			else
-				for i, value in ipairs(rowList) do
-					tooltip:SetCell(currentRow, i, value, fontWhite)
-				end
 			end
 			tooltip:SetCell(currentRow, 1, label, fontLabel)
 		end
