@@ -663,14 +663,16 @@ function Broker_Currency:Update(event)
 			local count = tokenInfo.countFunc(itemId)
 			playerInfo[tokenInfo.itemId] = count
 
-			if (self.last[itemId] < count) then
-				self.gained[itemId] = (self.gained[itemId] or 0) + count - self.last[itemId]
-				playerInfo.gained[today][itemId] = (playerInfo.gained[today][itemId] or 0) + count - self.last[itemId]
-				realmInfo.gained[today][itemId] = (realmInfo.gained[today][itemId] or 0) + count - self.last[itemId]
-			elseif (self.last[itemId] > count) then
-				self.spent[itemId] = (self.spent[itemId] or 0) + self.last[itemId] - count
-				playerInfo.spent[today][itemId] = (playerInfo.spent[today][itemId] or 0) + self.last[itemId] - count
-				realmInfo.spent[today][itemId] = (realmInfo.spent[today][itemId] or 0) + self.last[itemId] - count
+			if (self.last[itemId]) then
+				if (self.last[itemId] < count) then
+					self.gained[itemId] = (self.gained[itemId] or 0) + count - self.last[itemId]
+					playerInfo.gained[today][itemId] = (playerInfo.gained[today][itemId] or 0) + count - self.last[itemId]
+					realmInfo.gained[today][itemId] = (realmInfo.gained[today][itemId] or 0) + count - self.last[itemId]
+				elseif (self.last[itemId] > count) then
+					self.spent[itemId] = (self.spent[itemId] or 0) + self.last[itemId] - count
+					playerInfo.spent[today][itemId] = (playerInfo.spent[today][itemId] or 0) + self.last[itemId] - count
+					realmInfo.spent[today][itemId] = (realmInfo.spent[today][itemId] or 0) + self.last[itemId] - count
+				end
 			end
 			self.last[itemId] = count
 		end
