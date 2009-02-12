@@ -524,6 +524,14 @@ function Broker_Currency:ShowTooltip(button)
 			tooltip:SetCell(currentRow, 1, label, fontLabel)
 		end
 
+		-- Color the even columns
+		local column
+		for index = 2, maxColumns, 2 do
+			column = tooltip:AcquireColumn(index)
+			column:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = false, tileSize = 16, insets = {left = 0, right = 0, top = 2, bottom = 2},})
+			column:SetBackdropColor(1, 1, 1, 0.3)
+		end
+
 		tooltip:SmartAnchorTo(button)
 		tooltip:Show()
 	end
