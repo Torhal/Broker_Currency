@@ -35,6 +35,7 @@ local currencyInfo = {
 	{},
 	{itemId = 43307, countFunc = GetHonorCurrency},
 	{itemId = 43308, countFunc = GetArenaCurrency},
+	{itemId = 45624, countFunc = GetItemCount},
 	{itemId = 40753, countFunc = GetItemCount},
 	{itemId = 40752, countFunc = GetItemCount},
 	{itemId = 29434, countFunc = GetItemCount},
@@ -52,6 +53,7 @@ local currencyInfo = {
 	{itemId = 37836, countFunc = GetItemCount},
 
 	{itemId = 21100, countFunc = GetItemCount},
+	{itemId = 44990, countFunc = GetItemCount},
 }
 local arenaTexture = [[Interface\PVPFrame\PVP-ArenaPoints-Icon]]
 local settingsSliderIcon
@@ -95,6 +97,10 @@ local sPlus = "+"
 local sMinus = "-"
 local sTotal = "="
 
+local sColor = COLOR
+local sBackground = BACKGROUND
+local sHighlighting = HIGHLIGHTING
+
 local sDelete = DELETE
 
 local playerName = UnitName("player")
@@ -111,6 +117,17 @@ end
 
 local function setValue(info, value)
 	Broker_CurrencyCharDB[info[# info]] = true and value or nil
+	Broker_Currency:Update()
+end
+
+local function getColorValue(info)
+	local color = Broker_CurrencyCharDB[info[# info]]
+	return color.r, color.g, color.b, color.a
+end
+
+local function setColorValue(info, r, g, b, a)
+	local color = Broker_CurrencyCharDB[info[# info]]
+	color.r, color.g, color.b, color.a = r, g, b, a
 	Broker_Currency:Update()
 end
 
@@ -248,21 +265,46 @@ Broker_Currency.options = {
 				summarySilver = {
 					type = "toggle",
 					name = settingSilver,
-					order = 1,
+					order = 2,
 					width = "half",
 				},
 				summaryCopper = {
 					type = "toggle",
 					name = settingCopper,
-					order = 2,
+					order = 3,
 					width = "half",
+				},
+			},
+		},
+		color = {
+			type = "group",
+			name = sColor,
+			order = 50,
+			inline = true,
+			childGroups = "tree",
+			args = {
+				summaryColorDark = {
+					type = "color",
+					name = sBackground,
+					order = 11,
+					get = getColorValue,
+					set = setColorValue,
+					hasAlpha = true,
+				},
+				summaryColorLight = {
+					type = "color",
+					name = sHighlighting,
+					order = 12,
+					get = getColorValue,
+					set = setColorValue,
+					hasAlpha = true,
 				},
 			},
 		},
 		deleteCharacter = {
 			type = "group",
 			name = sDelete,
-			order = 50,
+			order = 60,
 			inline = true,
 			childGroups = "tree",
 			args = {
@@ -270,6 +312,7 @@ Broker_Currency.options = {
 		},
 	}
 }
+
 
 local function GetKey(itemId, broker)
 	if (broker) then
@@ -421,6 +464,7 @@ local tooltipAlignment = {}
 local tooltipHeader = {}
 local temp = {}
 function Broker_Currency:ShowTooltip(button)
+	Broker_Currency:Update()
 	local maxColumns = 0
 	for index, rowList in pairs(tooltipLines) do
 		local columns = 0
@@ -526,10 +570,19 @@ function Broker_Currency:ShowTooltip(button)
 
 		-- Color the even columns
 		local column
-		for index = 2, maxColumns, 2 do
-			column = tooltip:AcquireColumn(index)
-			column:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = false, tileSize = 16, insets = {left = 0, right = 0, top = 2, bottom = 2},})
-			column:SetBackdropColor(1, 1, 1, 0.3)
+		local summaryColorLight = Broker_CurrencyCharDB.summaryColorLight
+		if (summaryColorLight.a > 0) then
+			for index = 2, maxColumns, 2 do
+				column = tooltip:AcquireColumn(index)
+				column:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = false, tileSize = 16, insets = {left = 0, right = 0, top = 2, bottom = 2},})
+				column:SetBackdropColor(summaryColorLight.r, summaryColorLight.g, summaryColorLight.b, summaryColorLight.a)
+			end
+		end
+
+		local summaryColorDark = Broker_CurrencyCharDB.summaryColorDark
+		if (summaryColorDark.a > 0) then
+			tooltip:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = false, tileSize = 16, insets = {left = 0, right = 0, top = 2, bottom = 2},})
+			tooltip:SetBackdropColor(summaryColorDark.r, summaryColorDark.g, summaryColorDark.b, summaryColorDark.a)
 		end
 
 		tooltip:SmartAnchorTo(button)
@@ -620,6 +673,8 @@ end
 function Broker_Currency:Update(event)
 	if (event == "PLAYER_ENTERING_WORLD") then
 		self:InitializeSettings()
+		self.InitializeSettings = nil
+		return
 	end
 	if (event == "PLAYER_REGEN_ENABLED") then
 		Broker_Currency:RegisterEvent("BAG_UPDATE", "Update")
@@ -653,6 +708,8 @@ function Broker_Currency:Update(event)
 		realmInfo.spent[today] = realmInfo.spent[today] or {money = 0}
 		self.lastTime = today
 	end
+
+	-- Update Money
 	if (self.last.money < money) then
 		self.gained.money = (self.gained.money or 0) + money - self.last.money
 		playerInfo.gained[today].money = (playerInfo.gained[today].money or 0) + money - self.last.money
@@ -750,6 +807,9 @@ end
 
 -- Handle mouse enter event in our button
 local function OnEnter(button)
+	if (Broker_Currency.InitializeSettings) then
+		Broker_Currency:InitializeSettings()
+	end
 	wipe(tooltipLines)
 
 	-- Display the money string according to the summary settings
@@ -928,6 +988,8 @@ function Broker_Currency:InitializeSettings()
 			showYesterday = true,
 			showLastWeek = true,
 			summaryGold = true,
+			summaryColorDark = {r = 0, g = 0, b = 0, a = 0},
+			summaryColorLight = {r = 1, g = 1, b = 1, a = .3},
         }
   	end
 
@@ -936,6 +998,13 @@ function Broker_Currency:InitializeSettings()
 	end
 	if (not Broker_CurrencyCharDB.iconSizeGold) then
 		Broker_CurrencyCharDB.iconSizeGold = 16
+	end
+
+	if (not Broker_CurrencyCharDB.summaryColorDark) then
+		Broker_CurrencyCharDB.summaryColorDark = {r = 0, g = 0, b = 0, a = 0}
+	end
+	if (not Broker_CurrencyCharDB.summaryColorLight) then
+		Broker_CurrencyCharDB.summaryColorLight = {r = 1, g = 1, b = 1, a = .3}
 	end
 
 	if (not Broker_CurrencyDB) then
@@ -1056,9 +1125,6 @@ function Broker_Currency:InitializeSettings()
 		DeleteOptions(playerName, Broker_CurrencyDB.realm[realmName], index)
 		index = index + 1
 	end
-
-	-- Force first update
-	Broker_Currency:Update()
 
 	-- Register for update events
 	Broker_Currency:RegisterEvent("HONOR_CURRENCY_UPDATE", "Update")
