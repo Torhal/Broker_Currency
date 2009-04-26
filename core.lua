@@ -81,7 +81,7 @@ local playerName = UnitName("player")
 local realmName = GetRealmName()
 
 local sCurrency = CURRENCY
-local sVersion = GetAddOnMetadata("Broker_Currency", "Version")
+local sVersion = GetAddOnMetadata("Broker_Currency", "X-Curse-Packaged-Version") .. " (r" .. GetAddOnMetadata("Broker_Currency", "Version"):match("%d+") .. ")"
 
 local sDisplay = DISPLAY
 local sSummary = ACHIEVEMENT_SUMMARY_CATEGORY
