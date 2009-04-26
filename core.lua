@@ -474,29 +474,6 @@ function Broker_Currency:ShowTooltip(button)
 		maxColumns = max(maxColumns, columns)
 	end
 
-	local fontName, fontHeight, fontFlags = Tooltip_Small:GetFont()
-
-	fontPlus:SetFont(fontName, fontHeight, fontFlags)
-	fontPlus:SetTextColor(0, 1, 0)
-	fontPlus:SetJustifyH("RIGHT")
-	fontPlus:SetJustifyV("MIDDLE")
-
-	fontMinus:SetFont(fontName, fontHeight, fontFlags)
-	fontMinus:SetTextColor(1, 0, 0)
-	fontMinus:SetJustifyH("RIGHT")
-	fontMinus:SetJustifyV("MIDDLE")
-
-	fontWhite:SetFont(fontName, fontHeight, fontFlags)
-	fontWhite:SetTextColor(1, 1, 1)
-	fontWhite:SetJustifyH("RIGHT")
-	fontWhite:SetJustifyV("MIDDLE")
-
-	fontName, fontHeight, fontFlags = Tooltip_Med:GetFont()
-	fontLabel:SetFont(fontName, fontHeight, fontFlags)
-	fontLabel:SetTextColor(1, 1, 0.5)
-	fontLabel:SetJustifyH("LEFT")
-	fontLabel:SetJustifyV("MIDDLE")
-
 	if (maxColumns > 0) then
 		tooltipAlignment[1] = "LEFT"
 		for index = 2, maxColumns + 1 do
@@ -528,6 +505,29 @@ function Broker_Currency:ShowTooltip(button)
 
 		local tooltip = LibQTip:Acquire("Broker_CurrencyTooltip", maxColumns, unpack(tooltipAlignment))
 		self.tooltip = tooltip
+
+		local fontName, fontHeight, fontFlags = tooltip.regularFont:GetFont()
+
+		fontPlus:SetFont(fontName, fontHeight, fontFlags)
+		fontPlus:SetTextColor(0, 1, 0)
+		fontPlus:SetJustifyH("RIGHT")
+		fontPlus:SetJustifyV("MIDDLE")
+
+		fontMinus:SetFont(fontName, fontHeight, fontFlags)
+		fontMinus:SetTextColor(1, 0, 0)
+		fontMinus:SetJustifyH("RIGHT")
+		fontMinus:SetJustifyV("MIDDLE")
+
+		fontWhite:SetFont(fontName, fontHeight, fontFlags)
+		fontWhite:SetTextColor(1, 1, 1)
+		fontWhite:SetJustifyH("RIGHT")
+		fontWhite:SetJustifyV("MIDDLE")
+
+		fontName, fontHeight, fontFlags = tooltip.headerFont:GetFont()
+		fontLabel:SetFont(fontName, fontHeight, fontFlags)
+		fontLabel:SetTextColor(1, 1, 0.5)
+		fontLabel:SetJustifyH("LEFT")
+		fontLabel:SetJustifyV("MIDDLE")
 
 		tooltip:AddHeader(unpack(tooltipHeader))
 		tooltip:SetFont(fontWhite)
