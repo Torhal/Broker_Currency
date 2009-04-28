@@ -56,26 +56,7 @@ local currencyInfo = {
 	{itemId = 44990, countFunc = GetItemCount},
 }
 local arenaTexture = [[Interface\PVPFrame\PVP-ArenaPoints-Icon]]
-local settingsSliderIcon
-do
-	for index, tokenInfo in pairs(currencyInfo) do
-		local itemId = tokenInfo.itemId
-		if (itemId) then
-			local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture = GetItemInfo(itemId)
-			if (itemTexture) then
-				tokenInfo.itemName = itemName
-				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24:1:0\124t"
-				tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
-			end
-		end
-	end
-
-	-- Use the arena icon instead of a boj clone
-	local tokenInfo = currencyInfo[5]
-	tokenInfo.settingIcon = "\124T" .. arenaTexture .. ":24:24:1:0\124t"
-	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. arenaTexture .. DISPLAY_ICON_STRING2
-	settingsSliderIcon = tokenInfo.brokerIcon
-end
+local settingsSliderIcon = ""
 
 local playerName = UnitName("player")
 local realmName = GetRealmName()
@@ -156,17 +137,42 @@ Broker_Currency.options = {
 	get = getValue,
 	set = setValue,
 	childGroups = "tree",
-	args = {
+	args = {}
+}
+
+function Broker_Currency:InitializeOptions()
+	-- Icons, names and textures for the currencies
+	for index, tokenInfo in pairs(currencyInfo) do
+		local itemId = tokenInfo.itemId
+		if (itemId) then
+			local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture = GetItemInfo(itemId)
+			if (itemTexture) then
+				tokenInfo.itemName = itemName
+				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24:1:0\124t"
+				tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
+			elseif (itemId ~= "money") then
+				print("No Info for item", itemId)
+			end
+		end
+	end
+
+	-- Use the arena icon instead of a boj clone
+	local tokenInfo = currencyInfo[5]
+	tokenInfo.settingIcon = "\124T" .. arenaTexture .. ":24:24:1:0\124t"
+	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. arenaTexture .. DISPLAY_ICON_STRING2
+	settingsSliderIcon = tokenInfo.brokerIcon
+
+	Broker_Currency.options.args = {
 		header1 = {
 			type = "description",
-			order = 5,
-			name = sVersion,
+			order = 3,
+			name = sNotes,
 			cmdHidden = true
 		},
 		header2 = {
 			type = "description",
-			order = 10,
-			name = sNotes,
+			order = 5,
+			name = sVersion,
 			cmdHidden = true
 		},
 		iconSize = {
@@ -311,8 +317,7 @@ Broker_Currency.options = {
 			},
 		},
 	}
-}
-
+end
 
 local function GetKey(itemId, broker)
 	if (broker) then
@@ -670,7 +675,8 @@ local function GetToday(self)
 	return floor((time() / 60 / 60 + self:GetServerOffset()) / 24)
 end
 
-function Broker_Currency:Update(event)
+function Broker_Currency:Update(event)		--, ...)
+--print("Broker_Currency:Update", event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then
 		self:InitializeSettings()
 		self.InitializeSettings = nil
@@ -992,6 +998,8 @@ function Broker_Currency:InitializeSettings()
 			summaryColorLight = {r = 1, g = 1, b = 1, a = .3},
         }
   	end
+
+	self:InitializeOptions()
 
 	if (not Broker_CurrencyCharDB.iconSize) then
 		Broker_CurrencyCharDB.iconSize = 16
