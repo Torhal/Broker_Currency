@@ -54,6 +54,7 @@ local currencyInfo = {
 
 	{itemId = 21100, countFunc = GetItemCount},
 	{itemId = 44990, countFunc = GetItemCount},
+	{itemId = 46114, countFunc = GetItemCount},
 }
 local arenaTexture = [[Interface\PVPFrame\PVP-ArenaPoints-Icon]]
 local settingsSliderIcon = ""
@@ -151,7 +152,7 @@ function Broker_Currency:InitializeOptions()
 				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24:1:0\124t"
 				tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
 			elseif (itemId ~= "money") then
-				print("No Info for item", itemId)
+--				print("Broker_Currency:No Info for item", itemId)
 			end
 		end
 	end
