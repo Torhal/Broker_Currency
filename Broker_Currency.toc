@@ -17,7 +17,7 @@
 ## X-Category: Interface Enhancements
 ## X-Website: http://www.wowace.com/projects/broker-currency
 ## X-Credits: MoneyFu for getting me hooked on seeing my precious gold and soon the periodic calculations.
-## X-Curse-Packaged-Version:  v3.01.01.18
+## X-Curse-Packaged-Version:  v3.01.01.19
 ## X-Curse-Project-Name: Broker_Currency
 ## X-Curse-Project-ID: broker-currency
 ## X-Curse-Repository-ID: wow/broker-currency/mainline

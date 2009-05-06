@@ -35,26 +35,26 @@ local currencyInfo = {
 	{},
 	{itemId = 43307, countFunc = GetHonorCurrency},
 	{itemId = 43308, countFunc = GetArenaCurrency},
-	{itemId = 45624, countFunc = GetItemCount},
-	{itemId = 40753, countFunc = GetItemCount},
-	{itemId = 40752, countFunc = GetItemCount},
-	{itemId = 29434, countFunc = GetItemCount},
+	{itemId = 45624, countFunc = function() return GetItemCount(45624) end},
+	{itemId = 40753, countFunc = function() return GetItemCount(40753) end},
+	{itemId = 40752, countFunc = function() return GetItemCount(40752) end},
+	{itemId = 29434, countFunc = function() return GetItemCount(29434) end},
 
-	{itemId = 20560, countFunc = GetItemCount},
-	{itemId = 20559, countFunc = GetItemCount},
-	{itemId = 29024, countFunc = GetItemCount},
-	{itemId = 42425, countFunc = GetItemCount},
-	{itemId = 20558, countFunc = GetItemCount},
-	{itemId = 43589, countFunc = GetItemCount},
+	{itemId = 20560, countFunc = function() return GetItemCount(20560) end},
+	{itemId = 20559, countFunc = function() return GetItemCount(20559) end},
+	{itemId = 29024, countFunc = function() return GetItemCount(29024) end},
+	{itemId = 42425, countFunc = function() return GetItemCount(42425) end},
+	{itemId = 20558, countFunc = function() return GetItemCount(20558) end},
+	{itemId = 43589, countFunc = function() return GetItemCount(43589) end},
 
-	{itemId = 43016, countFunc = GetItemCount},
-	{itemId = 41596, countFunc = GetItemCount},
-	{itemId = 43228, countFunc = GetItemCount},
-	{itemId = 37836, countFunc = GetItemCount},
+	{itemId = 43016, countFunc = function() return GetItemCount(43016) end},
+	{itemId = 41596, countFunc = function() return GetItemCount(41596) end},
+	{itemId = 43228, countFunc = function() return GetItemCount(43228) end},
+	{itemId = 37836, countFunc = function() return GetItemCount(37836) end},
 
-	{itemId = 21100, countFunc = GetItemCount},
-	{itemId = 44990, countFunc = GetItemCount},
-	{itemId = 46114, countFunc = GetItemCount},
+	{itemId = 21100, countFunc = function() return GetItemCount(21100, true) end},
+	{itemId = 44990, countFunc = function() return GetItemCount(44990) end},
+	{itemId = 46114, countFunc = function() return GetItemCount(46114) end},
 }
 local arenaTexture = [[Interface\PVPFrame\PVP-ArenaPoints-Icon]]
 local settingsSliderIcon = ""
@@ -677,12 +677,7 @@ local function GetToday(self)
 end
 
 function Broker_Currency:Update(event)		--, ...)
---print("Broker_Currency:Update", event, ...)
-	if (event == "PLAYER_ENTERING_WORLD") then
-		self:InitializeSettings()
-		self.InitializeSettings = nil
-		return
-	end
+--print("Broker_Currency:Update", event)		--, ...)
 	if (event == "PLAYER_REGEN_ENABLED") then
 		Broker_Currency:RegisterEvent("BAG_UPDATE", "Update")
 	end
@@ -732,7 +727,7 @@ function Broker_Currency:Update(event)		--, ...)
 	for index, tokenInfo in pairs(currencyInfo) do
 		if (tokenInfo.brokerIcon) then
 			local itemId = tokenInfo.itemId
-			local count = tokenInfo.countFunc(itemId)
+			local count = tokenInfo.countFunc()
 			playerInfo[tokenInfo.itemId] = count
 
 			if (self.last[itemId]) then
@@ -815,7 +810,8 @@ end
 -- Handle mouse enter event in our button
 local function OnEnter(button)
 	if (Broker_Currency.InitializeSettings) then
-		Broker_Currency:InitializeSettings()
+print("Whoa OnEnter with non nil InitializeSettings")
+		Broker_Currency.InitializeSettings()
 	end
 	wipe(tooltipLines)
 
@@ -984,7 +980,8 @@ Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
 })
 
 
-function Broker_Currency:InitializeSettings()
+function Broker_Currency.InitializeSettings()
+	self = Broker_Currency
 	-- Set defaults
 	if (not Broker_CurrencyCharDB) then
 		Broker_CurrencyCharDB = {
@@ -1059,7 +1056,7 @@ function Broker_Currency:InitializeSettings()
 	for index, tokenInfo in pairs(currencyInfo) do
 		if (tokenInfo.brokerIcon) then
 			local itemId = tokenInfo.itemId
-			local count = tokenInfo.countFunc(itemId)
+			local count = tokenInfo.countFunc()
 			playerInfo[tokenInfo.itemId] = count
 
 			last[itemId] = count
@@ -1134,6 +1131,7 @@ function Broker_Currency:InitializeSettings()
 		DeleteOptions(playerName, Broker_CurrencyDB.realm[realmName], index)
 		index = index + 1
 	end
+	Broker_Currency:UnregisterEvent("BAG_UPDATE")
 
 	-- Register for update events
 	Broker_Currency:RegisterEvent("HONOR_CURRENCY_UPDATE", "Update")
@@ -1147,10 +1145,26 @@ function Broker_Currency:InitializeSettings()
 	Broker_Currency:RegisterEvent("PLAYER_REGEN_ENABLED", "Update")
 	Broker_Currency:RegisterEvent("PLAYER_REGEN_DISABLED", "Update")
 	Broker_Currency:RegisterEvent("BAG_UPDATE", "Update")
+
 	-- Done initializing
-	Broker_Currency:UnregisterEvent("PLAYER_ENTERING_WORLD")
+	Broker_Currency:SetScript("OnEvent", Broker_Currency.Update)
+	Broker_Currency.InitializeSettings = nil
+
+	self:Update()
 end
 
--- Initialize on the PLAYER_ENTERING_WORLD event
-Broker_Currency:RegisterEvent("PLAYER_ENTERING_WORLD")
-Broker_Currency:SetScript("OnEvent", Broker_Currency.Update)
+local startupTimer
+function Broker_Currency:Startup(event, ...)
+--print("Broker_Currency:Startup", event, ...)
+	if (event == "BAG_UPDATE") then
+		if (startupTimer) then
+			Broker_Currency:CancelTimer(startupTimer)
+		end
+		startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 4)
+	end
+end
+
+-- Initialize after end of BAG_UPDATE events
+Broker_Currency:RegisterEvent("BAG_UPDATE")
+Broker_Currency:SetScript("OnEvent", Broker_Currency.Startup)
+LibStub("AceTimer-3.0"):Embed(Broker_Currency)
