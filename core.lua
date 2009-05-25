@@ -579,9 +579,7 @@ function Broker_Currency:ShowTooltip(button)
 		local summaryColorLight = Broker_CurrencyCharDB.summaryColorLight
 		if (summaryColorLight.a > 0) then
 			for index = 2, maxColumns, 2 do
-				column = tooltip:AcquireColumn(index)
-				column:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = false, tileSize = 16, insets = {left = 0, right = 0, top = 2, bottom = 2},})
-				column:SetBackdropColor(summaryColorLight.r, summaryColorLight.g, summaryColorLight.b, summaryColorLight.a)
+				tooltip:SetColumnColor(index, summaryColorLight.r,summaryColorLight.g, summaryColorLight.b, summaryColorLight.a)
 			end
 		end
 
