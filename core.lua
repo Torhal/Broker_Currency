@@ -63,7 +63,7 @@ local playerName = UnitName("player")
 local realmName = GetRealmName()
 
 local sCurrency = CURRENCY
-local sVersion = GetAddOnMetadata("Broker_Currency", "X-Curse-Packaged-Version") .. " (r" .. GetAddOnMetadata("Broker_Currency", "Version"):match("%d+") .. ")"
+local sVersion = GetAddOnMetadata("Broker_Currency", "Version")
 
 local sDisplay = DISPLAY
 local sSummary = ACHIEVEMENT_SUMMARY_CATEGORY
@@ -1107,7 +1107,7 @@ function Broker_Currency.InitializeSettings()
 	-- Add faction honor icons
 	local faction = UnitFactionGroup("player")
 	local honorTexture
-	if faction == "Horde" then
+	if (faction == "Horde") then
 		honorTexture = [[Interface\PVPFrame\PVP-Currency-Horde]]
 	else
 		honorTexture = [[Interface\PVPFrame\PVP-Currency-Alliance]]
