@@ -2,7 +2,7 @@
 ## Title: Broker: Currency
 ## X-BrokerName: Currency
 ## Author: Toadkiller
-## Version:  @project-version@ @project-revision@
+## Version:  @project-version@ <r@project-revision@>
 ## Notes: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
 ## Notes-deDE: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
 ## Notes-esES: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
@@ -17,7 +17,6 @@
 ## X-Category: Interface Enhancements
 ## X-Website: http://www.wowace.com/projects/broker-currency
 ## X-Credits: MoneyFu for getting me hooked on seeing my precious gold and soon the periodic calculations.
-## X-Curse-Packaged-Version:  v3.01.01.19
 
 ## OptionalDeps: Ace3, LibDataBroker-1.1, LibQTip-1.0
 ## SavedVariablesPerCharacter: Broker_CurrencyCharDB
