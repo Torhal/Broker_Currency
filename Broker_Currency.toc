@@ -22,6 +22,9 @@
 ## SavedVariablesPerCharacter: Broker_CurrencyCharDB
 ## SavedVariables: Broker_CurrencyDB
 
+## LoadManagers: AddonLoader
+## X-LoadOn-Always: Delayed
+
 # Libraries
 embeds.xml
 

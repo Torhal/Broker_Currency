@@ -35,26 +35,27 @@ local currencyInfo = {
 	{},
 	{itemId = 43307, countFunc = GetHonorCurrency},
 	{itemId = 43308, countFunc = GetArenaCurrency},
-	{itemId = 45624, countFunc = function() return GetItemCount(45624) end},
-	{itemId = 40753, countFunc = function() return GetItemCount(40753) end},
-	{itemId = 40752, countFunc = function() return GetItemCount(40752) end},
-	{itemId = 29434, countFunc = function() return GetItemCount(29434) end},
+	{itemId = 29434, countFunc = function() return GetItemCount(29434) end},		-- Badge of Justice
+	{itemId = 45624, countFunc = function() return GetItemCount(45624) end},		-- Emblem of Conquest
+	{itemId = 40752, countFunc = function() return GetItemCount(40752) end},		-- Emblem of Heroism
+	{itemId = 40753, countFunc = function() return GetItemCount(40753) end},		-- Emblem of Valor
+	{itemId = 47241, countFunc = function() return GetItemCount(47241) end},		-- Emblem of Triumph
 
-	{itemId = 20560, countFunc = function() return GetItemCount(20560) end},
-	{itemId = 20559, countFunc = function() return GetItemCount(20559) end},
-	{itemId = 29024, countFunc = function() return GetItemCount(29024) end},
-	{itemId = 42425, countFunc = function() return GetItemCount(42425) end},
-	{itemId = 20558, countFunc = function() return GetItemCount(20558) end},
-	{itemId = 43589, countFunc = function() return GetItemCount(43589) end},
+	{itemId = 20560, countFunc = function() return GetItemCount(20560) end},		-- Alterac Valley Mark of Honor
+	{itemId = 20559, countFunc = function() return GetItemCount(20559) end},		-- Arathi Basin Mark of Honor
+	{itemId = 29024, countFunc = function() return GetItemCount(29024) end},		-- Eye of the Storm Mark of Honor
+	{itemId = 42425, countFunc = function() return GetItemCount(42425) end},		-- Strand of the Ancients Mark of Honor
+	{itemId = 20558, countFunc = function() return GetItemCount(20558) end},		-- Warsong Gulch Mark of Honor
+	{itemId = 43589, countFunc = function() return GetItemCount(43589) end},		-- Wintergrasp Mark of Honor
 
-	{itemId = 43016, countFunc = function() return GetItemCount(43016) end},
-	{itemId = 41596, countFunc = function() return GetItemCount(41596) end},
-	{itemId = 43228, countFunc = function() return GetItemCount(43228) end},
-	{itemId = 37836, countFunc = function() return GetItemCount(37836) end},
+	{itemId = 43016, countFunc = function() return GetItemCount(43016) end},		-- Dalaran Cooking Award
+	{itemId = 41596, countFunc = function() return GetItemCount(41596) end},		-- Dalaran Jewelcrafter's Token
+	{itemId = 43228, countFunc = function() return GetItemCount(43228) end},		-- Stone Keeper's Shard
+	{itemId = 37836, countFunc = function() return GetItemCount(37836) end},		-- Venture Coin
 
-	{itemId = 21100, countFunc = function() return GetItemCount(21100, true) end},
-	{itemId = 44990, countFunc = function() return GetItemCount(44990) end},
-	{itemId = 46114, countFunc = function() return GetItemCount(46114) end},
+	{itemId = 21100, countFunc = function() return GetItemCount(21100, true) end},		-- Coin of Ancestry
+	{itemId = 44990, countFunc = function() return GetItemCount(44990) end},		-- Champion's Seal
+	{itemId = 46114, countFunc = function() return GetItemCount(46114) end},		-- Champion's Writ
 }
 local arenaTexture = [[Interface\PVPFrame\PVP-ArenaPoints-Icon]]
 local settingsSliderIcon = ""
