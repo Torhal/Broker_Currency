@@ -47,6 +47,7 @@ local currencyInfo = {
 	{itemId = 42425, countFunc = function() return GetItemCount(42425) end},		-- Strand of the Ancients Mark of Honor
 	{itemId = 20558, countFunc = function() return GetItemCount(20558) end},		-- Warsong Gulch Mark of Honor
 	{itemId = 43589, countFunc = function() return GetItemCount(43589) end},		-- Wintergrasp Mark of Honor
+	{itemId = 47395, countFunc = function() return GetItemCount(47395) end},		-- Isle of Conquest Mark of Honor
 
 	{itemId = 43016, countFunc = function() return GetItemCount(43016) end},		-- Dalaran Cooking Award
 	{itemId = 41596, countFunc = function() return GetItemCount(41596) end},		-- Dalaran Jewelcrafter's Token
