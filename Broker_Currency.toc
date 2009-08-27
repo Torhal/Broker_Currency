@@ -2,7 +2,7 @@
 ## Title: Broker: Currency
 ## X-BrokerName: Currency
 ## Author: Toadkiller
-## Version:  @project-version@ <r@project-revision@>
+## Version:  v3.02.00.17 release
 ## Notes: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
 ## Notes-deDE: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
 ## Notes-esES: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
