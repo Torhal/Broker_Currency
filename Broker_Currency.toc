@@ -2,15 +2,17 @@
 ## Title: Broker: Currency
 ## X-BrokerName: Currency
 ## Author: Toadkiller
-## Version:  v3.02.00.17 release
+## Version:  3.2.0.@project-revision@
+
 ## Notes: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
-## Notes-deDE: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
+## Notes-deDE: LDB-Anzeige von Währungen, Summe des Goldes und Gold-Statistik pro Sitzung / Tag / Woche für alle Charaktere auf einem Server.
 ## Notes-esES: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
 ## Notes-frFR: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
 ## Notes-koKR: 자동으로LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
 ## Notes-ruRU: Динамические LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
 ## Notes-zhCN: 一组LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.。
 ## Notes-zhTW: 一組LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.。
+
 ## DefaultState: enabled
 ## UIType: 动作条
 ## UIType-zhTW: 動作條
