@@ -9,7 +9,7 @@
 --
 
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
-local LibQTip = LibStub('LibQTip-1.0')
+local LibQTip = LibStub("LibQTip-1.0")
 
 -- The localization goal is to only use existing Blizzard strings and localized Title strings from the toc
 local iconGold = GOLD_AMOUNT_TEXTURE
@@ -957,10 +957,9 @@ end
 --/dump Broker_CurrencyDB.realmInfo.Proudmoore.spent
 
 
-function OnLeave()
+local function OnLeave()
 	LibQTip:Release(Broker_Currency.tooltip)
 	Broker_Currency.tooltip = nil
---	GameTooltip:Hide()
 end
 
 
