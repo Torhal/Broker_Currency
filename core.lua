@@ -55,6 +55,7 @@ local currencyInfo = {
 	{itemId = 37836, countFunc = function() return GetItemCount(37836) end},		-- Venture Coin
 
 	{itemId = 21100, countFunc = function() return GetItemCount(21100, true) end},		-- Coin of Ancestry
+	{itemId = 37829, countFunc = function() return GetItemCount(37829, true) end},		-- Brewfest Prize Token
 	{itemId = 44990, countFunc = function() return GetItemCount(44990) end},		-- Champion's Seal
 	{itemId = 46114, countFunc = function() return GetItemCount(46114) end},		-- Champion's Writ
 }
@@ -772,6 +773,8 @@ end
 local totalList = {}
 local weekGained = {}
 local weekSpent = {}
+local lastWeekGained = {}
+local lastWeekSpent = {}
 local profit = {}
 local sortMoneyList = {}
 
@@ -921,29 +924,29 @@ print("Whoa OnEnter with non nil InitializeSettings")
 
 	-- Last Week totals
 	if (charDB.summaryRealmLastWeek) then
-		wipe(weekGained)
-		wipe(weekSpent)
+		wipe(lastWeekGained)
+		wipe(lastWeekSpent)
 		wipe(profit)
 		for i = self.lastTime - 13, self.lastTime - 7 do
 			for index, tokenInfo in pairs(currencyInfo) do
 				local itemId = tokenInfo.itemId
 				if (itemId) then
-					weekGained[itemId] = (weekGained[itemId] or 0) + (gained[i] and gained[i][itemId] or 0)
-					weekSpent[itemId] = (weekSpent[itemId] or 0) + (spent[i] and spent[i][itemId] or 0)
+					lastWeekGained[itemId] = (lastWeekGained[itemId] or 0) + (gained[i] and gained[i][itemId] or 0)
+					lastWeekSpent[itemId] = (lastWeekSpent[itemId] or 0) + (spent[i] and spent[i][itemId] or 0)
 				end
 			end
 		end
 		for index, tokenInfo in pairs(currencyInfo) do
 			local itemId = tokenInfo.itemId
 			if (itemId) then
-				profit[itemId] = weekGained[itemId] - weekSpent[itemId]
+				profit[itemId] = lastWeekGained[itemId] - lastWeekSpent[itemId]
 			end
 		end
 		Broker_Currency:AddLine(" ")
 		Broker_Currency:AddLine(sLastWeek)
 
-		Broker_Currency:AddLine(sPlus, weekGained)
-		Broker_Currency:AddLine(sMinus, weekSpent)
+		Broker_Currency:AddLine(sPlus, lastWeekGained)
+		Broker_Currency:AddLine(sMinus, lastWeekSpent)
 		Broker_Currency:AddLine(sTotal, profit)
 	end
 
@@ -1159,7 +1162,7 @@ function Broker_Currency:Startup(event, ...)
 		if (startupTimer) then
 			Broker_Currency:CancelTimer(startupTimer)
 		end
-		startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 4)
+		startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 8)
 	end
 end
 
