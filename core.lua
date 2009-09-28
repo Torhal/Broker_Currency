@@ -10,6 +10,7 @@
 
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 local LibQTip = LibStub("LibQTip-1.0")
+local startupTimer
 
 -- The localization goal is to only use existing Blizzard strings and localized Title strings from the toc
 local iconGold = GOLD_AMOUNT_TEXTURE
@@ -679,6 +680,11 @@ end
 
 function Broker_Currency:Update(event)		--, ...)
 --print("Broker_Currency:Update", event)		--, ...)
+	if (Broker_Currency.InitializeSettings) then
+print("Evil Illidan, Update with non nil InitializeSettings")
+		Broker_Currency.InitializeSettings()
+	end
+
 	if (event == "PLAYER_REGEN_ENABLED") then
 		Broker_Currency:RegisterEvent("BAG_UPDATE", "Update")
 	end
@@ -686,6 +692,14 @@ function Broker_Currency:Update(event)		--, ...)
 		Broker_Currency:UnregisterEvent("BAG_UPDATE")
 		return
 	end
+if (GetItemCount(6948) < 1 and GetMoney() == 0) then
+	print("WTF!  No Hearthstone or money during Update!")
+	print("WTF!  No Hearthstone or money during Update!")
+	print("WTF!  No Hearthstone or money during Update!")
+	print("WTF!  No Hearthstone or money during Update!")
+	print("WTF!  No Hearthstone or money during Update!")
+	print("WTF!  No Hearthstone or money during Update!")
+end
 
 	local realmInfo = Broker_CurrencyDB.realmInfo[realmName]
 	local playerInfo = Broker_CurrencyDB.realm[realmName][playerName]
@@ -812,6 +826,9 @@ end
 
 -- Handle mouse enter event in our button
 local function OnEnter(button)
+	if (startupTimer) then
+		return
+	end
 	if (Broker_Currency.InitializeSettings) then
 print("Whoa OnEnter with non nil InitializeSettings")
 		Broker_Currency.InitializeSettings()
@@ -982,7 +999,27 @@ Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
 })
 
 
+local wtfDelay = 5 -- For stupid cases where Blizzard pretends a player has no loots, wait up to 15 seconds
 function Broker_Currency.InitializeSettings()
+	-- No hearthstone and no money means trouble
+	if (startupTimer) then
+		Broker_Currency:CancelTimer(startupTimer)
+		startupTimer = nil
+	end
+	if (GetItemCount(6948) < 1 and GetMoney() == 0) then
+		if (wtfDelay > 0) then
+			startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, wtfDelay)
+			wtfDelay = wtfDelay - 1
+			return
+		end
+	end
+	if (GetItemCount(6948) < 1 and GetMoney() == 0) then
+		print("WTF!  No Hearthstone or money during InitializeSettings!")
+		print("WTF!  No Hearthstone or money during InitializeSettings!")
+		print("WTF!  No Hearthstone or money during InitializeSettings!")
+		print("WTF!  No Hearthstone or money during InitializeSettings!")
+		print("WTF!  No Hearthstone or money during InitializeSettings!")
+	end
 	self = Broker_Currency
 	-- Set defaults
 	if (not Broker_CurrencyCharDB) then
@@ -1134,6 +1171,10 @@ function Broker_Currency.InitializeSettings()
 		index = index + 1
 	end
 	Broker_Currency:UnregisterEvent("BAG_UPDATE")
+	if (startupTimer) then
+		Broker_Currency:CancelTimer(startupTimer)
+		startupTimer = nil
+	end
 
 	-- Register for update events
 	Broker_Currency:RegisterEvent("HONOR_CURRENCY_UPDATE", "Update")
@@ -1155,18 +1196,18 @@ function Broker_Currency.InitializeSettings()
 	self:Update()
 end
 
-local startupTimer
 function Broker_Currency:Startup(event, ...)
 --print("Broker_Currency:Startup", event, ...)
 	if (event == "BAG_UPDATE") then
 		if (startupTimer) then
 			Broker_Currency:CancelTimer(startupTimer)
 		end
-		startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 8)
+		startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 4)
 	end
 end
 
 -- Initialize after end of BAG_UPDATE events
 Broker_Currency:RegisterEvent("BAG_UPDATE")
+Broker_Currency:RegisterEvent("PLAYER_MONEY")
 Broker_Currency:SetScript("OnEvent", Broker_Currency.Startup)
 LibStub("AceTimer-3.0"):Embed(Broker_Currency)
