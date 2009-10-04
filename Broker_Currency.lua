@@ -155,8 +155,6 @@ function Broker_Currency:InitializeOptions()
 				tokenInfo.itemName = itemName
 				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24:1:0\124t"
 				tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
-			elseif (itemId ~= "money") then
---				print("Broker_Currency:No Info for item", itemId)
 			end
 		end
 	end
@@ -679,7 +677,6 @@ local function GetToday(self)
 end
 
 function Broker_Currency:Update(event)		--, ...)
---print("Broker_Currency:Update", event)		--, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then
 		Broker_Currency:RegisterEvents()
 	end
@@ -689,7 +686,6 @@ function Broker_Currency:Update(event)		--, ...)
 	end
 
 	if (Broker_Currency.InitializeSettings) then
-print("Evil Illidan, Update with non nil InitializeSettings")
 		Broker_Currency.InitializeSettings()
 	end
 
@@ -700,15 +696,10 @@ print("Evil Illidan, Update with non nil InitializeSettings")
 		Broker_Currency:UnregisterEvent("BAG_UPDATE")
 		return
 	end
-if (GetItemCount(6948) < 1 and GetMoney() == 0) then
-print("Evil Illidan, Update with no hearthstone or money")
-print("Evil Illidan, Update with no hearthstone or money")
-print("Evil Illidan, Update with no hearthstone or money")
-print("Evil Illidan, Update with no hearthstone or money")
-print("Evil Illidan, Update with no hearthstone or money")
-print("Evil Illidan, Update with no hearthstone or money")
-	return
-end
+	if (GetItemCount(6948) < 1 and GetMoney() == 0) then
+		-- ToDo: check all items for nil?
+		return
+	end
 
 	local realmInfo = Broker_CurrencyDB.realmInfo[realmName]
 	local playerInfo = Broker_CurrencyDB.realm[realmName][playerName]
@@ -839,7 +830,6 @@ local function OnEnter(button)
 		return
 	end
 	if (Broker_Currency.InitializeSettings) then
-print("Whoa OnEnter with non nil InitializeSettings")
 		Broker_Currency.InitializeSettings()
 	end
 	wipe(tooltipLines)
@@ -1227,7 +1217,6 @@ function Broker_Currency:UnregisterEvents()
 end
 
 function Broker_Currency:Startup(event, ...)
---print("Broker_Currency:Startup", event, ...)
 	if (event == "BAG_UPDATE") then
 		if (startupTimer) then
 			Broker_Currency:CancelTimer(startupTimer)
