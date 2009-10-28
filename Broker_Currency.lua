@@ -987,7 +987,7 @@ Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
 	type = "data source",
 	label = sCurrency,
 	icon = "Interface\\MoneyFrame\\UI-GoldIcon",
-	text = "5",
+	text = "Initializing...",
 	OnClick = function(clickedframe, button)
 		if (button == "RightButton") then
 			InterfaceOptionsFrame_OpenToCategory(Broker_Currency.menu)
@@ -1005,6 +1005,7 @@ function Broker_Currency.InitializeSettings()
 		Broker_Currency:CancelTimer(startupTimer)
 		startupTimer = nil
 	end
+
 	if (GetItemCount(6948) < 1 and GetMoney() == 0) then
 		if (wtfDelay > 0) then
 			startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, wtfDelay)
@@ -1229,4 +1230,10 @@ end
 Broker_Currency:RegisterEvent("BAG_UPDATE")
 Broker_Currency:RegisterEvent("PLAYER_MONEY")
 Broker_Currency:SetScript("OnEvent", Broker_Currency.Startup)
+
 LibStub("AceTimer-3.0"):Embed(Broker_Currency)
+
+-- This is only necessary if AddonLoader is present, using the Delayed load. -Torhal
+if IsLoggedIn() then
+	startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 4)
+end
