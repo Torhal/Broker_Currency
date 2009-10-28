@@ -556,8 +556,12 @@ function Broker_Currency:ShowTooltip(button)
 			local label = rowList[1]
 			local currentRow = index + 1
 
-			if rowList[1] == " " then
+			if label == " " then
 				tooltip:AddSeparator()
+			elseif (label == sStatistics) or (label == sToday) or (label == sYesterday) or (label == sThisWeek) or (label == sLastWeek) then
+				tooltip:AddHeader(unpack(tooltipHeader))
+				--					tooltip:SetCell(currentRow, 1, label, fontLabel, "CENTER", maxColumns)
+				tooltip:SetCell(currentRow, 1, label, fontLabel)
 			else
 				tooltip:AddLine(unpack(rowList))
 
@@ -895,6 +899,7 @@ local function OnEnter(button)
 	if (charDB.summaryRealmToday) then
 		Broker_Currency:AddLine(" ")
 		Broker_Currency:AddLine(sToday)
+		Broker_Currency:AddLine(" ")
 
 		wipe(profit)
 		for index, tokenInfo in pairs(currencyInfo) do
@@ -913,6 +918,7 @@ local function OnEnter(button)
 	if (charDB.summaryRealmYesterday) then
 		Broker_Currency:AddLine(" ")
 		Broker_Currency:AddLine(sYesterday)
+		Broker_Currency:AddLine(" ")
 
 		local yesterday = self.lastTime - 1
 		wipe(profit)
@@ -950,6 +956,7 @@ local function OnEnter(button)
 		end
 		Broker_Currency:AddLine(" ")
 		Broker_Currency:AddLine(sThisWeek)
+		Broker_Currency:AddLine(" ")
 
 		Broker_Currency:AddLine(sPlus, weekGained)
 		Broker_Currency:AddLine(sMinus, weekSpent)
@@ -978,6 +985,7 @@ local function OnEnter(button)
 		end
 		Broker_Currency:AddLine(" ")
 		Broker_Currency:AddLine(sLastWeek)
+		Broker_Currency:AddLine(" ")
 
 		Broker_Currency:AddLine(sPlus, lastWeekGained)
 		Broker_Currency:AddLine(sMinus, lastWeekSpent)
