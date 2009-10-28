@@ -466,11 +466,23 @@ function Broker_Currency:CreateMoneyString(currencyList)
 	return table.concat(concatList)
 end
 
+local tooltipBackdrop = {
+	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+	tile = false,
+	tileSize = 16,
+	insets = {
+		left = 0,
+		right = 0,
+		top = 2,
+		bottom = 2
+	},
+}
 local tooltipLines = {}
 local tooltipLinesRecycle = {}
 local tooltipAlignment = {}
 local tooltipHeader = {}
 local temp = {}
+
 function Broker_Currency:ShowTooltip(button)
 	Broker_Currency:Update()
 	local maxColumns = 0
@@ -541,39 +553,45 @@ function Broker_Currency:ShowTooltip(button)
 		tooltip:SetFont(fontWhite)
 
 		for index, rowList in pairs(tooltipLines) do
-			tooltip:AddLine(unpack(rowList))
 			local label = rowList[1]
 			local currentRow = index + 1
-			if (label == sPlus) then
-				for i, value in ipairs(rowList) do
-					if (value == 0) then
-						tooltip:SetCell(currentRow, i, " ", fontPlus)
-					else
-						tooltip:SetCell(currentRow, i, value, fontPlus)
-					end
-				end
-			elseif (label == sMinus) then
-				for i, value in ipairs(rowList) do
-					if (value == 0) then
-						tooltip:SetCell(currentRow, i, " ", fontMinus)
-					else
-						tooltip:SetCell(currentRow, i, value, fontMinus)
-					end
-				end
-			elseif (label == sTotal) then
-				for i, value in ipairs(rowList) do
-					if (value and type(value) == "number") then
+
+			if rowList[1] == " " then
+				tooltip:AddSeparator()
+			else
+				tooltip:AddLine(unpack(rowList))
+
+				if (label == sPlus) then
+					for i, value in ipairs(rowList) do
 						if (value == 0) then
-							tooltip:SetCell(currentRow, i, " ", fontMinus)
-						elseif (value < 0) then
-							tooltip:SetCell(currentRow, i, -1 * value, fontMinus)
+							tooltip:SetCell(currentRow, i, " ", fontPlus)
 						else
 							tooltip:SetCell(currentRow, i, value, fontPlus)
 						end
 					end
+				elseif (label == sMinus) then
+					for i, value in ipairs(rowList) do
+						if (value == 0) then
+							tooltip:SetCell(currentRow, i, " ", fontMinus)
+						else
+							tooltip:SetCell(currentRow, i, value, fontMinus)
+						end
+					end
+				elseif (label == sTotal) then
+					for i, value in ipairs(rowList) do
+						if (value and type(value) == "number") then
+							if (value == 0) then
+								tooltip:SetCell(currentRow, i, " ", fontMinus)
+							elseif (value < 0) then
+								tooltip:SetCell(currentRow, i, -1 * value, fontMinus)
+							else
+								tooltip:SetCell(currentRow, i, value, fontPlus)
+							end
+						end
+					end
 				end
+				tooltip:SetCell(currentRow, 1, label, fontLabel)
 			end
-			tooltip:SetCell(currentRow, 1, label, fontLabel)
 		end
 
 		-- Color the even columns
@@ -581,13 +599,13 @@ function Broker_Currency:ShowTooltip(button)
 		local summaryColorLight = Broker_CurrencyCharDB.summaryColorLight
 		if (summaryColorLight.a > 0) then
 			for index = 2, maxColumns, 2 do
-				tooltip:SetColumnColor(index, summaryColorLight.r,summaryColorLight.g, summaryColorLight.b, summaryColorLight.a)
+				tooltip:SetColumnColor(index, summaryColorLight.r, summaryColorLight.g, summaryColorLight.b, summaryColorLight.a)
 			end
 		end
 
 		local summaryColorDark = Broker_CurrencyCharDB.summaryColorDark
 		if (summaryColorDark.a > 0) then
-			tooltip:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = false, tileSize = 16, insets = {left = 0, right = 0, top = 2, bottom = 2},})
+			tooltip:SetBackdrop(tooltipBackdrop)
 			tooltip:SetBackdropColor(summaryColorDark.r, summaryColorDark.g, summaryColorDark.b, summaryColorDark.a)
 		end
 
