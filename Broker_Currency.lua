@@ -1039,13 +1039,6 @@ function Broker_Currency.InitializeSettings()
 			return
 		end
 	end
-	if (GetItemCount(6948) < 1 and GetMoney() == 0) then
-		print("WTF!  No Hearthstone or money during InitializeSettings!")
-		print("WTF!  No Hearthstone or money during InitializeSettings!")
-		print("WTF!  No Hearthstone or money during InitializeSettings!")
-		print("WTF!  No Hearthstone or money during InitializeSettings!")
-		print("WTF!  No Hearthstone or money during InitializeSettings!")
-	end
 	self = Broker_Currency
 	-- Set defaults
 	if (not Broker_CurrencyCharDB) then
