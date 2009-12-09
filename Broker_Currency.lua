@@ -41,6 +41,7 @@ local currencyInfo = {
 	{itemId = 40752, countFunc = function() return GetItemCount(40752) end},		-- Emblem of Heroism
 	{itemId = 40753, countFunc = function() return GetItemCount(40753) end},		-- Emblem of Valor
 	{itemId = 47241, countFunc = function() return GetItemCount(47241) end},		-- Emblem of Triumph
+	{itemId = 49426, countFunc = function() return GetItemCount(49426) end},		-- Emblem of Frost
 
 	{itemId = 20560, countFunc = function() return GetItemCount(20560) end},		-- Alterac Valley Mark of Honor
 	{itemId = 20559, countFunc = function() return GetItemCount(20559) end},		-- Arathi Basin Mark of Honor
