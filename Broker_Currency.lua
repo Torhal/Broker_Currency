@@ -607,9 +607,12 @@ function Broker_Currency:ShowTooltip(button)
 				tooltip:SetColumnColor(index, summaryColorLight.r, summaryColorLight.g, summaryColorLight.b, summaryColorLight.a)
 			end
 		end
-
 		local summaryColorDark = Broker_CurrencyCharDB.summaryColorDark
-		if (summaryColorDark.a > 0) then
+
+		if _G.TipTac and _G.TipTac.AddModifiedTip then
+			-- Pass true as second parameter because hooking OnHide causes C stack overflows
+			_G.TipTac:AddModifiedTip(tooltip, true)
+		elseif (summaryColorDark.a > 0) then
 			tooltip:SetBackdrop(tooltipBackdrop)
 			tooltip:SetBackdropColor(summaryColorDark.r, summaryColorDark.g, summaryColorDark.b, summaryColorDark.a)
 		end

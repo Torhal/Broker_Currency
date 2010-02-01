@@ -20,7 +20,7 @@
 ## X-Website: http://www.wowace.com/projects/broker-currency
 ## X-Credits: MoneyFu for getting me hooked on seeing my precious gold and soon the periodic calculations.
 
-## OptionalDeps: Ace3, LibDataBroker-1.1, LibQTip-1.0
+## OptionalDeps: Ace3, LibDataBroker-1.1, LibQTip-1.0, TipTac
 ## SavedVariablesPerCharacter: Broker_CurrencyCharDB
 ## SavedVariables: Broker_CurrencyDB
 
