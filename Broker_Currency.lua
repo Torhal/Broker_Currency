@@ -17,13 +17,13 @@ local iconGold = GOLD_AMOUNT_TEXTURE
 local iconSilver = SILVER_AMOUNT_TEXTURE
 local iconCopper = COPPER_AMOUNT_TEXTURE
 
-local settingGold = "\124TInterface\\MoneyFrame\\UI-GoldIcon:24:24:1:0\124t"
-local settingSilver = "\124TInterface\\MoneyFrame\\UI-SilverIcon:24:24:1:0\124t"
-local settingCopper = "\124TInterface\\MoneyFrame\\UI-CopperIcon:24:24:1:0\124t"
+local settingGold = "\124TInterface\\MoneyFrame\\UI-GoldIcon:24:24\124t"
+local settingSilver = "\124TInterface\\MoneyFrame\\UI-SilverIcon:24:24\124t"
+local settingCopper = "\124TInterface\\MoneyFrame\\UI-CopperIcon:24:24\124t"
 
-local SETTING_ICON_STRING = "\124T%s:24:24:1:0\124t"
+local SETTING_ICON_STRING = "\124T%s:24:24\124t"
 local DISPLAY_ICON_STRING1 = "%d\124T"
-local DISPLAY_ICON_STRING2 = ":%d:%d:2:0\124t"
+local DISPLAY_ICON_STRING2 = ":%d:%d\124t"
 
 local fontWhite = CreateFont("Broker_CurrencyFontWhite")
 local fontPlus = CreateFont("Broker_CurrencyFontPlus")
@@ -36,12 +36,12 @@ local currencyInfo = {
 	{},
 	{itemId = 43307, countFunc = GetHonorCurrency},
 	{itemId = 43308, countFunc = GetArenaCurrency},
-	{itemId = 29434, countFunc = function() return GetItemCount(29434) end},		-- Badge of Justice
-	{itemId = 45624, countFunc = function() return GetItemCount(45624) end},		-- Emblem of Conquest
-	{itemId = 40752, countFunc = function() return GetItemCount(40752) end},		-- Emblem of Heroism
-	{itemId = 40753, countFunc = function() return GetItemCount(40753) end},		-- Emblem of Valor
-	{itemId = 47241, countFunc = function() return GetItemCount(47241) end},		-- Emblem of Triumph
 	{itemId = 49426, countFunc = function() return GetItemCount(49426) end},		-- Emblem of Frost
+	{itemId = 47241, countFunc = function() return GetItemCount(47241) end},		-- Emblem of Triumph
+	{itemId = 45624, countFunc = function() return GetItemCount(45624) end},		-- Emblem of Conquest
+	{itemId = 40753, countFunc = function() return GetItemCount(40753) end},		-- Emblem of Valor
+	{itemId = 40752, countFunc = function() return GetItemCount(40752) end},		-- Emblem of Heroism
+	{itemId = 29434, countFunc = function() return GetItemCount(29434) end},		-- Badge of Justice
 
 	{itemId = 20560, countFunc = function() return GetItemCount(20560) end},		-- Alterac Valley Mark of Honor
 	{itemId = 20559, countFunc = function() return GetItemCount(20559) end},		-- Arathi Basin Mark of Honor
@@ -58,6 +58,7 @@ local currencyInfo = {
 
 	{itemId = 21100, countFunc = function() return GetItemCount(21100, true) end},		-- Coin of Ancestry
 	{itemId = 37829, countFunc = function() return GetItemCount(37829, true) end},		-- Brewfest Prize Token
+	{itemId = 49927, countFunc = function() return GetItemCount(49927, true) end},		-- Love Token
 	{itemId = 44990, countFunc = function() return GetItemCount(44990) end},		-- Champion's Seal
 	{itemId = 46114, countFunc = function() return GetItemCount(46114) end},		-- Champion's Writ
 }
@@ -154,7 +155,7 @@ function Broker_Currency:InitializeOptions()
 			local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture = GetItemInfo(itemId)
 			if (itemTexture) then
 				tokenInfo.itemName = itemName
-				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24:1:0\124t"
+				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24\124t"
 				tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
 			end
 		end
@@ -162,7 +163,7 @@ function Broker_Currency:InitializeOptions()
 
 	-- Use the arena icon instead of a boj clone
 	local tokenInfo = currencyInfo[5]
-	tokenInfo.settingIcon = "\124T" .. arenaTexture .. ":24:24:1:0\124t"
+	tokenInfo.settingIcon = "\124T" .. arenaTexture .. ":24:24\124t"
 	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. arenaTexture .. DISPLAY_ICON_STRING2
 	settingsSliderIcon = tokenInfo.brokerIcon
 
@@ -1177,7 +1178,7 @@ function Broker_Currency.InitializeSettings()
 		honorTexture = [[Interface\PVPFrame\PVP-Currency-Alliance]]
 	end
 	local tokenInfo = currencyInfo[4]
-	tokenInfo.settingIcon = "\124T" .. honorTexture .. ":24:24:1:0\124t"
+	tokenInfo.settingIcon = "\124T" .. honorTexture .. ":24:24\124t"
 	tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. honorTexture .. DISPLAY_ICON_STRING2
 
 	-- Add settings for the various currencies
