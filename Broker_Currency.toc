@@ -1,8 +1,8 @@
-﻿## Interface: 30300
+﻿## Interface: 40000
 ## Title: Broker: Currency
 ## X-BrokerName: Currency
-## Author: Toadkiller, Azethoth
-## Version:  3.2.0.@project-revision@
+## Author: Torhal, Toadkiller, Azethoth
+## Version:  @project-version@
 
 ## Notes: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
 ## Notes-deDE: LDB-Anzeige von Währungen, Summe des Goldes und Gold-Statistik pro Sitzung / Tag / Woche für alle Charaktere auf einem Server.
