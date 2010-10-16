@@ -162,225 +162,6 @@ Broker_Currency.options = {
 	args = {}
 }
 
-function Broker_Currency:InitializeOptions()
-	local settingsSliderIcon = ""
-
-	local function setIconSize(info, value)
-		Broker_CurrencyCharDB[info[# info]] = true and value or nil
-		local iconSize = Broker_CurrencyCharDB.iconSize
-		Broker_Currency.options.args.iconSize.name = string.format(settingsSliderIcon, 8, iconSize, iconSize)
-		Broker_Currency:Update()
-	end
-
-	local function setIconSizeGold(info, value)
-		Broker_CurrencyCharDB[info[# info]] = true and value or nil
-		local iconSize = Broker_CurrencyCharDB.iconSizeGold
-		Broker_Currency.options.args.iconSizeGold.name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, iconSize, iconSize)
-		Broker_Currency:Update()
-	end
-
-	local function getColorValue(info)
-		local color = Broker_CurrencyCharDB[info[# info]]
-		return color.r, color.g, color.b, color.a
-	end
-
-	local function setColorValue(info, r, g, b, a)
-		local color = Broker_CurrencyCharDB[info[# info]]
-		color.r, color.g, color.b, color.a = r, g, b, a
-		Broker_Currency:Update()
-	end
-
-	-- Icons, names and textures for the currencies
-	for index, tokenInfo in pairs(CURRENCY_DATA) do
-		local item_id = tokenInfo.item_id
-		local currency_id = tokenInfo.currency_id
-
-		if item_id then
-			local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture = _G.GetItemInfo(item_id)
-
-			if itemTexture then
-				tokenInfo.itemName = itemName
-				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24\124t"
-				tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
-			end
-		elseif currency_id then
-			local name, _, icon_name = _G.GetCurrencyInfo(currency_id)
-
-			if icon_name then
-				tokenInfo.itemName = name
-				tokenInfo.settingIcon = "\124T" .. "Interface\\Icons\\" .. icon_name .. ":24:24\124t"
-				tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. icon_name .. DISPLAY_ICON_STRING2
-			end
-		end
-	end
-
-	settingsSliderIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. select(3, _G.GetCurrencyInfo(CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
-
-	Broker_Currency.options.args = {
-		header1 = {
-			type = "description",
-			order = 3,
-			name = sNotes,
-			cmdHidden = true
-		},
-		header2 = {
-			type = "description",
-			order = 5,
-			name = sVersion,
-			cmdHidden = true
-		},
-		iconSize = {
-			type = "range",
-			order = 10,
-			name = string.format(settingsSliderIcon, 8, 16, 16),
-			desc = _G.TOKENS,
-			min = 1, max = 32, step = 1, bigStep = 1,
-			set = setIconSize,
-		},
-		iconSizeGold = {
-			type = "range",
-			order = 10,
-			name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
-			desc = _G.MONEY,
-			min = 1, max = 32, step = 1, bigStep = 1,
-			set = setIconSizeGold,
-		},
-		brokerDisplay = {
-			type = "group",
-			name = _G.DISPLAY,
-			order = 20,
-			inline = true,
-			childGroups = "tree",
-			args = {
-				showGold = {
-					type = "toggle",
-					name = ICON_GOLD,
-					desc = _G.MONEY,
-					order = 1,
-					width = "half",
-				},
-				showSilver = {
-					type = "toggle",
-					name = ICON_SILVER,
-					desc = _G.MONEY,
-					order = 2,
-					width = "half",
-				},
-				showCopper = {
-					type = "toggle",
-					name = ICON_COPPER,
-					desc = _G.MONEY,
-					order = 3,
-					width = "half",
-				},
-			},
-		},
-		statisticsDisplay = {
-			type = "group",
-			name = _G.STATISTICS,
-			order = 30,
-			inline = true,
-			childGroups = "tree",
-			args = {
-				summaryPlayerSession = {
-					type = "toggle",
-					name = PLAYER_NAME,
-					order = 1,
-					width = "full",
-				},
-				summaryRealmToday = {
-					type = "toggle",
-					name = sToday,
-					order = 2,
-					width = "full",
-				},
-				summaryRealmYesterday = {
-					type = "toggle",
-					name = sYesterday,
-					order = 3,
-					width = "full",
-				},
-				summaryRealmThisWeek = {
-					type = "toggle",
-					name = sThisWeek,
-					order = 4,
-					width = "full",
-				},
-				summaryRealmLastWeek = {
-					type = "toggle",
-					name = sLastWeek,
-					order = 5,
-					width = "full",
-				},
-			},
-		},
-		summaryDisplay = {
-			type = "group",
-			name = _G.ACHIEVEMENT_SUMMARY_CATEGORY,
-			order = 40,
-			inline = true,
-			childGroups = "tree",
-			args = {
-				summaryGold = {
-					type = "toggle",
-					name = ICON_GOLD,
-					desc = _G.MONEY,
-					order = 1,
-					width = "half",
-				},
-				summarySilver = {
-					type = "toggle",
-					name = ICON_SILVER,
-					desc = _G.MONEY,
-					order = 2,
-					width = "half",
-				},
-				summaryCopper = {
-					type = "toggle",
-					name = ICON_COPPER,
-					desc = _G.MONEY,
-					order = 3,
-					width = "half",
-				},
-			},
-		},
-		color = {
-			type = "group",
-			name = _G.COLOR,
-			order = 50,
-			inline = true,
-			childGroups = "tree",
-			args = {
-				summaryColorDark = {
-					type = "color",
-					name = _G.BACKGROUND,
-					order = 11,
-					get = getColorValue,
-					set = setColorValue,
-					hasAlpha = true,
-				},
-				summaryColorLight = {
-					type = "color",
-					name = _G.HIGHLIGHTING,
-					order = 12,
-					get = getColorValue,
-					set = setColorValue,
-					hasAlpha = true,
-				},
-			},
-		},
-		deleteCharacter = {
-			type = "group",
-			name = _G.DELETE,
-			order = 60,
-			inline = true,
-			childGroups = "tree",
-			args = {
-			},
-		},
-	}
-end
-
 local function GetKey(idnum, broker)
 	if broker then
 		return "show" .. idnum
@@ -1159,7 +940,9 @@ do
 			end
 		end
 
+		-------------------------------------------------------------------------------
 		-- Set defaults
+		-------------------------------------------------------------------------------
 		if not Broker_CurrencyCharDB then
 			Broker_CurrencyCharDB = {
 				showCopper = true,
@@ -1173,9 +956,234 @@ do
 				summaryColorLight = {r = 1, g = 1, b = 1, a = .3},
 			}
 		end
-		local char_db = Broker_CurrencyCharDB
 
-		self:InitializeOptions()
+		-------------------------------------------------------------------------------
+		-- Initialize the configuration options.
+		-------------------------------------------------------------------------------
+		local settingsSliderIcon = ""
+
+		local function setIconSize(info, value)
+			local iconSize = Broker_CurrencyCharDB.iconSize
+
+			Broker_CurrencyCharDB[info[# info]] = true and value or nil
+			Broker_Currency.options.args.iconSize.name = string.format(settingsSliderIcon, 8, iconSize, iconSize)
+			Broker_Currency:Update()
+		end
+
+		local function setIconSizeGold(info, value)
+			local iconSize = Broker_CurrencyCharDB.iconSizeGold
+
+			Broker_CurrencyCharDB[info[#info]] = true and value or nil
+			Broker_Currency.options.args.iconSizeGold.name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, iconSize, iconSize)
+			Broker_Currency:Update()
+		end
+
+		local function getColorValue(info)
+			local color = Broker_CurrencyCharDB[info[# info]]
+			return color.r, color.g, color.b, color.a
+		end
+
+		local function setColorValue(info, r, g, b, a)
+			local color = Broker_CurrencyCharDB[info[# info]]
+
+			color.r, color.g, color.b, color.a = r, g, b, a
+			Broker_Currency:Update()
+		end
+
+		-- Icons, names and textures for the currencies
+		for index, tokenInfo in pairs(CURRENCY_DATA) do
+			local item_id = tokenInfo.item_id
+			local currency_id = tokenInfo.currency_id
+
+			if item_id then
+				local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture = _G.GetItemInfo(item_id)
+
+				if itemTexture then
+					tokenInfo.itemName = itemName
+					tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24\124t"
+					tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
+				end
+			elseif currency_id then
+				local name, _, icon_name = _G.GetCurrencyInfo(currency_id)
+
+				if icon_name then
+					tokenInfo.itemName = name
+					tokenInfo.settingIcon = "\124T" .. "Interface\\Icons\\" .. icon_name .. ":24:24\124t"
+					tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. icon_name .. DISPLAY_ICON_STRING2
+				end
+			end
+		end
+
+		settingsSliderIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. select(3, _G.GetCurrencyInfo(CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
+
+		Broker_Currency.options.args = {
+			header1 = {
+				type = "description",
+				order = 3,
+				name = sNotes,
+				cmdHidden = true
+			},
+			header2 = {
+				type = "description",
+				order = 5,
+				name = sVersion,
+				cmdHidden = true
+			},
+			iconSize = {
+				type = "range",
+				order = 10,
+				name = string.format(settingsSliderIcon, 8, 16, 16),
+				desc = _G.TOKENS,
+				min = 1, max = 32, step = 1, bigStep = 1,
+				set = setIconSize,
+			},
+			iconSizeGold = {
+				type = "range",
+				order = 10,
+				name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
+				desc = _G.MONEY,
+				min = 1, max = 32, step = 1, bigStep = 1,
+				set = setIconSizeGold,
+			},
+			brokerDisplay = {
+				type = "group",
+				name = _G.DISPLAY,
+				order = 20,
+				inline = true,
+				childGroups = "tree",
+				args = {
+					showGold = {
+						type = "toggle",
+						name = ICON_GOLD,
+						desc = _G.MONEY,
+						order = 1,
+						width = "half",
+					},
+					showSilver = {
+						type = "toggle",
+						name = ICON_SILVER,
+						desc = _G.MONEY,
+						order = 2,
+						width = "half",
+					},
+					showCopper = {
+						type = "toggle",
+						name = ICON_COPPER,
+						desc = _G.MONEY,
+						order = 3,
+						width = "half",
+					},
+				},
+			},
+			statisticsDisplay = {
+				type = "group",
+				name = _G.STATISTICS,
+				order = 30,
+				inline = true,
+				childGroups = "tree",
+				args = {
+					summaryPlayerSession = {
+						type = "toggle",
+						name = PLAYER_NAME,
+						order = 1,
+						width = "full",
+					},
+					summaryRealmToday = {
+						type = "toggle",
+						name = sToday,
+						order = 2,
+						width = "full",
+					},
+					summaryRealmYesterday = {
+						type = "toggle",
+						name = sYesterday,
+						order = 3,
+						width = "full",
+					},
+					summaryRealmThisWeek = {
+						type = "toggle",
+						name = sThisWeek,
+						order = 4,
+						width = "full",
+					},
+					summaryRealmLastWeek = {
+						type = "toggle",
+						name = sLastWeek,
+						order = 5,
+						width = "full",
+					},
+				},
+			},
+			summaryDisplay = {
+				type = "group",
+				name = _G.ACHIEVEMENT_SUMMARY_CATEGORY,
+				order = 40,
+				inline = true,
+				childGroups = "tree",
+				args = {
+					summaryGold = {
+						type = "toggle",
+						name = ICON_GOLD,
+						desc = _G.MONEY,
+						order = 1,
+						width = "half",
+					},
+					summarySilver = {
+						type = "toggle",
+						name = ICON_SILVER,
+						desc = _G.MONEY,
+						order = 2,
+						width = "half",
+					},
+					summaryCopper = {
+						type = "toggle",
+						name = ICON_COPPER,
+						desc = _G.MONEY,
+						order = 3,
+						width = "half",
+					},
+				},
+			},
+			color = {
+				type = "group",
+				name = _G.COLOR,
+				order = 50,
+				inline = true,
+				childGroups = "tree",
+				args = {
+					summaryColorDark = {
+						type = "color",
+						name = _G.BACKGROUND,
+						order = 11,
+						get = getColorValue,
+						set = setColorValue,
+						hasAlpha = true,
+					},
+					summaryColorLight = {
+						type = "color",
+						name = _G.HIGHLIGHTING,
+						order = 12,
+						get = getColorValue,
+						set = setColorValue,
+						hasAlpha = true,
+					},
+				},
+			},
+			deleteCharacter = {
+				type = "group",
+				name = _G.DELETE,
+				order = 60,
+				inline = true,
+				childGroups = "tree",
+				args = {
+				},
+			},
+		}
+
+		-------------------------------------------------------------------------------
+		-- Check or initialize the character database.
+		-------------------------------------------------------------------------------
+		local char_db = Broker_CurrencyCharDB
 
 		if not char_db.iconSize then
 			char_db.iconSize = 16
@@ -1194,6 +1202,9 @@ do
 		end
 		Broker_CurrencyCharDB = char_db
 
+		-------------------------------------------------------------------------------
+		-- Check or initialize the database.
+		-------------------------------------------------------------------------------
 		if not Broker_CurrencyDB then
 			Broker_CurrencyDB = {}
 		end
