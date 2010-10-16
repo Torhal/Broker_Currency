@@ -686,7 +686,6 @@ local function TotalCurrencies(totalList, player_info)
 	end
 	totalList.money = (totalList.money or 0) + (player_info.money or 0)
 end
--- /dump Broker_CurrencyDB.realm["Proudmoore"]["Bliksem"]
 
 local totalList = {}
 local weekGained = {}
