@@ -142,15 +142,6 @@ local startupTimer
 -------------------------------------------------------------------------------
 -- Helper functions
 -------------------------------------------------------------------------------
-local function getValue(info)
-	return Broker_CurrencyCharDB[info[# info]]
-end
-
-local function setValue(info, value)
-	Broker_CurrencyCharDB[info[# info]] = true and value or nil
-	Broker_Currency:Update()
-end
-
 -- Data is saved per realm/character in Broker_CurrencyDB
 -- Options are saved per character in Broker_CurrencyCharDB
 -- There is separate settings for display of the broker, and the summary display on the tooltip
@@ -160,8 +151,13 @@ local sName = GetAddOnMetadata("Broker_Currency", "X-BrokerName")
 Broker_Currency.options = {
 	type = "group",
 	name = sName,
-	get = getValue,
-	set = setValue,
+	get = function(info)
+		      return Broker_CurrencyCharDB[info[#info]]
+	      end,
+	set = function(info, value)
+		      Broker_CurrencyCharDB[info[# info]] = true and value or nil
+		      Broker_Currency:Update()
+	      end,
 	childGroups = "tree",
 	args = {}
 }
