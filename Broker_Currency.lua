@@ -151,17 +151,6 @@ local function setValue(info, value)
 	Broker_Currency:Update()
 end
 
-local function getColorValue(info)
-	local color = Broker_CurrencyCharDB[info[# info]]
-	return color.r, color.g, color.b, color.a
-end
-
-local function setColorValue(info, r, g, b, a)
-	local color = Broker_CurrencyCharDB[info[# info]]
-	color.r, color.g, color.b, color.a = r, g, b, a
-	Broker_Currency:Update()
-end
-
 -- Data is saved per realm/character in Broker_CurrencyDB
 -- Options are saved per character in Broker_CurrencyCharDB
 -- There is separate settings for display of the broker, and the summary display on the tooltip
@@ -177,7 +166,7 @@ Broker_Currency.options = {
 	args = {}
 }
 
-do
+function Broker_Currency:InitializeOptions()
 	local settingsSliderIcon = ""
 
 	local function setIconSize(info, value)
@@ -194,198 +183,207 @@ do
 		Broker_Currency:Update()
 	end
 
-	function Broker_Currency:InitializeOptions()
-		-- Icons, names and textures for the currencies
-		for index, tokenInfo in pairs(CURRENCY_DATA) do
-			local item_id = tokenInfo.item_id
-			local currency_id = tokenInfo.currency_id
+	local function getColorValue(info)
+		local color = Broker_CurrencyCharDB[info[# info]]
+		return color.r, color.g, color.b, color.a
+	end
 
-			if item_id then
-				local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture = _G.GetItemInfo(item_id)
+	local function setColorValue(info, r, g, b, a)
+		local color = Broker_CurrencyCharDB[info[# info]]
+		color.r, color.g, color.b, color.a = r, g, b, a
+		Broker_Currency:Update()
+	end
 
-				if itemTexture then
-					tokenInfo.itemName = itemName
-					tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24\124t"
-					tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
-				end
-			elseif currency_id then
-				local name, _, icon_name = _G.GetCurrencyInfo(currency_id)
+	-- Icons, names and textures for the currencies
+	for index, tokenInfo in pairs(CURRENCY_DATA) do
+		local item_id = tokenInfo.item_id
+		local currency_id = tokenInfo.currency_id
 
-				if icon_name then
-					tokenInfo.itemName = name
-					tokenInfo.settingIcon = "\124T" .. "Interface\\Icons\\" .. icon_name .. ":24:24\124t"
-					tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. icon_name .. DISPLAY_ICON_STRING2
-				end
+		if item_id then
+			local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture = _G.GetItemInfo(item_id)
+
+			if itemTexture then
+				tokenInfo.itemName = itemName
+				tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24\124t"
+				tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
+			end
+		elseif currency_id then
+			local name, _, icon_name = _G.GetCurrencyInfo(currency_id)
+
+			if icon_name then
+				tokenInfo.itemName = name
+				tokenInfo.settingIcon = "\124T" .. "Interface\\Icons\\" .. icon_name .. ":24:24\124t"
+				tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. icon_name .. DISPLAY_ICON_STRING2
 			end
 		end
-
-		settingsSliderIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. select(3, _G.GetCurrencyInfo(CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
-
-		Broker_Currency.options.args = {
-			header1 = {
-				type = "description",
-				order = 3,
-				name = sNotes,
-				cmdHidden = true
-			},
-			header2 = {
-				type = "description",
-				order = 5,
-				name = sVersion,
-				cmdHidden = true
-			},
-			iconSize = {
-				type = "range",
-				order = 10,
-				name = string.format(settingsSliderIcon, 8, 16, 16),
-				desc = _G.TOKENS,
-				min = 1, max = 32, step = 1, bigStep = 1,
-				set = setIconSize,
-			},
-			iconSizeGold = {
-				type = "range",
-				order = 10,
-				name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
-				desc = _G.MONEY,
-				min = 1, max = 32, step = 1, bigStep = 1,
-				set = setIconSizeGold,
-			},
-			brokerDisplay = {
-				type = "group",
-				name = _G.DISPLAY,
-				order = 20,
-				inline = true,
-				childGroups = "tree",
-				args = {
-					showGold = {
-						type = "toggle",
-						name = ICON_GOLD,
-						desc = _G.MONEY,
-						order = 1,
-						width = "half",
-					},
-					showSilver = {
-						type = "toggle",
-						name = ICON_SILVER,
-						desc = _G.MONEY,
-						order = 2,
-						width = "half",
-					},
-					showCopper = {
-						type = "toggle",
-						name = ICON_COPPER,
-						desc = _G.MONEY,
-						order = 3,
-						width = "half",
-					},
-				},
-			},
-			statisticsDisplay = {
-				type = "group",
-				name = _G.STATISTICS,
-				order = 30,
-				inline = true,
-				childGroups = "tree",
-				args = {
-					summaryPlayerSession = {
-						type = "toggle",
-						name = PLAYER_NAME,
-						order = 1,
-						width = "full",
-					},
-					summaryRealmToday = {
-						type = "toggle",
-						name = sToday,
-						order = 2,
-						width = "full",
-					},
-					summaryRealmYesterday = {
-						type = "toggle",
-						name = sYesterday,
-						order = 3,
-						width = "full",
-					},
-					summaryRealmThisWeek = {
-						type = "toggle",
-						name = sThisWeek,
-						order = 4,
-						width = "full",
-					},
-					summaryRealmLastWeek = {
-						type = "toggle",
-						name = sLastWeek,
-						order = 5,
-						width = "full",
-					},
-				},
-			},
-			summaryDisplay = {
-				type = "group",
-				name = _G.ACHIEVEMENT_SUMMARY_CATEGORY,
-				order = 40,
-				inline = true,
-				childGroups = "tree",
-				args = {
-					summaryGold = {
-						type = "toggle",
-						name = ICON_GOLD,
-						desc = _G.MONEY,
-						order = 1,
-						width = "half",
-					},
-					summarySilver = {
-						type = "toggle",
-						name = ICON_SILVER,
-						desc = _G.MONEY,
-						order = 2,
-						width = "half",
-					},
-					summaryCopper = {
-						type = "toggle",
-						name = ICON_COPPER,
-						desc = _G.MONEY,
-						order = 3,
-						width = "half",
-					},
-				},
-			},
-			color = {
-				type = "group",
-				name = _G.COLOR,
-				order = 50,
-				inline = true,
-				childGroups = "tree",
-				args = {
-					summaryColorDark = {
-						type = "color",
-						name = _G.BACKGROUND,
-						order = 11,
-						get = getColorValue,
-						set = setColorValue,
-						hasAlpha = true,
-					},
-					summaryColorLight = {
-						type = "color",
-						name = _G.HIGHLIGHTING,
-						order = 12,
-						get = getColorValue,
-						set = setColorValue,
-						hasAlpha = true,
-					},
-				},
-			},
-			deleteCharacter = {
-				type = "group",
-				name = _G.DELETE,
-				order = 60,
-				inline = true,
-				childGroups = "tree",
-				args = {
-				},
-			},
-		}
 	end
-end	-- do-block
+
+	settingsSliderIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. select(3, _G.GetCurrencyInfo(CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
+
+	Broker_Currency.options.args = {
+		header1 = {
+			type = "description",
+			order = 3,
+			name = sNotes,
+			cmdHidden = true
+		},
+		header2 = {
+			type = "description",
+			order = 5,
+			name = sVersion,
+			cmdHidden = true
+		},
+		iconSize = {
+			type = "range",
+			order = 10,
+			name = string.format(settingsSliderIcon, 8, 16, 16),
+			desc = _G.TOKENS,
+			min = 1, max = 32, step = 1, bigStep = 1,
+			set = setIconSize,
+		},
+		iconSizeGold = {
+			type = "range",
+			order = 10,
+			name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
+			desc = _G.MONEY,
+			min = 1, max = 32, step = 1, bigStep = 1,
+			set = setIconSizeGold,
+		},
+		brokerDisplay = {
+			type = "group",
+			name = _G.DISPLAY,
+			order = 20,
+			inline = true,
+			childGroups = "tree",
+			args = {
+				showGold = {
+					type = "toggle",
+					name = ICON_GOLD,
+					desc = _G.MONEY,
+					order = 1,
+					width = "half",
+				},
+				showSilver = {
+					type = "toggle",
+					name = ICON_SILVER,
+					desc = _G.MONEY,
+					order = 2,
+					width = "half",
+				},
+				showCopper = {
+					type = "toggle",
+					name = ICON_COPPER,
+					desc = _G.MONEY,
+					order = 3,
+					width = "half",
+				},
+			},
+		},
+		statisticsDisplay = {
+			type = "group",
+			name = _G.STATISTICS,
+			order = 30,
+			inline = true,
+			childGroups = "tree",
+			args = {
+				summaryPlayerSession = {
+					type = "toggle",
+					name = PLAYER_NAME,
+					order = 1,
+					width = "full",
+				},
+				summaryRealmToday = {
+					type = "toggle",
+					name = sToday,
+					order = 2,
+					width = "full",
+				},
+				summaryRealmYesterday = {
+					type = "toggle",
+					name = sYesterday,
+					order = 3,
+					width = "full",
+				},
+				summaryRealmThisWeek = {
+					type = "toggle",
+					name = sThisWeek,
+					order = 4,
+					width = "full",
+				},
+				summaryRealmLastWeek = {
+					type = "toggle",
+					name = sLastWeek,
+					order = 5,
+					width = "full",
+				},
+			},
+		},
+		summaryDisplay = {
+			type = "group",
+			name = _G.ACHIEVEMENT_SUMMARY_CATEGORY,
+			order = 40,
+			inline = true,
+			childGroups = "tree",
+			args = {
+				summaryGold = {
+					type = "toggle",
+					name = ICON_GOLD,
+					desc = _G.MONEY,
+					order = 1,
+					width = "half",
+				},
+				summarySilver = {
+					type = "toggle",
+					name = ICON_SILVER,
+					desc = _G.MONEY,
+					order = 2,
+					width = "half",
+				},
+				summaryCopper = {
+					type = "toggle",
+					name = ICON_COPPER,
+					desc = _G.MONEY,
+					order = 3,
+					width = "half",
+				},
+			},
+		},
+		color = {
+			type = "group",
+			name = _G.COLOR,
+			order = 50,
+			inline = true,
+			childGroups = "tree",
+			args = {
+				summaryColorDark = {
+					type = "color",
+					name = _G.BACKGROUND,
+					order = 11,
+					get = getColorValue,
+					set = setColorValue,
+					hasAlpha = true,
+				},
+				summaryColorLight = {
+					type = "color",
+					name = _G.HIGHLIGHTING,
+					order = 12,
+					get = getColorValue,
+					set = setColorValue,
+					hasAlpha = true,
+				},
+			},
+		},
+		deleteCharacter = {
+			type = "group",
+			name = _G.DELETE,
+			order = 60,
+			inline = true,
+			childGroups = "tree",
+			args = {
+			},
+		},
+	}
+end
 
 local function GetKey(idnum, broker)
 	if broker then
@@ -802,24 +800,24 @@ end
 
 function Broker_Currency:Update(event)		--, ...)
 	if event == "PLAYER_ENTERING_WORLD" then
-		Broker_Currency:RegisterEvents()
+		self:RegisterEvents()
 	end
 
 	if event == "PLAYER_LEAVING_WORLD" then
-		Broker_Currency:UnregisterEvents()
+		self:UnregisterEvents()
 		return
 	end
 
-	if Broker_Currency.InitializeSettings then
-		Broker_Currency.InitializeSettings()
+	if self.InitializeSettings then
+		self:InitializeSettings()
 	end
 
 	if event == "PLAYER_REGEN_ENABLED" then
-		Broker_Currency:RegisterEvent("BAG_UPDATE", "Update")
+		self:RegisterEvent("BAG_UPDATE", "Update")
 	end
 
 	if event == "PLAYER_REGEN_DISABLED" then
-		Broker_Currency:UnregisterEvent("BAG_UPDATE")
+		self:UnregisterEvent("BAG_UPDATE")
 		return
 	end
 
@@ -893,7 +891,7 @@ function Broker_Currency:Update(event)		--, ...)
 	end
 
 	-- Display the money string according to the broker settings
-	Broker_Currency.ldb.text = CreateMoneyString(player_info)
+	self.ldb.text = CreateMoneyString(player_info)
 
 	self.savedTime = time()
 end
@@ -959,9 +957,10 @@ local function OnEnter(button)
 	if startupTimer then
 		return
 	end
+	local self = Broker_Currency
 
 	if Broker_Currency.InitializeSettings then
-		Broker_Currency.InitializeSettings()
+		Broker_Currency:InitializeSettings()
 	end
 	table.wipe(tooltipLines)
 
@@ -984,7 +983,6 @@ local function OnEnter(button)
 	end
 
 	-- Session totals
-	local self = Broker_Currency
 	local gained = self.gained
 	local spent = self.spent
 
@@ -1150,21 +1148,20 @@ Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
 do
 	local wtfDelay = 5 -- For stupid cases where Blizzard pretends a player has no loots, wait up to 15 seconds
 
-	function Broker_Currency.InitializeSettings()
+	function Broker_Currency:InitializeSettings()
 		-- No hearthstone and no money means trouble
 		if startupTimer then
-			Broker_Currency:CancelTimer(startupTimer)
+			self:CancelTimer(startupTimer)
 			startupTimer = nil
 		end
 
 		if _G.GetItemCount(HEARTHSTONE_IDNUM) < 1 and _G.GetMoney() == 0 then
 			if wtfDelay > 0 then
-				startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, wtfDelay)
+				startupTimer = self:ScheduleTimer(self.InitializeSettings, wtfDelay, self)
 				wtfDelay = wtfDelay - 1
 				return
 			end
 		end
-		local self = Broker_Currency
 
 		-- Set defaults
 		if not Broker_CurrencyCharDB then
@@ -1180,50 +1177,53 @@ do
 				summaryColorLight = {r = 1, g = 1, b = 1, a = .3},
 			}
 		end
+		local char_db = Broker_CurrencyCharDB
 
 		self:InitializeOptions()
 
-		if not Broker_CurrencyCharDB.iconSize then
-			Broker_CurrencyCharDB.iconSize = 16
+		if not char_db.iconSize then
+			char_db.iconSize = 16
 		end
 
-		if not Broker_CurrencyCharDB.iconSizeGold then
-			Broker_CurrencyCharDB.iconSizeGold = 16
+		if not char_db.iconSizeGold then
+			char_db.iconSizeGold = 16
 		end
 
-		if not Broker_CurrencyCharDB.summaryColorDark then
-			Broker_CurrencyCharDB.summaryColorDark = {r = 0, g = 0, b = 0, a = 0}
+		if not char_db.summaryColorDark then
+			char_db.summaryColorDark = {r = 0, g = 0, b = 0, a = 0}
 		end
 
-		if not Broker_CurrencyCharDB.summaryColorLight then
-			Broker_CurrencyCharDB.summaryColorLight = {r = 1, g = 1, b = 1, a = .3}
+		if not char_db.summaryColorLight then
+			char_db.summaryColorLight = {r = 1, g = 1, b = 1, a = .3}
 		end
+		Broker_CurrencyCharDB = char_db
 
 		if not Broker_CurrencyDB then
 			Broker_CurrencyDB = {}
 		end
+		local db = Broker_CurrencyDB
 
-		if not Broker_CurrencyDB.realm then
-			Broker_CurrencyDB.realm = {}
+		if not db.realm then
+			db.realm = {}
 		end
 
-		if not Broker_CurrencyDB.realmInfo then
-			Broker_CurrencyDB.realmInfo = {}
+		if not db.realmInfo then
+			db.realmInfo = {}
 		end
 
-		if not Broker_CurrencyDB.realmInfo[REALM_NAME] then
-			Broker_CurrencyDB.realmInfo[REALM_NAME] = {}
+		if not db.realmInfo[REALM_NAME] then
+			db.realmInfo[REALM_NAME] = {}
 		end
 
-		if not Broker_CurrencyDB.realm[REALM_NAME] then
-			Broker_CurrencyDB.realm[REALM_NAME] = {}
+		if not db.realm[REALM_NAME] then
+			db.realm[REALM_NAME] = {}
 		end
 
-		if not Broker_CurrencyDB.realm[REALM_NAME][PLAYER_NAME] then
-			Broker_CurrencyDB.realm[REALM_NAME][PLAYER_NAME] = {}
+		if not db.realm[REALM_NAME][PLAYER_NAME] then
+			db.realm[REALM_NAME][PLAYER_NAME] = {}
 		end
 
-		local realmInfo = Broker_CurrencyDB.realmInfo[REALM_NAME]
+		local realmInfo = db.realmInfo[REALM_NAME]
 
 		if not realmInfo.gained or type(realmInfo.gained) ~= "table" then
 			realmInfo.gained = {}
@@ -1233,7 +1233,7 @@ do
 			realmInfo.spent = {}
 		end
 
-		local player_info = Broker_CurrencyDB.realm[REALM_NAME][PLAYER_NAME]
+		local player_info = db.realm[REALM_NAME][PLAYER_NAME]
 
 		if not player_info.gained or type(player_info.gained) ~= "table" then
 			player_info.gained = {}
@@ -1316,15 +1316,17 @@ do
 		self.gained = {
 			money = 0
 		}
+
 		self.spent = {
 			money = 0
 		}
+
 		self.sessionTime = time()
 		self.savedTime = time()
 
 		-- Add settings for the various currencies
-		local brokerDisplay = Broker_Currency.options.args.brokerDisplay.args
-		local summaryDisplay = Broker_Currency.options.args.summaryDisplay.args
+		local brokerDisplay = self.options.args.brokerDisplay.args
+		local summaryDisplay = self.options.args.summaryDisplay.args
 
 		for index = 1, # CURRENCY_DATA, 1 do
 			-- Offset by three to ensure that gold, silver, and copper come first in the list.
@@ -1334,65 +1336,67 @@ do
 		-- Add delete settings so deleted characters can be removed
 		local index = 1
 
-		for PLAYER_NAME in pairs(Broker_CurrencyDB.realm[REALM_NAME]) do
-			DeleteOptions(PLAYER_NAME, Broker_CurrencyDB.realm[REALM_NAME], index)
+		for player_name in pairs(db.realm[REALM_NAME]) do
+			DeleteOptions(player_name, db.realm[REALM_NAME], index)
 			index = index + 1
 		end
-		Broker_Currency:UnregisterEvent("BAG_UPDATE")
+		Broker_CurrencyDB = db
+
+		self:UnregisterEvent("BAG_UPDATE")
 
 		if startupTimer then
-			Broker_Currency:CancelTimer(startupTimer)
+			self:CancelTimer(startupTimer)
 			startupTimer = nil
 		end
 
 		-- Register for update events
-		Broker_Currency:RegisterEvents()
+		self:RegisterEvents()
 		
-		Broker_Currency:RegisterEvent("PLAYER_ENTERING_WORLD", "Update")
-		Broker_Currency:RegisterEvent("PLAYER_LEAVING_WORLD", "Update")
+		self:RegisterEvent("PLAYER_ENTERING_WORLD", "Update")
+		self:RegisterEvent("PLAYER_LEAVING_WORLD", "Update")
 
 		-- Done initializing
-		Broker_Currency:SetScript("OnEvent", Broker_Currency.Update)
-		Broker_Currency.InitializeSettings = nil
+		self:SetScript("OnEvent", Broker_Currency.Update)
+		self.InitializeSettings = nil
 
 		self:Update()
 	end
 end	-- do-block
 
 function Broker_Currency:RegisterEvents()
-	Broker_Currency:RegisterEvent("HONOR_CURRENCY_UPDATE", "Update")
-	Broker_Currency:RegisterEvent("MERCHANT_CLOSED", "Update")
-	Broker_Currency:RegisterEvent("PLAYER_MONEY", "Update")
-	Broker_Currency:RegisterEvent("PLAYER_TRADE_MONEY", "Update")
-	Broker_Currency:RegisterEvent("TRADE_MONEY_CHANGED", "Update")
-	Broker_Currency:RegisterEvent("SEND_MAIL_MONEY_CHANGED", "Update")
-	Broker_Currency:RegisterEvent("SEND_MAIL_COD_CHANGED", "Update")
+	self:RegisterEvent("CURRENCY_DISPLAY_UPDATE", "Update")
+	self:RegisterEvent("MERCHANT_CLOSED", "Update")
+	self:RegisterEvent("PLAYER_MONEY", "Update")
+	self:RegisterEvent("PLAYER_TRADE_MONEY", "Update")
+	self:RegisterEvent("TRADE_MONEY_CHANGED", "Update")
+	self:RegisterEvent("SEND_MAIL_MONEY_CHANGED", "Update")
+	self:RegisterEvent("SEND_MAIL_COD_CHANGED", "Update")
 
-	Broker_Currency:RegisterEvent("PLAYER_REGEN_ENABLED", "Update")
-	Broker_Currency:RegisterEvent("PLAYER_REGEN_DISABLED", "Update")
-	Broker_Currency:RegisterEvent("BAG_UPDATE", "Update")
+	self:RegisterEvent("PLAYER_REGEN_ENABLED", "Update")
+	self:RegisterEvent("PLAYER_REGEN_DISABLED", "Update")
+	self:RegisterEvent("BAG_UPDATE", "Update")
 end
 
 function Broker_Currency:UnregisterEvents()
-	Broker_Currency:UnregisterEvent("HONOR_CURRENCY_UPDATE", "Update")
-	Broker_Currency:UnregisterEvent("MERCHANT_CLOSED", "Update")
-	Broker_Currency:UnregisterEvent("PLAYER_MONEY", "Update")
-	Broker_Currency:UnregisterEvent("PLAYER_TRADE_MONEY", "Update")
-	Broker_Currency:UnregisterEvent("TRADE_MONEY_CHANGED", "Update")
-	Broker_Currency:UnregisterEvent("SEND_MAIL_MONEY_CHANGED", "Update")
-	Broker_Currency:UnregisterEvent("SEND_MAIL_COD_CHANGED", "Update")
+	self:UnregisterEvent("HONOR_CURRENCY_UPDATE")
+	self:UnregisterEvent("MERCHANT_CLOSED")
+	self:UnregisterEvent("PLAYER_MONEY")
+	self:UnregisterEvent("PLAYER_TRADE_MONEY")
+	self:UnregisterEvent("TRADE_MONEY_CHANGED")
+	self:UnregisterEvent("SEND_MAIL_MONEY_CHANGED")
+	self:UnregisterEvent("SEND_MAIL_COD_CHANGED")
 
-	Broker_Currency:UnregisterEvent("PLAYER_REGEN_ENABLED", "Update")
-	Broker_Currency:UnregisterEvent("PLAYER_REGEN_DISABLED", "Update")
-	Broker_Currency:UnregisterEvent("BAG_UPDATE", "Update")
+	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+	self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+	self:UnregisterEvent("BAG_UPDATE")
 end
 
 function Broker_Currency:Startup(event, ...)
 	if event == "BAG_UPDATE" then
 		if startupTimer then
-			Broker_Currency:CancelTimer(startupTimer)
+			self:CancelTimer(startupTimer)
 		end
-		startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 4)
+		startupTimer = self:ScheduleTimer(self.InitializeSettings, 4, self)
 	end
 end
 
@@ -1405,5 +1409,5 @@ LibStub("AceTimer-3.0"):Embed(Broker_Currency)
 
 -- This is only necessary if AddonLoader is present, using the Delayed load. -Torhal
 if IsLoggedIn() then
-	startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 4)
+	startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 4, Broker_Currency)
 end
