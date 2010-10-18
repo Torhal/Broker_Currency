@@ -73,6 +73,7 @@ local HEARTHSTONE_IDNUM = 6948
 -------------------------------------------------------------------------------
 -- Currencies
 -------------------------------------------------------------------------------
+local DALARAN_JEWELCRAFTERS_TOKEN	= 61
 local DALARAN_COOKING_AWARD		= 81
 local CHAMPIONS_SEAL			= 241
 local CONQUEST_POINTS			= 390
@@ -84,6 +85,7 @@ local BREWFEST_PRIZE_TOKEN		= 37829
 local LOVE_TOKEN			= 49927
 
 local ORDERED_CURRENCIES = {
+	DALARAN_JEWELCRAFTERS_TOKEN,
 	DALARAN_COOKING_AWARD,
 	CHAMPIONS_SEAL,
 	CONQUEST_POINTS,
@@ -95,6 +97,7 @@ local ORDERED_CURRENCIES = {
 }
 
 local VALID_CURRENCIES = {
+	[DALARAN_JEWELCRAFTERS_TOKEN]	= true,
 	[DALARAN_COOKING_AWARD]		= true,
 	[CHAMPIONS_SEAL]		= true,
 	[CONQUEST_POINTS]		= true,
@@ -106,6 +109,7 @@ local VALID_CURRENCIES = {
 }
 
 local PHYSICAL_CURRENCIES = {
+	[DALARAN_JEWELCRAFTERS_TOKEN]	= false,
 	[DALARAN_COOKING_AWARD]		= false,
 	[CHAMPIONS_SEAL]		= false,
 	[CONQUEST_POINTS]		= false,
