@@ -286,6 +286,7 @@ local temp = {}
 function Broker_Currency:ShowTooltip(button)
 	Broker_Currency:Update()
 	local maxColumns = 0
+
 	for index, rowList in pairs(tooltipLines) do
 		local columns = 0
 		for i in pairs(rowList) do
@@ -374,29 +375,19 @@ function Broker_Currency:ShowTooltip(button)
 
 				if label == sPlus then
 					for i, value in ipairs(rowList) do
-						if value == 0 then
-							tooltip:SetCell(currentRow, i, " ", fontPlus)
-						else
-							tooltip:SetCell(currentRow, i, value, fontPlus)
-						end
+						tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontPlus)
 					end
 				elseif label == sMinus then
 					for i, value in ipairs(rowList) do
-						if value == 0 then
-							tooltip:SetCell(currentRow, i, " ", fontMinus)
-						else
-							tooltip:SetCell(currentRow, i, value, fontMinus)
-						end
+						tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontMinus)
 					end
 				elseif label == sTotal then
 					for i, value in ipairs(rowList) do
 						if value and type(value) == "number" then
-							if value == 0 then
-								tooltip:SetCell(currentRow, i, " ", fontMinus)
-							elseif value < 0 then
+							if value < 0 then
 								tooltip:SetCell(currentRow, i, -1 * value, fontMinus)
 							else
-								tooltip:SetCell(currentRow, i, value, fontPlus)
+								tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontPlus)
 							end
 						end
 					end
