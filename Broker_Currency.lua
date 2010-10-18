@@ -121,9 +121,9 @@ local PHYSICAL_CURRENCIES = {
 }
 
 -- Populated as needed.
-local CURRENCY_NAMES = {}
-local OPTION_ICONS = {}
-local BROKER_ICONS = {}
+local CURRENCY_NAMES
+local OPTION_ICONS
+local BROKER_ICONS
 
 -------------------------------------------------------------------------------
 -- Variables
@@ -953,27 +953,6 @@ do
 			Broker_Currency:Update()
 		end
 
-		-- Icons, names and textures for the currencies
-		for idnum in pairs(VALID_CURRENCIES) do
-			if PHYSICAL_CURRENCIES[idnum] then
-				local name, _, _, _, _, _, _, _, _, icon_path = _G.GetItemInfo(idnum)
-
-				if icon_path then
-					CURRENCY_NAMES[idnum] = name
-					OPTION_ICONS[idnum] = "\124T" .. icon_path .. ":24:24\124t"
-					BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. icon_path .. DISPLAY_ICON_STRING2
-				end
-			else
-				local name, _, icon_name = _G.GetCurrencyInfo(idnum)
-
-				if icon_name then
-					CURRENCY_NAMES[idnum] = name
-					OPTION_ICONS[idnum] = "\124T" .. "Interface\\Icons\\" .. icon_name .. ":24:24\124t"
-					BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. icon_name .. DISPLAY_ICON_STRING2
-				end
-			end
-		end
-
 		Broker_Currency.options.args = {
 			header1 = {
 				type = "description",
@@ -1167,6 +1146,48 @@ do
 			Broker_CurrencyDB = {}
 		end
 		local db = Broker_CurrencyDB
+
+		-- Icons, names and textures for the currencies
+		if not db.currencyNames then
+			db.currencyNames = {}
+		end
+		CURRENCY_NAMES = db.currencyNames
+
+		if not db.optionIcons then
+			db.optionIcons = {}
+		end
+		OPTION_ICONS = db.optionIcons
+
+		if not db.brokerIcons then
+			db.brokerIcons = {}
+		end
+		BROKER_ICONS = db.brokerIcons
+
+		for idnum in pairs(VALID_CURRENCIES) do
+			local cur_name = CURRENCY_NAMES[idnum]
+			local opt_icon = OPTION_ICONS[idnum]
+			local ldb_icon = BROKER_ICONS[idnum]
+
+			if not cur_name or not opt_icon or not ldb_icon or cur_name == "" or opt_icon == "" or ldb_icon == "" then
+				if PHYSICAL_CURRENCIES[idnum] then
+					local name, _, _, _, _, _, _, _, _, icon_path = _G.GetItemInfo(idnum)
+
+					if icon_path then
+						CURRENCY_NAMES[idnum] = name
+						OPTION_ICONS[idnum] = "\124T" .. icon_path .. ":24:24\124t"
+						BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. icon_path .. DISPLAY_ICON_STRING2
+					end
+				else
+					local name, _, icon_name = _G.GetCurrencyInfo(idnum)
+
+					if icon_name and icon_name ~= "" then
+						CURRENCY_NAMES[idnum] = name
+						OPTION_ICONS[idnum] = "\124T" .. "Interface\\Icons\\" .. icon_name .. ":24:24\124t"
+						BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. icon_name .. DISPLAY_ICON_STRING2
+					end
+				end
+			end
+		end
 
 		if not db.realm then
 			db.realm = {}
