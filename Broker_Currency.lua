@@ -73,66 +73,53 @@ local HEARTHSTONE_IDNUM = 6948
 -------------------------------------------------------------------------------
 -- Currencies
 -------------------------------------------------------------------------------
-local DALARAN_COOKING_AWARD = 81
-local CHAMPIONS_SEAL = 241
-local CONQUEST_POINTS = 390
-local HONOR_POINTS = 392
-local JUSTICE_POINTS = 395
+local DALARAN_COOKING_AWARD		= 81
+local CHAMPIONS_SEAL			= 241
+local CONQUEST_POINTS			= 390
+local HONOR_POINTS			= 392
+local JUSTICE_POINTS			= 395
 
-local COIN_OF_ANCESTRY = 21100
-local BREWFEST_PRIZE_TOKEN = 37829
-local LOVE_TOKEN = 49927
+local COIN_OF_ANCESTRY			= 21100
+local BREWFEST_PRIZE_TOKEN		= 37829
+local LOVE_TOKEN			= 49927
 
-local CURRENCY_DATA = {
-	{
-		currency_id = DALARAN_COOKING_AWARD,
-		countFunc = function()
-				    return select(2, _G.GetCurrencyInfo(DALARAN_COOKING_AWARD))
-			    end
-	},
-	{
-		currency_id = CHAMPIONS_SEAL,
-		countFunc = function()
-				    return select(2, _G.GetCurrencyInfo(CHAMPIONS_SEAL))
-			    end
-	},
-	{
-		currency_id = CONQUEST_POINTS,
-		countFunc = function()
-				    return select(2, _G.GetCurrencyInfo(CONQUEST_POINTS))
-			    end
-	},
-	{
-		currency_id = HONOR_POINTS,
-		countFunc = function()
-				    return select(2, _G.GetCurrencyInfo(HONOR_POINTS))
-			    end
-	},
-	{
-		currency_id = JUSTICE_POINTS,
-		countFunc = function()
-				    return select(2, _G.GetCurrencyInfo(JUSTICE_POINTS))
-			    end
-	},
-	{
-		item_id = COIN_OF_ANCESTRY,
-		countFunc = function()
-				    return _G.GetItemCount(COIN_OF_ANCESTRY, true)
-			    end
-	},
-	{
-		item_id = BREWFEST_PRIZE_TOKEN,
-		countFunc = function()
-				    return _G.GetItemCount(BREWFEST_PRIZE_TOKEN, true)
-			    end
-	},
-	{
-		item_id = LOVE_TOKEN,
-		countFunc = function()
-				    return _G.GetItemCount(LOVE_TOKEN, true)
-			    end
-	},
+local ORDERED_CURRENCIES = {
+	DALARAN_COOKING_AWARD,
+	CHAMPIONS_SEAL,
+	CONQUEST_POINTS,
+	HONOR_POINTS,
+	JUSTICE_POINTS,
+	COIN_OF_ANCESTRY,
+	BREWFEST_PRIZE_TOKEN,
+	LOVE_TOKEN,
 }
+
+local VALID_CURRENCIES = {
+	[DALARAN_COOKING_AWARD]		= true,
+	[CHAMPIONS_SEAL]		= true,
+	[CONQUEST_POINTS]		= true,
+	[HONOR_POINTS]			= true,
+	[JUSTICE_POINTS]		= true,
+	[COIN_OF_ANCESTRY]		= true,
+	[BREWFEST_PRIZE_TOKEN]		= true,
+	[LOVE_TOKEN]			= true,
+}
+
+local PHYSICAL_CURRENCIES = {
+	[DALARAN_COOKING_AWARD]		= false,
+	[CHAMPIONS_SEAL]		= false,
+	[CONQUEST_POINTS]		= false,
+	[HONOR_POINTS]			= false,
+	[JUSTICE_POINTS]		= false,
+	[COIN_OF_ANCESTRY]		= true,
+	[BREWFEST_PRIZE_TOKEN]		= true,
+	[LOVE_TOKEN]			= true,
+}
+
+-- Populated as needed.
+local CURRENCY_NAMES = {}
+local OPTION_ICONS = {}
+local BROKER_ICONS = {}
 
 -------------------------------------------------------------------------------
 -- Variables
@@ -170,46 +157,44 @@ local function GetKey(idnum, broker)
 	end
 end
 
--- Provide settings options for tokenInfo
-local function SetOptions(brokerArgs, summaryArgs, tokenInfo, index)
-	if tokenInfo.settingIcon then
-		local idnum = tokenInfo.item_id or tokenInfo.currency_id
-		local brokerName = GetKey(idnum, true)
-		local summaryName = GetKey(idnum, nil)
+-- Provide settings options for non-money currencies
+local function SetOptions(brokerArgs, summaryArgs, idnum, index)
+	local currency_name = CURRENCY_NAMES[idnum]
 
-		brokerArgs[brokerName] = {
-			type = "toggle",
-			order = index,
-			name = tokenInfo.settingIcon,
-			desc = tokenInfo.itemName,
-			width = "half",
-			get = function()
-				      local key = brokerName
-				      return Broker_CurrencyCharDB[key]
-			      end,
-			set = function(_, value)
-				      local key = brokerName
-				      Broker_CurrencyCharDB[key] = true and value or nil
-				      Broker_Currency:Update()
-			      end,
-		}
-		summaryArgs[summaryName] = {
-			type = "toggle",
-			order = index,
-			name = tokenInfo.settingIcon,
-			desc = tokenInfo.itemName,
-			width = "half",
-			get = function()
-				      local key = summaryName
-				      return Broker_CurrencyCharDB[key]
-			      end,
-			set = function(_, value)
-				      local key = summaryName
-				      Broker_CurrencyCharDB[key] = true and value or nil
-				      Broker_Currency:Update()
-			      end,
-		}
+	if not currency_name or currency_name == "" then
+		return
 	end
+	local brokerName = GetKey(idnum, true)
+	local summaryName = GetKey(idnum, nil)
+
+	brokerArgs[brokerName] = {
+		type = "toggle",
+		order = index,
+		name = OPTION_ICONS[idnum],
+		desc = currency_name,
+		width = "half",
+		get = function()
+			      return Broker_CurrencyCharDB[brokerName]
+		      end,
+		set = function(info, value)
+			      Broker_CurrencyCharDB[brokerName] = true and value or nil
+			      Broker_Currency:Update()
+		      end,
+	}
+	summaryArgs[summaryName] = {
+		type = "toggle",
+		order = index,
+		name = OPTION_ICONS[idnum],
+		desc = currency_name,
+		width = "half",
+		get = function()
+			      return Broker_CurrencyCharDB[summaryName]
+		      end,
+		set = function(info, value)
+			      Broker_CurrencyCharDB[summaryName] = true and value or nil
+			      Broker_Currency:Update()
+		      end,
+	}
 end
 
 local function DeletePlayer(info)
@@ -309,13 +294,12 @@ function Broker_Currency:ShowTooltip(button)
 		table.wipe(tooltipHeader)
 		tooltipHeader[1] = " "
 
-		for index, tokenInfo in pairs(CURRENCY_DATA) do
-			if tokenInfo.brokerIcon then
-				local idnum = tokenInfo.item_id or tokenInfo.currency_id
+		for idnum in pairs(VALID_CURRENCIES) do
+			if BROKER_ICONS[idnum] then
 				local key = GetKey(idnum, false)
 
 				if Broker_CurrencyCharDB[key] then
-					tooltipHeader[# tooltipHeader + 1] = tokenInfo.settingIcon
+					tooltipHeader[# tooltipHeader + 1] = OPTION_ICONS[idnum]
 				end
 			end
 		end
@@ -435,9 +419,8 @@ function Broker_Currency:AddLine(label, currencyList)
 
 	if currencyList then
 		-- Create Strings for the various currencies
-		for index, tokenInfo in pairs(CURRENCY_DATA) do
-			if tokenInfo.brokerIcon then
-				local idnum = tokenInfo.item_id or tokenInfo.currency_id
+		for idnum in pairs(VALID_CURRENCIES) do
+			if BROKER_ICONS[idnum] then
 				local key = GetKey(idnum, false)
 				local count = currencyList[idnum] or 0
 
@@ -525,15 +508,16 @@ do
 		table.wipe(concatList)
 
 		if currencyList then
-			for index, tokenInfo in pairs(CURRENCY_DATA) do
-				if tokenInfo.brokerIcon then
-					local idnum = tokenInfo.item_id or tokenInfo.currency_id
+			for idnum in pairs(VALID_CURRENCIES) do
+				local broker_icon = BROKER_ICONS[idnum]
+
+				if broker_icon then
 					local key = GetKey(idnum, true)
 					local count = currencyList[idnum] or 0
 					local size = Broker_CurrencyCharDB.iconSize
 
 					if count > 0 and Broker_CurrencyCharDB[key] then
-						concatList[# concatList + 1] = string.format(tokenInfo.brokerIcon, count, size, size)
+						concatList[# concatList + 1] = string.format(broker_icon, count, size, size)
 						concatList[# concatList + 1] = "  "
 					end
 				end
@@ -564,6 +548,13 @@ do
 
 		return table.concat(concatList)
 	end
+end
+
+local function GetCurrencyCount(idnum)
+	if not VALID_CURRENCIES[idnum] then
+		return 0
+	end
+	return PHYSICAL_CURRENCIES[idnum] and _G.GetItemCount(idnum, true) or select(2, _G.GetCurrencyInfo(idnum))
 end
 
 function Broker_Currency:Update(event)		--, ...)
@@ -634,10 +625,9 @@ function Broker_Currency:Update(event)		--, ...)
 	self.last.money = current_money
 
 	-- Update Tokens
-	for index, tokenInfo in pairs(CURRENCY_DATA) do
-		if tokenInfo.brokerIcon then
-			local idnum = tokenInfo.item_id or tokenInfo.currency_id
-			local count = tokenInfo.countFunc()
+	for idnum in pairs(VALID_CURRENCIES) do
+		if BROKER_ICONS[idnum] then
+			local count = GetCurrencyCount(idnum)
 
 			player_info[idnum] = count
 
@@ -759,12 +749,8 @@ local function OnEnter(button)
 
 		table.wipe(profit)
 
-		for index, tokenInfo in pairs(CURRENCY_DATA) do
-			local idnum = tokenInfo.item_id or tokenInfo.currency_id
-
-			if idnum then
-				profit[idnum] = (gained[idnum] or 0) - (spent[idnum] or 0)
-			end
+		for idnum in pairs(VALID_CURRENCIES) do
+			profit[idnum] = (gained[idnum] or 0) - (spent[idnum] or 0)
 		end
 		Broker_Currency:AddLine(sPlus, gained)
 		Broker_Currency:AddLine(sMinus, spent)
@@ -783,12 +769,8 @@ local function OnEnter(button)
 
 		table.wipe(profit)
 
-		for index, tokenInfo in pairs(CURRENCY_DATA) do
-			local idnum = tokenInfo.item_id or tokenInfo.currency_id
-
-			if idnum then
-				profit[idnum] = (gained[self.lastTime][idnum] or 0) - (spent[self.lastTime][idnum] or 0)
-			end
+		for idnum in pairs(VALID_CURRENCIES) do
+			profit[idnum] = (gained[self.lastTime][idnum] or 0) - (spent[self.lastTime][idnum] or 0)
 		end
 		Broker_Currency:AddLine(sPlus, gained[self.lastTime])
 		Broker_Currency:AddLine(sMinus, spent[self.lastTime])
@@ -804,12 +786,8 @@ local function OnEnter(button)
 		local yesterday = self.lastTime - 1
 		table.wipe(profit)
 
-		for index, tokenInfo in pairs(CURRENCY_DATA) do
-			local idnum = tokenInfo.item_id or tokenInfo.currency_id
-
-			if idnum then
-				profit[idnum] = (gained[yesterday][idnum] or 0) - (spent[yesterday][idnum] or 0)
-			end
+		for idnum in pairs(VALID_CURRENCIES) do
+			profit[idnum] = (gained[yesterday][idnum] or 0) - (spent[yesterday][idnum] or 0)
 		end
 		Broker_Currency:AddLine(sPlus, gained[yesterday])
 		Broker_Currency:AddLine(sMinus, spent[yesterday])
@@ -826,22 +804,14 @@ local function OnEnter(button)
 			weekGained.money = (weekGained.money or 0) + (gained[i] and gained[i].money or 0)
 			weekSpent.money = (weekSpent.money or 0) + (spent[i] and spent[i].money or 0)
 
-			for index, tokenInfo in pairs(CURRENCY_DATA) do
-				local idnum = tokenInfo.item_id or tokenInfo.currency_id
-
-				if idnum then
-					weekGained[idnum] = (weekGained[idnum] or 0) + (gained[i] and gained[i][idnum] or 0)
-					weekSpent[idnum] = (weekSpent[idnum] or 0) + (spent[i] and spent[i][idnum] or 0)
-				end
+			for idnum in pairs(VALID_CURRENCIES) do
+				weekGained[idnum] = (weekGained[idnum] or 0) + (gained[i] and gained[i][idnum] or 0)
+				weekSpent[idnum] = (weekSpent[idnum] or 0) + (spent[i] and spent[i][idnum] or 0)
 			end
 		end
 
-		for index, tokenInfo in pairs(CURRENCY_DATA) do
-			local idnum = tokenInfo.item_id or tokenInfo.currency_id
-
-			if idnum then
-				profit[idnum] = weekGained[idnum] - weekSpent[idnum]
-			end
+		for idnum in pairs(VALID_CURRENCIES) do
+			profit[idnum] = weekGained[idnum] - weekSpent[idnum]
 		end
 		Broker_Currency:AddLine(" ")
 		Broker_Currency:AddLine(sThisWeek)
@@ -862,22 +832,14 @@ local function OnEnter(button)
 			lastWeekGained.money = (lastWeekGained.money or 0) + (gained[i] and gained[i].money or 0)
 			lastWeekSpent.money = (lastWeekSpent.money or 0) + (spent[i] and spent[i].money or 0)
 
-			for index, tokenInfo in pairs(CURRENCY_DATA) do
-				local idnum = tokenInfo.item_id or tokenInfo.currency_id
-
-				if idnum then
-					lastWeekGained[idnum] = (lastWeekGained[idnum] or 0) + (gained[i] and gained[i][idnum] or 0)
-					lastWeekSpent[idnum] = (lastWeekSpent[idnum] or 0) + (spent[i] and spent[i][idnum] or 0)
-				end
+			for idnum in pairs(VALID_CURRENCIES) do
+				lastWeekGained[idnum] = (lastWeekGained[idnum] or 0) + (gained[i] and gained[i][idnum] or 0)
+				lastWeekSpent[idnum] = (lastWeekSpent[idnum] or 0) + (spent[i] and spent[i][idnum] or 0)
 			end
 		end
 
-		for index, tokenInfo in pairs(CURRENCY_DATA) do
-			local idnum = tokenInfo.item_id or tokenInfo.currency_id
-
-			if idnum then
-				profit[idnum] = lastWeekGained[idnum] - lastWeekSpent[idnum]
-			end
+		for idnum in pairs(VALID_CURRENCIES) do
+			profit[idnum] = lastWeekGained[idnum] - lastWeekSpent[idnum]
 		end
 		Broker_Currency:AddLine(" ")
 		Broker_Currency:AddLine(sLastWeek)
@@ -956,13 +918,14 @@ do
 		-------------------------------------------------------------------------------
 		-- Initialize the configuration options.
 		-------------------------------------------------------------------------------
-		local settingsSliderIcon = ""
+		local ICON_TOKEN = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. select(3, _G.GetCurrencyInfo(CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
+
 
 		local function setIconSize(info, value)
 			local iconSize = Broker_CurrencyCharDB.iconSize
 
 			Broker_CurrencyCharDB[info[# info]] = true and value or nil
-			Broker_Currency.options.args.iconSize.name = string.format(settingsSliderIcon, 8, iconSize, iconSize)
+			Broker_Currency.options.args.iconSize.name = string.format(ICON_TOKEN, 8, iconSize, iconSize)
 			Broker_Currency:Update()
 		end
 
@@ -987,30 +950,25 @@ do
 		end
 
 		-- Icons, names and textures for the currencies
-		for index, tokenInfo in pairs(CURRENCY_DATA) do
-			local item_id = tokenInfo.item_id
-			local currency_id = tokenInfo.currency_id
+		for idnum in pairs(VALID_CURRENCIES) do
+			if PHYSICAL_CURRENCIES[idnum] then
+				local name, _, _, _, _, _, _, _, _, icon_path = _G.GetItemInfo(idnum)
 
-			if item_id then
-				local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture = _G.GetItemInfo(item_id)
-
-				if itemTexture then
-					tokenInfo.itemName = itemName
-					tokenInfo.settingIcon = "\124T" .. itemTexture .. ":24:24\124t"
-					tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. itemTexture .. DISPLAY_ICON_STRING2
+				if icon_path then
+					CURRENCY_NAMES[idnum] = name
+					OPTION_ICONS[idnum] = "\124T" .. icon_path .. ":24:24\124t"
+					BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. icon_path .. DISPLAY_ICON_STRING2
 				end
-			elseif currency_id then
-				local name, _, icon_name = _G.GetCurrencyInfo(currency_id)
+			else
+				local name, _, icon_name = _G.GetCurrencyInfo(idnum)
 
 				if icon_name then
-					tokenInfo.itemName = name
-					tokenInfo.settingIcon = "\124T" .. "Interface\\Icons\\" .. icon_name .. ":24:24\124t"
-					tokenInfo.brokerIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. icon_name .. DISPLAY_ICON_STRING2
+					CURRENCY_NAMES[idnum] = name
+					OPTION_ICONS[idnum] = "\124T" .. "Interface\\Icons\\" .. icon_name .. ":24:24\124t"
+					BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. icon_name .. DISPLAY_ICON_STRING2
 				end
 			end
 		end
-
-		settingsSliderIcon = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. select(3, _G.GetCurrencyInfo(CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
 
 		Broker_Currency.options.args = {
 			header1 = {
@@ -1028,7 +986,7 @@ do
 			iconSize = {
 				type = "range",
 				order = 10,
-				name = string.format(settingsSliderIcon, 8, 16, 16),
+				name = string.format(ICON_TOKEN, 8, 16, 16),
 				desc = _G.TOKENS,
 				min = 1, max = 32, step = 1, bigStep = 1,
 				set = setIconSize,
@@ -1251,10 +1209,9 @@ do
 		end
 		local last = self.last
 
-		for index, tokenInfo in pairs(CURRENCY_DATA) do
-			if tokenInfo.brokerIcon then
-				local idnum = tokenInfo.item_id or tokenInfo.currency_id
-				local count = tokenInfo.countFunc()
+		for idnum in pairs(VALID_CURRENCIES) do
+			if BROKER_ICONS[idnum] then
+				local count = GetCurrencyCount(idnum)
 
 				player_info[idnum] = count
 				last[idnum] = count
@@ -1331,9 +1288,9 @@ do
 		local brokerDisplay = self.options.args.brokerDisplay.args
 		local summaryDisplay = self.options.args.summaryDisplay.args
 
-		for index = 1, # CURRENCY_DATA, 1 do
-			-- Offset by three to ensure that gold, silver, and copper come first in the list.
-			SetOptions(brokerDisplay, summaryDisplay, CURRENCY_DATA[index], index + 3)
+		for index, idnum in ipairs(ORDERED_CURRENCIES) do
+			-- Offset the index by three to ensure that gold, silver, and copper come first in the list.
+			SetOptions(brokerDisplay, summaryDisplay, idnum, index + 3)
 		end
 
 		-- Add delete settings so deleted characters can be removed
