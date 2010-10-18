@@ -823,6 +823,9 @@ local function OnEnter(button)
 		table.wipe(profit)
 
 		for i = self.lastTime - 6, self.lastTime do
+			weekGained.money = (weekGained.money or 0) + (gained[i] and gained[i].money or 0)
+			weekSpent.money = (weekSpent.money or 0) + (spent[i] and spent[i].money or 0)
+
 			for index, tokenInfo in pairs(CURRENCY_DATA) do
 				local idnum = tokenInfo.item_id or tokenInfo.currency_id
 
@@ -856,6 +859,9 @@ local function OnEnter(button)
 		table.wipe(profit)
 
 		for i = self.lastTime - 13, self.lastTime - 7 do
+			lastWeekGained.money = (lastWeekGained.money or 0) + (gained[i] and gained[i].money or 0)
+			lastWeekSpent.money = (lastWeekSpent.money or 0) + (spent[i] and spent[i].money or 0)
+
 			for index, tokenInfo in pairs(CURRENCY_DATA) do
 				local idnum = tokenInfo.item_id or tokenInfo.currency_id
 
