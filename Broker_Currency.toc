@@ -27,7 +27,9 @@
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Always: Delayed
 
+#@no-lib-strip@
 # Libraries
 embeds.xml
+#@end-no-lib-strip@
 
 Broker_Currency.lua
