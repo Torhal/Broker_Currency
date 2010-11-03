@@ -355,7 +355,7 @@ function Broker_Currency:ShowTooltip(button)
 
 			if label == " " then
 				tooltip:AddSeparator()
-			elseif label == _G.STATISTICS or label == sToday or label == sYesterday or label == sThisWeek or label == sLastWeek then
+			elseif label == PLAYER_NAME or label == sToday or label == sYesterday or label == sThisWeek or label == sLastWeek then
 				tooltip:AddHeader(unpack(tooltipHeader))
 				tooltip:SetCell(currentRow, 1, label, fontLabel)
 			else
@@ -659,25 +659,6 @@ function Broker_Currency:Update(event)		--, ...)
 end
 
 
--- Add counts from player_info to totalList according to the summary settings this character is interested in
-local function TotalCurrencies(totalList, player_info)
-	for summaryName in pairs(Broker_CurrencyCharDB) do
-		local countKey = tonumber(string.match(summaryName, "summary(%d+)"))
-		local count = player_info[countKey]
-
-		if count then
-			totalList[countKey] = (totalList[countKey] or 0) + count
-		end
-	end
-	totalList.money = (totalList.money or 0) + (player_info.money or 0)
-end
-
-local totalList = {}
-local weekGained = {}
-local weekSpent = {}
-local lastWeekGained = {}
-local lastWeekSpent = {}
-local profit = {}
 local sortMoneyList = {}
 
 -- Sorting is in descending order of money
@@ -713,160 +694,140 @@ local function GetSortedPlayerInfo()
 	return sortMoneyList
 end
 
--- Handle mouse enter event in our button
-local function OnEnter(button)
-	if startupTimer then
-		return
-	end
-	local self = Broker_Currency
+local Tooltip_AddTotals
+do
+	local currency_gained = {}
+	local currency_spent = {}
+	local profit = {}
 
-	if Broker_Currency.InitializeSettings then
-		Broker_Currency:InitializeSettings()
-	end
-	table.wipe(tooltipLines)
-
-	-- Display the money string according to the summary settings
-	table.wipe(totalList)
-
-	local sortedPlayerInfo = GetSortedPlayerInfo()
-
-	for i, data in ipairs(sortedPlayerInfo) do
-		Broker_Currency:AddLine(string.format("%s: ", data.PLAYER_NAME), data.player_info, fontWhite)
-		TotalCurrencies(totalList, data.player_info)
-	end
-
-	-- Statistics
-	local charDB = Broker_CurrencyCharDB
-
-	if charDB.summaryPlayerSession or charDB.summaryRealmToday or charDB.summaryRealmYesterday or charDB.summaryRealmThisWeek or charDB.summaryRealmLastWeek then
-		Broker_Currency:AddLine(" ")
-		Broker_Currency:AddLine(_G.STATISTICS)
-	end
-
-	-- Session totals
-	local gained = self.gained
-	local spent = self.spent
-
-	if charDB.summaryPlayerSession then
-		Broker_Currency:AddLine(" ")
-		Broker_Currency:AddLine(PLAYER_NAME)
+	function Tooltip_AddTotals(label, gained, spent, start, finish)
+		local gained_ref, spent_ref
 
 		table.wipe(profit)
 
-		for idnum in pairs(VALID_CURRENCIES) do
-			profit[idnum] = (gained[idnum] or 0) - (spent[idnum] or 0)
-		end
-		Broker_Currency:AddLine(sPlus, gained)
-		Broker_Currency:AddLine(sMinus, spent)
-		Broker_Currency:AddLine(sTotal, profit)
-	end
-
-	-- Today totals
-	local realmInfo = Broker_CurrencyDB.realmInfo[REALM_NAME]
-	gained = realmInfo.gained
-	spent = realmInfo.spent
-
-	if charDB.summaryRealmToday then
 		Broker_Currency:AddLine(" ")
-		Broker_Currency:AddLine(sToday)
+		Broker_Currency:AddLine(label)
 		Broker_Currency:AddLine(" ")
 
-		table.wipe(profit)
+		if start and finish then
+			table.wipe(currency_gained)
+			table.wipe(currency_spent)
 
-		for idnum in pairs(VALID_CURRENCIES) do
-			profit[idnum] = (gained[self.lastTime][idnum] or 0) - (spent[self.lastTime][idnum] or 0)
-		end
-		Broker_Currency:AddLine(sPlus, gained[self.lastTime])
-		Broker_Currency:AddLine(sMinus, spent[self.lastTime])
-		Broker_Currency:AddLine(sTotal, profit)
-	end
+			gained_ref = currency_gained
+			spent_ref = currency_spent
 
-	-- Yesterday totals
-	if charDB.summaryRealmYesterday then
-		Broker_Currency:AddLine(" ")
-		Broker_Currency:AddLine(sYesterday)
-		Broker_Currency:AddLine(" ")
+			for index = start, finish do
+				gained_ref.money = (gained_ref.money or 0) + (gained[index] and gained[index].money or 0)
+				spent_ref.money = (spent_ref.money or 0) + (spent[index] and spent[index].money or 0)
 
-		local yesterday = self.lastTime - 1
-		table.wipe(profit)
-
-		for idnum in pairs(VALID_CURRENCIES) do
-			profit[idnum] = (gained[yesterday][idnum] or 0) - (spent[yesterday][idnum] or 0)
-		end
-		Broker_Currency:AddLine(sPlus, gained[yesterday])
-		Broker_Currency:AddLine(sMinus, spent[yesterday])
-		Broker_Currency:AddLine(sTotal, profit)
-	end
-
-	-- This Week totals
-	if charDB.summaryRealmThisWeek then
-		table.wipe(weekGained)
-		table.wipe(weekSpent)
-		table.wipe(profit)
-
-		for i = self.lastTime - 6, self.lastTime do
-			weekGained.money = (weekGained.money or 0) + (gained[i] and gained[i].money or 0)
-			weekSpent.money = (weekSpent.money or 0) + (spent[i] and spent[i].money or 0)
-
-			for idnum in pairs(VALID_CURRENCIES) do
-				weekGained[idnum] = (weekGained[idnum] or 0) + (gained[i] and gained[i][idnum] or 0)
-				weekSpent[idnum] = (weekSpent[idnum] or 0) + (spent[i] and spent[i][idnum] or 0)
+				for idnum in pairs(VALID_CURRENCIES) do
+					gained_ref[idnum] = (gained_ref[idnum] or 0) + (gained[index] and gained[index][idnum] or 0)
+					spent_ref[idnum] = (spent_ref[idnum] or 0) + (spent[index] and spent[index][idnum] or 0)
+				end
 			end
+		elseif start then
+			gained_ref = gained[start]
+			spent_ref = spent[start]
+		else
+			gained_ref = gained
+			spent_ref = spent
 		end
 
 		for idnum in pairs(VALID_CURRENCIES) do
-			profit[idnum] = weekGained[idnum] - weekSpent[idnum]
+			profit[idnum] = (gained_ref[idnum] or 0) - (spent_ref[idnum] or 0)
 		end
-		Broker_Currency:AddLine(" ")
-		Broker_Currency:AddLine(sThisWeek)
-		Broker_Currency:AddLine(" ")
+		profit.money = (gained_ref.money or 0) - (spent_ref.money or 0)
 
-		Broker_Currency:AddLine(sPlus, weekGained)
-		Broker_Currency:AddLine(sMinus, weekSpent)
+		Broker_Currency:AddLine(sPlus, gained_ref)
+		Broker_Currency:AddLine(sMinus, spent_ref)
 		Broker_Currency:AddLine(sTotal, profit)
 	end
+end	-- do-block
 
-	-- Last Week totals
-	if charDB.summaryRealmLastWeek then
-		table.wipe(lastWeekGained)
-		table.wipe(lastWeekSpent)
-		table.wipe(profit)
+local OnEnter
+do
+	local totalList = {}
 
-		for i = self.lastTime - 13, self.lastTime - 7 do
-			lastWeekGained.money = (lastWeekGained.money or 0) + (gained[i] and gained[i].money or 0)
-			lastWeekSpent.money = (lastWeekSpent.money or 0) + (spent[i] and spent[i].money or 0)
+	-- Handle mouse enter event in our button
+	function OnEnter(button)
+		if startupTimer then
+			return
+		end
+		local self = Broker_Currency
 
-			for idnum in pairs(VALID_CURRENCIES) do
-				lastWeekGained[idnum] = (lastWeekGained[idnum] or 0) + (gained[i] and gained[i][idnum] or 0)
-				lastWeekSpent[idnum] = (lastWeekSpent[idnum] or 0) + (spent[i] and spent[i][idnum] or 0)
+		if Broker_Currency.InitializeSettings then
+			Broker_Currency:InitializeSettings()
+		end
+		table.wipe(tooltipLines)
+
+		-- Display the money string according to the summary settings
+		table.wipe(totalList)
+
+		local sortedPlayerInfo = GetSortedPlayerInfo()
+
+		for i, data in ipairs(sortedPlayerInfo) do
+			Broker_Currency:AddLine(string.format("%s: ", data.player_name), data.player_info, fontWhite)
+
+			-- Add counts from player_info to totalList according to the summary settings this character is interested in
+			for summaryName in pairs(Broker_CurrencyCharDB) do
+				local countKey = tonumber(string.match(summaryName, "summary(%d+)"))
+				local count = data.player_info[countKey]
+
+				if count then
+					totalList[countKey] = (totalList[countKey] or 0) + count
+				end
 			end
-		end
-
-		for idnum in pairs(VALID_CURRENCIES) do
-			profit[idnum] = lastWeekGained[idnum] - lastWeekSpent[idnum]
+			totalList.money = (totalList.money or 0) + (data.player_info.money or 0)
 		end
 		Broker_Currency:AddLine(" ")
-		Broker_Currency:AddLine(sLastWeek)
-		Broker_Currency:AddLine(" ")
 
-		Broker_Currency:AddLine(sPlus, lastWeekGained)
-		Broker_Currency:AddLine(sMinus, lastWeekSpent)
-		Broker_Currency:AddLine(sTotal, profit)
+		-- Statistics
+		local charDB = Broker_CurrencyCharDB
+
+		-- Session totals
+		local gained = self.gained
+		local spent = self.spent
+
+		if charDB.summaryPlayerSession then
+			Tooltip_AddTotals(PLAYER_NAME, gained, spent, nil, nil)
+		end
+
+		-- Today totals
+		local realmInfo = Broker_CurrencyDB.realmInfo[REALM_NAME]
+		gained = realmInfo.gained
+		spent = realmInfo.spent
+
+		if charDB.summaryRealmToday then
+			Tooltip_AddTotals(sToday, gained, spent, self.lastTime, nil)
+		end
+
+		-- Yesterday totals
+		if charDB.summaryRealmYesterday then
+			Tooltip_AddTotals(sYesterday, gained, spent, self.lastTime - 1, nil)
+		end
+
+		-- This Week totals
+		if charDB.summaryRealmThisWeek then
+			Tooltip_AddTotals(sThisWeek, gained, spent, self.lastTime - 6, self.lastTime)
+		end
+
+		-- Last Week totals
+		if charDB.summaryRealmLastWeek then
+			Tooltip_AddTotals(sLastWeek, gained, spent, self.lastTime - 13, self.lastTime - 7)
+		end
+
+		-- Totals
+		Broker_Currency:AddLine(" ")
+		Broker_Currency:AddLine(_G.ACHIEVEMENT_SUMMARY_CATEGORY, totalList)
+
+		Broker_Currency:ShowTooltip(button)
 	end
-
-	-- Totals
-	Broker_Currency:AddLine(" ")
-	Broker_Currency:AddLine(_G.ACHIEVEMENT_SUMMARY_CATEGORY, totalList)
-
-	Broker_Currency:ShowTooltip(button)
-end
-
+end	-- do-block
 
 local function OnLeave()
 	LibQTip:Release(Broker_Currency.tooltip)
 	Broker_Currency.tooltip = nil
 end
-
 
 -- Set up as a LibBroker data source
 Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
