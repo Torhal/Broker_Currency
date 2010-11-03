@@ -421,54 +421,56 @@ function Broker_Currency:AddLine(label, currencyList)
 
 	line[1] = label
 
-	if currencyList then
-		-- Create Strings for the various currencies
-		for idnum in pairs(VALID_CURRENCIES) do
-			if BROKER_ICONS[idnum] then
-				local key = GetKey(idnum, false)
-				local count = currencyList[idnum] or 0
+	if not currencyList then
+		return
+	end
+	local char_db = Broker_CurrencyCharDB
 
-				if Broker_CurrencyCharDB[key] then
-					if count ~= 0 then
-						line[# line + 1] = count
-					else
-						line[# line + 1] = " "
-					end
+	-- Create Strings for the various currencies
+	for idnum in pairs(VALID_CURRENCIES) do
+		if BROKER_ICONS[idnum] then
+			local key = GetKey(idnum, false)
+			local count = currencyList[idnum] or 0
+
+			if char_db[key] then
+				if count ~= 0 then
+					line[# line + 1] = count
+				else
+					line[# line + 1] = " "
 				end
 			end
 		end
+	end
 
-		-- Create Strings for gold, silver, copper
-		local money = currencyList.money or 0
-		local moneySign = (money < 0) and -1 or 1
-		money = money * moneySign
+	-- Create Strings for gold, silver, copper
+	local money = currencyList.money or 0
+	local moneySign = (money < 0) and -1 or 1
+	money = money * moneySign
 
-		local copper = money % 100
-		money = (money - copper) / 100
+	local copper = money % 100
+	money = (money - copper) / 100
 
-		local silver = money % 100
-		local gold = math.floor(money / 100)
+	local silver = money % 100
+	local gold = math.floor(money / 100)
 
-		gold = gold * moneySign
-		silver = silver * moneySign
-		copper = copper * moneySign
+	gold = gold * moneySign
+	silver = silver * moneySign
+	copper = copper * moneySign
 
-		if gold + silver + copper ~= 0 then
-			if Broker_CurrencyCharDB.summaryGold then
-				line[# line + 1] = gold
-			end
+	if gold + silver + copper ~= 0 then
+		if char_db.summaryGold then
+			line[# line + 1] = gold
+		end
 
-			if Broker_CurrencyCharDB.summarySilver then
-				line[# line + 1] = silver
-			end
+		if char_db.summarySilver then
+			line[# line + 1] = silver
+		end
 
-			if Broker_CurrencyCharDB.summaryCopper then
-				line[# line + 1] = copper
-			end
+		if char_db.summaryCopper then
+			line[# line + 1] = copper
 		end
 	end
 end
-
 
 do
 	local offset
@@ -501,12 +503,14 @@ end
 local CreateMoneyString
 do
 	local concatList = {}
+
 	-- Create the display string for a single line
 	-- money is the gold.silver.copper amount
 	-- broker is true if it is the broker string, nil if it is the tooltip summary string
 	-- currencyList contains totals for the set of currencies
 	function CreateMoneyString(currencyList)
 		local money = currencyList.money
+		local char_db = Broker_CurrencyCharDB
 
 		-- Create Strings for the various currencies
 		table.wipe(concatList)
@@ -518,9 +522,9 @@ do
 				if broker_icon then
 					local key = GetKey(idnum, true)
 					local count = currencyList[idnum] or 0
-					local size = Broker_CurrencyCharDB.iconSize
+					local size = char_db.iconSize
 
-					if count > 0 and Broker_CurrencyCharDB[key] then
+					if count > 0 and char_db[key] then
 						concatList[# concatList + 1] = string.format(broker_icon, count, size, size)
 						concatList[# concatList + 1] = "  "
 					end
@@ -535,21 +539,20 @@ do
 		local silver = money % 100
 		local gold = math.floor(money / 100)
 
-		if gold > 0 and Broker_CurrencyCharDB.showGold then
-			concatList[# concatList + 1] = string.format(_G.GOLD_AMOUNT_TEXTURE, gold, Broker_CurrencyCharDB.iconSizeGold, Broker_CurrencyCharDB.iconSizeGold)
+		if char_db.showGold and gold > 0 then
+			concatList[# concatList + 1] = string.format(_G.GOLD_AMOUNT_TEXTURE, gold, char_db.iconSizeGold, char_db.iconSizeGold)
 			concatList[# concatList + 1] = " "
 		end
 
-		if (gold + silver > 0) and Broker_CurrencyCharDB.showSilver then
-			concatList[# concatList + 1] = string.format(_G.SILVER_AMOUNT_TEXTURE, silver, Broker_CurrencyCharDB.iconSizeGold, Broker_CurrencyCharDB.iconSizeGold)
+		if char_db.showSilver and gold + silver > 0 then
+			concatList[# concatList + 1] = string.format(_G.SILVER_AMOUNT_TEXTURE, silver, char_db.iconSizeGold, char_db.iconSizeGold)
 			concatList[# concatList + 1] = " "
 		end
 
-		if (gold + silver + copper > 0) and Broker_CurrencyCharDB.showCopper then
-			concatList[# concatList + 1] = string.format(_G.COPPER_AMOUNT_TEXTURE, copper, Broker_CurrencyCharDB.iconSizeGold, Broker_CurrencyCharDB.iconSizeGold)
+		if char_db.showCopper and gold + silver + copper > 0 then
+			concatList[# concatList + 1] = string.format(_G.COPPER_AMOUNT_TEXTURE, copper, char_db.iconSizeGold, char_db.iconSizeGold)
 			concatList[# concatList + 1] = " "
 		end
-
 		return table.concat(concatList)
 	end
 end
@@ -561,7 +564,7 @@ local function GetCurrencyCount(idnum)
 	return PHYSICAL_CURRENCIES[idnum] and _G.GetItemCount(idnum, true) or select(2, _G.GetCurrencyInfo(idnum))
 end
 
-function Broker_Currency:Update(event)		--, ...)
+function Broker_Currency:Update(event)
 	if event == "PLAYER_ENTERING_WORLD" then
 		self:RegisterEvents()
 	end
@@ -658,42 +661,6 @@ function Broker_Currency:Update(event)		--, ...)
 	self.savedTime = time()
 end
 
-
-local sortMoneyList = {}
-
--- Sorting is in descending order of money
-local function SortByMoneyDescending(a, b)
-	if a.player_info.money and b.player_info.money then
-		return a.player_info.money > b.player_info.money
-	elseif a.player_info.money then
-		return true
-	elseif b.player_info.money then
-		return false
-	else
-		return true
-	end
-end
-
-local function GetSortedPlayerInfo()
-	local index = 1
-
-	for player_name, player_info in pairs(Broker_CurrencyDB.realm[REALM_NAME]) do
-		if not sortMoneyList[index] then
-			sortMoneyList[index] = {}
-		end
-		sortMoneyList[index].player_name = player_name
-		sortMoneyList[index].player_info = player_info
-		index = index + 1
-	end
-
-	for i = # sortMoneyList, index, -1 do
-		sortMoneyList[i] = nil
-	end
-	table.sort(sortMoneyList, SortByMoneyDescending)
-
-	return sortMoneyList
-end
-
 local Tooltip_AddTotals
 do
 	local currency_gained = {}
@@ -747,6 +714,40 @@ end	-- do-block
 local OnEnter
 do
 	local totalList = {}
+	local sortMoneyList = {}
+
+	-- Sorting is in descending order of money
+	local function SortByMoneyDescending(a, b)
+		if a.player_info.money and b.player_info.money then
+			return a.player_info.money > b.player_info.money
+		elseif a.player_info.money then
+			return true
+		elseif b.player_info.money then
+			return false
+		else
+			return true
+		end
+	end
+
+	local function GetSortedPlayerInfo()
+		local index = 1
+
+		for player_name, player_info in pairs(Broker_CurrencyDB.realm[REALM_NAME]) do
+			if not sortMoneyList[index] then
+				sortMoneyList[index] = {}
+			end
+			sortMoneyList[index].player_name = player_name
+			sortMoneyList[index].player_info = player_info
+			index = index + 1
+		end
+
+		for i = # sortMoneyList, index, -1 do
+			sortMoneyList[i] = nil
+		end
+		table.sort(sortMoneyList, SortByMoneyDescending)
+
+		return sortMoneyList
+	end
 
 	-- Handle mouse enter event in our button
 	function OnEnter(button)
@@ -764,12 +765,13 @@ do
 		table.wipe(totalList)
 
 		local sortedPlayerInfo = GetSortedPlayerInfo()
+		local charDB = Broker_CurrencyCharDB
 
 		for i, data in ipairs(sortedPlayerInfo) do
 			Broker_Currency:AddLine(string.format("%s: ", data.player_name), data.player_info, fontWhite)
 
 			-- Add counts from player_info to totalList according to the summary settings this character is interested in
-			for summaryName in pairs(Broker_CurrencyCharDB) do
+			for summaryName in pairs(charDB) do
 				local countKey = tonumber(string.match(summaryName, "summary(%d+)"))
 				local count = data.player_info[countKey]
 
@@ -782,8 +784,6 @@ do
 		Broker_Currency:AddLine(" ")
 
 		-- Statistics
-		local charDB = Broker_CurrencyCharDB
-
 		-- Session totals
 		local gained = self.gained
 		local spent = self.spent
@@ -1355,5 +1355,5 @@ LibStub("AceTimer-3.0"):Embed(Broker_Currency)
 
 -- This is only necessary if AddonLoader is present, using the Delayed load. -Torhal
 if IsLoggedIn() then
-	startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 4, Broker_Currency)
+	startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 1, Broker_Currency)
 end
