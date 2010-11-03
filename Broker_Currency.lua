@@ -202,34 +202,34 @@ local function SetOptions(brokerArgs, summaryArgs, idnum, index)
 end
 
 local function DeletePlayer(info)
-	local PLAYER_NAME = info[# info]
+	local player_name = info[# info]
 	local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
 
-	deleteOptions[PLAYER_NAME] = nil
-	deleteOptions[PLAYER_NAME .. "Name"] = nil
-	deleteOptions[PLAYER_NAME .. "Spacer"] = nil
-	Broker_CurrencyDB.realm[REALM_NAME][PLAYER_NAME] = nil
+	deleteOptions[player_name] = nil
+	deleteOptions[player_name .. "Name"] = nil
+	deleteOptions[player_name .. "Spacer"] = nil
+	Broker_CurrencyDB.realm[REALM_NAME][player_name] = nil
 end
 
 -- Provide settings options for tokenInfo
-local function DeleteOptions(PLAYER_NAME, player_infoList, index)
+local function DeleteOptions(player_name, player_infoList, index)
 	local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
 
-	if not deleteOptions[PLAYER_NAME] then
-		deleteOptions[PLAYER_NAME .. "Name"] = {
+	if not deleteOptions[player_name] then
+		deleteOptions[player_name .. "Name"] = {
 			type = "description",
 			order = index * 3,
-			name = PLAYER_NAME,
+			name = player_name,
 		}
 
-		deleteOptions[PLAYER_NAME] = {
+		deleteOptions[player_name] = {
 			type = "execute",
 			order = index * 3 + 1,
 			name = _G.DELETE,
 			func = DeletePlayer,
 		}
 
-		deleteOptions[PLAYER_NAME .. "Spacer"] = {
+		deleteOptions[player_name .. "Spacer"] = {
 			type = "header",
 			order = index * 3 + 2,
 			name = "",
@@ -696,11 +696,11 @@ end
 local function GetSortedPlayerInfo()
 	local index = 1
 
-	for PLAYER_NAME, player_info in pairs(Broker_CurrencyDB.realm[REALM_NAME]) do
+	for player_name, player_info in pairs(Broker_CurrencyDB.realm[REALM_NAME]) do
 		if not sortMoneyList[index] then
 			sortMoneyList[index] = {}
 		end
-		sortMoneyList[index].PLAYER_NAME = PLAYER_NAME
+		sortMoneyList[index].player_name = player_name
 		sortMoneyList[index].player_info = player_info
 		index = index + 1
 	end
