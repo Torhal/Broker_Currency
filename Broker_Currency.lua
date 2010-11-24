@@ -45,7 +45,6 @@ local ICON_GOLD = "\124TInterface\\MoneyFrame\\UI-GoldIcon:24:24\124t"
 local ICON_SILVER = "\124TInterface\\MoneyFrame\\UI-SilverIcon:24:24\124t"
 local ICON_COPPER = "\124TInterface\\MoneyFrame\\UI-CopperIcon:24:24\124t"
 
-local SETTING_ICON_STRING = "\124T%s:24:24\124t"
 local DISPLAY_ICON_STRING1 = "%d\124T"
 local DISPLAY_ICON_STRING2 = ":%d:%d\124t"
 
@@ -324,9 +323,12 @@ function Broker_Currency:ShowTooltip(button)
 		end
 
 		local tooltip = LibQTip:Acquire("Broker_CurrencyTooltip", maxColumns, unpack(tooltipAlignment))
+		tooltip:SetCellMarginH(1)
+		tooltip:SetCellMarginV(1)
+
 		self.tooltip = tooltip
 
-		local fontName, fontHeight, fontFlags = tooltip.regularFont:GetFont()
+		local fontName, fontHeight, fontFlags = tooltip:GetFont():GetFont()
 
 		fontPlus:SetFont(fontName, fontHeight, fontFlags)
 		fontPlus:SetTextColor(0, 1, 0)
@@ -343,7 +345,6 @@ function Broker_Currency:ShowTooltip(button)
 		fontWhite:SetJustifyH("RIGHT")
 		fontWhite:SetJustifyV("MIDDLE")
 
-		fontName, fontHeight, fontFlags = tooltip.headerFont:GetFont()
 		fontLabel:SetFont(fontName, fontHeight, fontFlags)
 		fontLabel:SetTextColor(1, 1, 0.5)
 		fontLabel:SetJustifyH("LEFT")
