@@ -41,9 +41,9 @@ local Broker_Currency = Broker_Currency
 -- Constants
 -------------------------------------------------------------------------------
 -- The localization goal is to only use existing Blizzard strings and localized Title strings from the toc
-local ICON_GOLD = "\124TInterface\\MoneyFrame\\UI-GoldIcon:24:24\124t"
-local ICON_SILVER = "\124TInterface\\MoneyFrame\\UI-SilverIcon:24:24\124t"
-local ICON_COPPER = "\124TInterface\\MoneyFrame\\UI-CopperIcon:24:24\124t"
+local ICON_GOLD = "\124TInterface\\MoneyFrame\\UI-GoldIcon:20:20\124t"
+local ICON_SILVER = "\124TInterface\\MoneyFrame\\UI-SilverIcon:20:20\124t"
+local ICON_COPPER = "\124TInterface\\MoneyFrame\\UI-CopperIcon:20:20\124t"
 
 local DISPLAY_ICON_STRING1 = "%d\124T"
 local DISPLAY_ICON_STRING2 = ":%d:%d\124t"
@@ -163,6 +163,15 @@ local function GetKey(idnum, broker)
 	end
 end
 
+local function ShowOptionIcon(idnum)
+	local size = Broker_CurrencyCharDB.iconSize
+
+	if PHYSICAL_CURRENCIES[idnum] then
+		return ("\124T" .. OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
+	end
+	return ("\124T" .. "Interface\\Icons\\" .. OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
+end
+
 -- Provide settings options for non-money currencies
 local function SetOptions(brokerArgs, summaryArgs, idnum, index)
 	local currency_name = CURRENCY_NAMES[idnum]
@@ -176,7 +185,7 @@ local function SetOptions(brokerArgs, summaryArgs, idnum, index)
 	brokerArgs[brokerName] = {
 		type = "toggle",
 		order = index,
-		name = OPTION_ICONS[idnum],
+		name = ShowOptionIcon(idnum),
 		desc = currency_name,
 		width = "half",
 		get = function()
@@ -190,7 +199,7 @@ local function SetOptions(brokerArgs, summaryArgs, idnum, index)
 	summaryArgs[summaryName] = {
 		type = "toggle",
 		order = index,
-		name = OPTION_ICONS[idnum],
+		name = ShowOptionIcon(idnum),
 		desc = currency_name,
 		width = "half",
 		get = function()
@@ -301,11 +310,11 @@ function Broker_Currency:ShowTooltip(button)
 		tooltipHeader[1] = " "
 
 		for idnum in pairs(VALID_CURRENCIES) do
-			if BROKER_ICONS[idnum] then
+			if OPTION_ICONS[idnum] then
 				local key = GetKey(idnum, false)
 
 				if Broker_CurrencyCharDB[key] then
-					tooltipHeader[# tooltipHeader + 1] = OPTION_ICONS[idnum]
+					tooltipHeader[# tooltipHeader + 1] = ShowOptionIcon(idnum)
 				end
 			end
 		end
@@ -1129,27 +1138,21 @@ do
 		BROKER_ICONS = db.brokerIcons
 
 		for idnum in pairs(VALID_CURRENCIES) do
-			local cur_name = CURRENCY_NAMES[idnum]
-			local opt_icon = OPTION_ICONS[idnum]
-			local ldb_icon = BROKER_ICONS[idnum]
+			if PHYSICAL_CURRENCIES[idnum] then
+				local name, _, _, _, _, _, _, _, _, icon_path = _G.GetItemInfo(idnum)
 
-			if not cur_name or not opt_icon or not ldb_icon or cur_name == "" or opt_icon == "" or ldb_icon == "" then
-				if PHYSICAL_CURRENCIES[idnum] then
-					local name, _, _, _, _, _, _, _, _, icon_path = _G.GetItemInfo(idnum)
+				if icon_path and icon_path ~= "" then
+					CURRENCY_NAMES[idnum] = name
+					OPTION_ICONS[idnum] = icon_path
+					BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. icon_path .. DISPLAY_ICON_STRING2
+				end
+			else
+				local name, _, icon_name = _G.GetCurrencyInfo(idnum)
 
-					if icon_path then
-						CURRENCY_NAMES[idnum] = name
-						OPTION_ICONS[idnum] = "\124T" .. icon_path .. ":24:24\124t"
-						BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. icon_path .. DISPLAY_ICON_STRING2
-					end
-				else
-					local name, _, icon_name = _G.GetCurrencyInfo(idnum)
-
-					if icon_name and icon_name ~= "" then
-						CURRENCY_NAMES[idnum] = name
-						OPTION_ICONS[idnum] = "\124T" .. "Interface\\Icons\\" .. icon_name .. ":24:24\124t"
-						BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. icon_name .. DISPLAY_ICON_STRING2
-					end
+				if icon_name and icon_name ~= "" then
+					CURRENCY_NAMES[idnum] = name
+					OPTION_ICONS[idnum] = icon_name
+					BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. icon_name .. DISPLAY_ICON_STRING2
 				end
 			end
 		end
