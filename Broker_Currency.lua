@@ -133,6 +133,12 @@ local OPTION_ICONS
 local BROKER_ICONS
 
 -------------------------------------------------------------------------------
+-- If you want to send id numbers for currencies which are missing, run this
+-- while in-game.
+-------------------------------------------------------------------------------
+-- /script for id = 1, 10000 do local name = GetCurrencyInfo(id); if name and name ~= "" then print(("%d - %s"):format(id, name)) end end
+
+-------------------------------------------------------------------------------
 -- Variables
 -------------------------------------------------------------------------------
 local startupTimer
