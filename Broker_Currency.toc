@@ -1,4 +1,4 @@
-﻿## Interface: 40000
+﻿## Interface: 40100
 ## Title: Broker: Currency
 ## X-BrokerName: Currency
 ## Author: Torhal, Toadkiller, Azethoth
