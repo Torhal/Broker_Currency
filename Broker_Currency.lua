@@ -120,30 +120,7 @@ local ORDERED_CURRENCIES = {
 	LOVE_TOKEN,
 }
 
-local VALID_CURRENCIES = {
-	[DALARAN_JEWELCRAFTERS_TOKEN]		= true,
-	[DALARAN_COOKING_AWARD]			= true,
-	[CHAMPIONS_SEAL]			= true,
-	[ILLUSTRIOUS_JEWELCRAFTERS_TOKEN]	= true,
-	[DWARF_ARCHAEOLOGY_FRAGMENT]		= true,
-	[TROLL_ARCHAEOLOGY_FRAGMENT]		= true,
-	[CHEFS_AWARD]				= true,
-	[CONQUEST_POINTS]			= true,
-	[FOSSIL_ARCHAEOLOGY_FRAGMENT]		= true,
-	[NIGHTELF_ARCHAEOLOGY_FRAGMENT]		= true,
-	[TOL_BARAD_COMMENDATION]		= true,
-	[HONOR_POINTS]				= true,
-	[JUSTICE_POINTS]			= true,
-	[VALOR_POINTS]				= true,
-	[ORC_ARCHAEOLOGY_FRAGMENT]		= true,
-	[DRAENEI_ARCHAEOLOGY_FRAGMENT]		= true,
-	[VRYKUL_ARCHAEOLOGY_FRAGMENT]		= true,
-	[NERUBIAN_ARCHAEOLOGY_FRAGMENT]		= true,
-	[TOLVIR_ARCHAEOLOGY_FRAGMENT]		= true,
-	[COIN_OF_ANCESTRY]			= true,
-	[BREWFEST_PRIZE_TOKEN]			= true,
-	[LOVE_TOKEN]				= true,
-}
+local NUM_CURRENCIES = #ORDERED_CURRENCIES
 
 local PHYSICAL_CURRENCIES = {
 	[COIN_OF_ANCESTRY]		= true,
@@ -344,7 +321,9 @@ function Broker_Currency:ShowTooltip(button)
 		table.wipe(tooltipHeader)
 		tooltipHeader[1] = " "
 
-		for idnum in pairs(VALID_CURRENCIES) do
+		for index = 1, NUM_CURRENCIES do
+			local idnum = ORDERED_CURRENCIES[index]
+
 			if OPTION_ICONS[idnum] then
 				local key = GetKey(idnum, false)
 
@@ -475,7 +454,9 @@ function Broker_Currency:AddLine(label, currencyList)
 	local char_db = Broker_CurrencyCharDB
 
 	-- Create Strings for the various currencies
-	for idnum in pairs(VALID_CURRENCIES) do
+	for index = 1, NUM_CURRENCIES do
+		local idnum = ORDERED_CURRENCIES[index]
+
 		if BROKER_ICONS[idnum] then
 			local key = GetKey(idnum, false)
 			local count = currencyList[idnum] or 0
@@ -564,7 +545,8 @@ do
 		table.wipe(concatList)
 
 		if currencyList then
-			for idnum in pairs(VALID_CURRENCIES) do
+			for index = 1, NUM_CURRENCIES do
+				local idnum = ORDERED_CURRENCIES[index]
 				local broker_icon = BROKER_ICONS[idnum]
 
 				if broker_icon then
@@ -605,11 +587,19 @@ do
 	end
 end
 
-local function GetCurrencyCount(idnum)
-	if not VALID_CURRENCIES[idnum] then
-		return 0
+local GetCurrencyCount
+do
+	local VALID_CURRENCIES = {}
+	for index = 1, NUM_CURRENCIES do
+		VALID_CURRENCIES[ORDERED_CURRENCIES[index]] = true
 	end
-	return PHYSICAL_CURRENCIES[idnum] and _G.GetItemCount(idnum, true) or select(2, _G.GetCurrencyInfo(idnum))
+
+	function GetCurrencyCount(idnum)
+		if not VALID_CURRENCIES[idnum] then
+			return 0
+		end
+		return PHYSICAL_CURRENCIES[idnum] and _G.GetItemCount(idnum, true) or select(2, _G.GetCurrencyInfo(idnum))
+	end
 end
 
 function Broker_Currency:Update(event)
@@ -680,7 +670,9 @@ function Broker_Currency:Update(event)
 	self.last.money = current_money
 
 	-- Update Tokens
-	for idnum in pairs(VALID_CURRENCIES) do
+	for index = 1, NUM_CURRENCIES do
+		local idnum = ORDERED_CURRENCIES[index]
+
 		if BROKER_ICONS[idnum] then
 			local count = GetCurrencyCount(idnum)
 
@@ -735,7 +727,8 @@ do
 				gained_ref.money = (gained_ref.money or 0) + (gained[index] and gained[index].money or 0)
 				spent_ref.money = (spent_ref.money or 0) + (spent[index] and spent[index].money or 0)
 
-				for idnum in pairs(VALID_CURRENCIES) do
+				for index = 1, NUM_CURRENCIES do
+					local idnum = ORDERED_CURRENCIES[index]
 					gained_ref[idnum] = (gained_ref[idnum] or 0) + (gained[index] and gained[index][idnum] or 0)
 					spent_ref[idnum] = (spent_ref[idnum] or 0) + (spent[index] and spent[index][idnum] or 0)
 				end
@@ -748,7 +741,8 @@ do
 			spent_ref = spent
 		end
 
-		for idnum in pairs(VALID_CURRENCIES) do
+		for index = 1, NUM_CURRENCIES do
+			local idnum = ORDERED_CURRENCIES[index]
 			profit[idnum] = (gained_ref[idnum] or 0) - (spent_ref[idnum] or 0)
 		end
 		profit.money = (gained_ref.money or 0) - (spent_ref.money or 0)
@@ -1173,7 +1167,9 @@ do
 		end
 		BROKER_ICONS = db.brokerIcons
 
-		for idnum in pairs(VALID_CURRENCIES) do
+		for index = 1, NUM_CURRENCIES do
+			local idnum = ORDERED_CURRENCIES[index]
+
 			if PHYSICAL_CURRENCIES[idnum] then
 				local name, _, _, _, _, _, _, _, _, icon_path = _G.GetItemInfo(idnum)
 
@@ -1238,7 +1234,9 @@ do
 		end
 		local last = self.last
 
-		for idnum in pairs(VALID_CURRENCIES) do
+		for index = 1, NUM_CURRENCIES do
+			local idnum = ORDERED_CURRENCIES[index]
+
 			if BROKER_ICONS[idnum] then
 				local count = GetCurrencyCount(idnum)
 
