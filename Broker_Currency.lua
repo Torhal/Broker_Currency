@@ -72,28 +72,28 @@ local HEARTHSTONE_IDNUM = 6948
 -------------------------------------------------------------------------------
 -- Currencies
 -------------------------------------------------------------------------------
-local DALARAN_JEWELCRAFTERS_TOKEN	= 61
-local DALARAN_COOKING_AWARD		= 81
-local CHAMPIONS_SEAL			= 241
-local ILLUSTRIOUS_JEWELCRAFTERS_TOKEN	= 361
-local DWARF_ARCHAEOLOGY_FRAGMENT	= 384
-local TROLL_ARCHAEOLOGY_FRAGMENT	= 385
-local CONQUEST_POINTS			= 390
-local TOL_BARAD_COMMENDATION		= 391
-local HONOR_POINTS			= 392
-local FOSSIL_ARCHAEOLOGY_FRAGMENT	= 393
-local NIGHTELF_ARCHAEOLOGY_FRAGMENT	= 394
-local JUSTICE_POINTS			= 395
-local VALOR_POINTS			= 396
-local ORC_ARCHAEOLOGY_FRAGMENT		= 397
-local DRAENEI_ARCHAEOLOGY_FRAGMENT	= 398
-local VRYKUL_ARCHAEOLOGY_FRAGMENT	= 399
-local NERUBIAN_ARCHAEOLOGY_FRAGMENT	= 400
-local TOLVIR_ARCHAEOLOGY_FRAGMENT	= 401
-local CHEFS_AWARD			= 402
-local COIN_OF_ANCESTRY			= 21100
-local BREWFEST_PRIZE_TOKEN		= 37829
-local LOVE_TOKEN			= 49927
+local DALARAN_JEWELCRAFTERS_TOKEN = 61
+local DALARAN_COOKING_AWARD = 81
+local CHAMPIONS_SEAL = 241
+local ILLUSTRIOUS_JEWELCRAFTERS_TOKEN = 361
+local DWARF_ARCHAEOLOGY_FRAGMENT = 384
+local TROLL_ARCHAEOLOGY_FRAGMENT = 385
+local CONQUEST_POINTS = 390
+local TOL_BARAD_COMMENDATION = 391
+local HONOR_POINTS = 392
+local FOSSIL_ARCHAEOLOGY_FRAGMENT = 393
+local NIGHTELF_ARCHAEOLOGY_FRAGMENT = 394
+local JUSTICE_POINTS = 395
+local VALOR_POINTS = 396
+local ORC_ARCHAEOLOGY_FRAGMENT = 397
+local DRAENEI_ARCHAEOLOGY_FRAGMENT = 398
+local VRYKUL_ARCHAEOLOGY_FRAGMENT = 399
+local NERUBIAN_ARCHAEOLOGY_FRAGMENT = 400
+local TOLVIR_ARCHAEOLOGY_FRAGMENT = 401
+local CHEFS_AWARD = 402
+local COIN_OF_ANCESTRY = 21100
+local BREWFEST_PRIZE_TOKEN = 37829
+local LOVE_TOKEN = 49927
 
 local ORDERED_CURRENCIES = {
 	JUSTICE_POINTS,
@@ -123,9 +123,9 @@ local ORDERED_CURRENCIES = {
 local NUM_CURRENCIES = #ORDERED_CURRENCIES
 
 local PHYSICAL_CURRENCIES = {
-	[COIN_OF_ANCESTRY]		= true,
-	[BREWFEST_PRIZE_TOKEN]		= true,
-	[LOVE_TOKEN]			= true,
+	[COIN_OF_ANCESTRY] = true,
+	[BREWFEST_PRIZE_TOKEN] = true,
+	[LOVE_TOKEN] = true,
 }
 
 -- Populated as needed.
@@ -157,12 +157,12 @@ Broker_Currency.options = {
 	type = "group",
 	name = sName,
 	get = function(info)
-		      return Broker_CurrencyCharDB[info[#info]]
-	      end,
+		return Broker_CurrencyCharDB[info[#info]]
+	end,
 	set = function(info, value)
-		      Broker_CurrencyCharDB[info[# info]] = true and value or nil
-		      Broker_Currency:Update()
-	      end,
+		Broker_CurrencyCharDB[info[#info]] = true and value or nil
+		Broker_Currency:Update()
+	end,
 	childGroups = "tree",
 	args = {}
 }
@@ -201,12 +201,12 @@ local function SetOptions(brokerArgs, summaryArgs, idnum, index)
 		desc = currency_name,
 		width = "half",
 		get = function()
-			      return Broker_CurrencyCharDB[brokerName]
-		      end,
+			return Broker_CurrencyCharDB[brokerName]
+		end,
 		set = function(info, value)
-			      Broker_CurrencyCharDB[brokerName] = true and value or nil
-			      Broker_Currency:Update()
-		      end,
+			Broker_CurrencyCharDB[brokerName] = true and value or nil
+			Broker_Currency:Update()
+		end,
 	}
 	summaryArgs[summaryName] = {
 		type = "toggle",
@@ -215,17 +215,17 @@ local function SetOptions(brokerArgs, summaryArgs, idnum, index)
 		desc = currency_name,
 		width = "half",
 		get = function()
-			      return Broker_CurrencyCharDB[summaryName]
-		      end,
+			return Broker_CurrencyCharDB[summaryName]
+		end,
 		set = function(info, value)
-			      Broker_CurrencyCharDB[summaryName] = true and value or nil
-			      Broker_Currency:Update()
-		      end,
+			Broker_CurrencyCharDB[summaryName] = true and value or nil
+			Broker_Currency:Update()
+		end,
 	}
 end
 
 local function DeletePlayer(info)
-	local player_name = info[# info]
+	local player_name = info[#info]
 	local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
 
 	deleteOptions[player_name] = nil
@@ -268,8 +268,7 @@ if not brokerOptions then
 	brokerOptions = {
 		type = "group",
 		name = "Broker",
-		args = {
-		}
+		args = {}
 	}
 	AceCfg:RegisterOptionsTable("Broker", brokerOptions)
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker", "Broker")
@@ -314,7 +313,7 @@ function Broker_Currency:ShowTooltip(button)
 			tooltipAlignment[index] = "RIGHT"
 		end
 
-		for index = # tooltipAlignment, maxColumns + 2, -1 do
+		for index = #tooltipAlignment, maxColumns + 2, -1 do
 			tooltipAlignment[index] = nil
 		end
 
@@ -328,21 +327,21 @@ function Broker_Currency:ShowTooltip(button)
 				local key = GetKey(idnum, false)
 
 				if Broker_CurrencyCharDB[key] then
-					tooltipHeader[# tooltipHeader + 1] = ShowOptionIcon(idnum)
+					tooltipHeader[#tooltipHeader + 1] = ShowOptionIcon(idnum)
 				end
 			end
 		end
 
 		if Broker_CurrencyCharDB.summaryGold then
-			tooltipHeader[# tooltipHeader + 1] = ICON_GOLD
+			tooltipHeader[#tooltipHeader + 1] = ICON_GOLD
 		end
 
 		if Broker_CurrencyCharDB.summarySilver then
-			tooltipHeader[# tooltipHeader + 1] = ICON_SILVER
+			tooltipHeader[#tooltipHeader + 1] = ICON_SILVER
 		end
 
 		if Broker_CurrencyCharDB.summaryCopper then
-			tooltipHeader[# tooltipHeader + 1] = ICON_COPPER
+			tooltipHeader[#tooltipHeader + 1] = ICON_COPPER
 		end
 
 		local tooltip = LibQTip:Acquire("Broker_CurrencyTooltip", maxColumns, unpack(tooltipAlignment))
@@ -436,7 +435,7 @@ end
 
 
 function Broker_Currency:AddLine(label, currencyList)
-	local newIndex = # tooltipLines + 1
+	local newIndex = #tooltipLines + 1
 
 	if not tooltipLinesRecycle[newIndex] then
 		tooltipLinesRecycle[newIndex] = {}
@@ -463,9 +462,9 @@ function Broker_Currency:AddLine(label, currencyList)
 
 			if char_db[key] then
 				if count ~= 0 then
-					line[# line + 1] = count
+					line[#line + 1] = count
 				else
-					line[# line + 1] = " "
+					line[#line + 1] = " "
 				end
 			end
 		end
@@ -488,15 +487,15 @@ function Broker_Currency:AddLine(label, currencyList)
 
 	if gold + silver + copper ~= 0 then
 		if char_db.summaryGold then
-			line[# line + 1] = gold
+			line[#line + 1] = gold
 		end
 
 		if char_db.summarySilver then
-			line[# line + 1] = silver
+			line[#line + 1] = silver
 		end
 
 		if char_db.summaryCopper then
-			line[# line + 1] = copper
+			line[#line + 1] = copper
 		end
 	end
 end
@@ -555,8 +554,8 @@ do
 					local size = char_db.iconSize
 
 					if count > 0 and char_db[key] then
-						concatList[# concatList + 1] = string.format(broker_icon, count, size, size)
-						concatList[# concatList + 1] = "  "
+						concatList[#concatList + 1] = string.format(broker_icon, count, size, size)
+						concatList[#concatList + 1] = "  "
 					end
 				end
 			end
@@ -570,18 +569,18 @@ do
 		local gold = math.floor(money / 100)
 
 		if char_db.showGold and gold > 0 then
-			concatList[# concatList + 1] = string.format(_G.GOLD_AMOUNT_TEXTURE, gold, char_db.iconSizeGold, char_db.iconSizeGold)
-			concatList[# concatList + 1] = " "
+			concatList[#concatList + 1] = string.format(_G.GOLD_AMOUNT_TEXTURE, gold, char_db.iconSizeGold, char_db.iconSizeGold)
+			concatList[#concatList + 1] = " "
 		end
 
 		if char_db.showSilver and gold + silver > 0 then
-			concatList[# concatList + 1] = string.format(_G.SILVER_AMOUNT_TEXTURE, silver, char_db.iconSizeGold, char_db.iconSizeGold)
-			concatList[# concatList + 1] = " "
+			concatList[#concatList + 1] = string.format(_G.SILVER_AMOUNT_TEXTURE, silver, char_db.iconSizeGold, char_db.iconSizeGold)
+			concatList[#concatList + 1] = " "
 		end
 
 		if char_db.showCopper and gold + silver + copper > 0 then
-			concatList[# concatList + 1] = string.format(_G.COPPER_AMOUNT_TEXTURE, copper, char_db.iconSizeGold, char_db.iconSizeGold)
-			concatList[# concatList + 1] = " "
+			concatList[#concatList + 1] = string.format(_G.COPPER_AMOUNT_TEXTURE, copper, char_db.iconSizeGold, char_db.iconSizeGold)
+			concatList[#concatList + 1] = " "
 		end
 		return table.concat(concatList)
 	end
@@ -650,10 +649,10 @@ function Broker_Currency:Update(event)
 		player_info.spent[cutoffDay] = nil
 		realmInfo.gained[cutoffDay] = nil
 		realmInfo.spent[cutoffDay] = nil
-		player_info.gained[today] = player_info.gained[today] or {money = 0}
-		player_info.spent[today] = player_info.spent[today] or {money = 0}
-		realmInfo.gained[today] = realmInfo.gained[today] or {money = 0}
-		realmInfo.spent[today] = realmInfo.spent[today] or {money = 0}
+		player_info.gained[today] = player_info.gained[today] or { money = 0 }
+		player_info.spent[today] = player_info.spent[today] or { money = 0 }
+		realmInfo.gained[today] = realmInfo.gained[today] or { money = 0 }
+		realmInfo.spent[today] = realmInfo.spent[today] or { money = 0 }
 		self.lastTime = today
 	end
 
@@ -751,7 +750,7 @@ do
 		Broker_Currency:AddLine(sMinus, spent_ref)
 		Broker_Currency:AddLine(sTotal, profit)
 	end
-end	-- do-block
+end -- do-block
 
 local OnEnter
 do
@@ -783,7 +782,7 @@ do
 			index = index + 1
 		end
 
-		for i = # sortMoneyList, index, -1 do
+		for i = #sortMoneyList, index, -1 do
 			sortMoneyList[i] = nil
 		end
 		table.sort(sortMoneyList, SortByMoneyDescending)
@@ -864,7 +863,7 @@ do
 
 		Broker_Currency:ShowTooltip(button)
 	end
-end	-- do-block
+end -- do-block
 
 local function OnLeave()
 	LibQTip:Release(Broker_Currency.tooltip)
@@ -873,19 +872,19 @@ end
 
 -- Set up as a LibBroker data source
 Broker_Currency.ldb = LDB:NewDataObject("Broker Currency",
-					{
-						type = "data source",
-						label = _G.CURRENCY,
-						icon = "Interface\\MoneyFrame\\UI-GoldIcon",
-						text = "Initializing...",
-						OnClick = function(clickedframe, button)
-								  if button == "RightButton" then
-									  _G.InterfaceOptionsFrame_OpenToCategory(Broker_Currency.menu)
-								  end
-							  end,
-						OnEnter = OnEnter,
-						OnLeave = OnLeave,
-					})
+	{
+		type = "data source",
+		label = _G.CURRENCY,
+		icon = "Interface\\MoneyFrame\\UI-GoldIcon",
+		text = "Initializing...",
+		OnClick = function(clickedframe, button)
+			if button == "RightButton" then
+				_G.InterfaceOptionsFrame_OpenToCategory(Broker_Currency.menu)
+			end
+		end,
+		OnEnter = OnEnter,
+		OnLeave = OnLeave,
+	})
 
 
 do
@@ -918,8 +917,8 @@ do
 				showYesterday = true,
 				showLastWeek = true,
 				summaryGold = true,
-				summaryColorDark = {r = 0, g = 0, b = 0, a = 0},
-				summaryColorLight = {r = 1, g = 1, b = 1, a = .3},
+				summaryColorDark = { r = 0, g = 0, b = 0, a = 0 },
+				summaryColorLight = { r = 1, g = 1, b = 1, a = .3 },
 			}
 		end
 
@@ -932,7 +931,7 @@ do
 		local function setIconSize(info, value)
 			local iconSize = Broker_CurrencyCharDB.iconSize
 
-			Broker_CurrencyCharDB[info[# info]] = true and value or nil
+			Broker_CurrencyCharDB[info[#info]] = true and value or nil
 			Broker_Currency.options.args.iconSize.name = string.format(ICON_TOKEN, 8, iconSize, iconSize)
 			Broker_Currency:Update()
 		end
@@ -946,12 +945,12 @@ do
 		end
 
 		local function getColorValue(info)
-			local color = Broker_CurrencyCharDB[info[# info]]
+			local color = Broker_CurrencyCharDB[info[#info]]
 			return color.r, color.g, color.b, color.a
 		end
 
 		local function setColorValue(info, r, g, b, a)
-			local color = Broker_CurrencyCharDB[info[# info]]
+			local color = Broker_CurrencyCharDB[info[#info]]
 
 			color.r, color.g, color.b, color.a = r, g, b, a
 			Broker_Currency:Update()
@@ -975,7 +974,10 @@ do
 				order = 10,
 				name = string.format(ICON_TOKEN, 8, 16, 16),
 				desc = _G.TOKENS,
-				min = 1, max = 32, step = 1, bigStep = 1,
+				min = 1,
+				max = 32,
+				step = 1,
+				bigStep = 1,
 				set = setIconSize,
 			},
 			iconSizeGold = {
@@ -983,7 +985,10 @@ do
 				order = 10,
 				name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
 				desc = _G.MONEY,
-				min = 1, max = 32, step = 1, bigStep = 1,
+				min = 1,
+				max = 32,
+				step = 1,
+				bigStep = 1,
 				set = setIconSizeGold,
 			},
 			brokerDisplay = {
@@ -1116,8 +1121,7 @@ do
 				order = 60,
 				inline = true,
 				childGroups = "tree",
-				args = {
-				},
+				args = {},
 			},
 		}
 
@@ -1135,11 +1139,11 @@ do
 		end
 
 		if not char_db.summaryColorDark then
-			char_db.summaryColorDark = {r = 0, g = 0, b = 0, a = 0}
+			char_db.summaryColorDark = { r = 0, g = 0, b = 0, a = 0 }
 		end
 
 		if not char_db.summaryColorLight then
-			char_db.summaryColorLight = {r = 1, g = 1, b = 1, a = .3}
+			char_db.summaryColorLight = { r = 1, g = 1, b = 1, a = .3 }
 		end
 		Broker_CurrencyCharDB = char_db
 
@@ -1338,7 +1342,7 @@ do
 
 		-- Register for update events
 		self:RegisterEvents()
-		
+
 		self:RegisterEvent("PLAYER_ENTERING_WORLD", "Update")
 		self:RegisterEvent("PLAYER_LEAVING_WORLD", "Update")
 
@@ -1348,7 +1352,7 @@ do
 
 		self:Update()
 	end
-end	-- do-block
+end -- do-block
 
 function Broker_Currency:RegisterEvents()
 	self:RegisterEvent("CURRENCY_DISPLAY_UPDATE", "Update")
