@@ -917,18 +917,6 @@ do
 			end,
 			childGroups = "tab",
 			args = {
-				header1 = {
-					type = "description",
-					order = 3,
-					name = sNotes,
-					cmdHidden = true
-				},
-				header2 = {
-					type = "description",
-					order = 5,
-					name = sVersion,
-					cmdHidden = true
-				},
 				separator = {
 					order = 6,
 					type = "header",
