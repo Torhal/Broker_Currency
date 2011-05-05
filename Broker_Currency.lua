@@ -153,19 +153,6 @@ local startupTimer
 local sName, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("Broker_Currency")
 local sName = GetAddOnMetadata("Broker_Currency", "X-BrokerName")
 
-Broker_Currency.options = {
-	type = "group",
-	name = sName,
-	get = function(info)
-		return Broker_CurrencyCharDB[info[#info]]
-	end,
-	set = function(info, value)
-		Broker_CurrencyCharDB[info[#info]] = true and value or nil
-		Broker_Currency:Update()
-	end,
-	childGroups = "tree",
-	args = {}
-}
 
 local function GetKey(idnum, broker)
 	if broker then
@@ -224,42 +211,6 @@ local function SetOptions(brokerArgs, summaryArgs, idnum, index)
 	}
 end
 
-local function DeletePlayer(info)
-	local player_name = info[#info]
-	local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
-
-	deleteOptions[player_name] = nil
-	deleteOptions[player_name .. "Name"] = nil
-	deleteOptions[player_name .. "Spacer"] = nil
-	Broker_CurrencyDB.realm[REALM_NAME][player_name] = nil
-end
-
--- Provide settings options for tokenInfo
-local function DeleteOptions(player_name, player_infoList, index)
-	local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
-
-	if not deleteOptions[player_name] then
-		deleteOptions[player_name .. "Name"] = {
-			type = "description",
-			order = index * 3,
-			name = player_name,
-		}
-
-		deleteOptions[player_name] = {
-			type = "execute",
-			order = index * 3 + 1,
-			name = _G.DELETE,
-			func = DeletePlayer,
-		}
-
-		deleteOptions[player_name .. "Spacer"] = {
-			type = "header",
-			order = index * 3 + 2,
-			name = "",
-		}
-	end
-end
-
 local AceCfgReg = LibStub("AceConfigRegistry-3.0")
 local AceCfg = LibStub("AceConfig-3.0")
 local brokerOptions = AceCfgReg:GetOptionsTable("Broker", "dialog", "LibDataBroker-1.1")
@@ -274,8 +225,6 @@ if not brokerOptions then
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker", "Broker")
 end
 
-AceCfg:RegisterOptionsTable("Broker_Currency", Broker_Currency.options)
-Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency", sName, "Broker")
 
 local tooltipBackdrop = {
 	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
@@ -956,174 +905,214 @@ do
 			Broker_Currency:Update()
 		end
 
-		Broker_Currency.options.args = {
-			header1 = {
-				type = "description",
-				order = 3,
-				name = sNotes,
-				cmdHidden = true
-			},
-			header2 = {
-				type = "description",
-				order = 5,
-				name = sVersion,
-				cmdHidden = true
-			},
-			iconSize = {
-				type = "range",
-				order = 10,
-				name = string.format(ICON_TOKEN, 8, 16, 16),
-				desc = _G.TOKENS,
-				min = 1,
-				max = 32,
-				step = 1,
-				bigStep = 1,
-				set = setIconSize,
-			},
-			iconSizeGold = {
-				type = "range",
-				order = 10,
-				name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
-				desc = _G.MONEY,
-				min = 1,
-				max = 32,
-				step = 1,
-				bigStep = 1,
-				set = setIconSizeGold,
-			},
-			brokerDisplay = {
-				type = "group",
-				name = _G.DISPLAY,
-				order = 20,
-				inline = true,
-				childGroups = "tree",
-				args = {
-					showGold = {
-						type = "toggle",
-						name = ICON_GOLD,
-						desc = _G.MONEY,
-						order = 1,
-						width = "half",
-					},
-					showSilver = {
-						type = "toggle",
-						name = ICON_SILVER,
-						desc = _G.MONEY,
-						order = 2,
-						width = "half",
-					},
-					showCopper = {
-						type = "toggle",
-						name = ICON_COPPER,
-						desc = _G.MONEY,
-						order = 3,
-						width = "half",
+		Broker_Currency.options = {
+			type = "group",
+			name = sName,
+			get = function(info)
+				return Broker_CurrencyCharDB[info[#info]]
+			end,
+			set = function(info, value)
+				Broker_CurrencyCharDB[info[#info]] = true and value or nil
+				Broker_Currency:Update()
+			end,
+			childGroups = "tab",
+			args = {
+				header1 = {
+					type = "description",
+					order = 3,
+					name = sNotes,
+					cmdHidden = true
+				},
+				header2 = {
+					type = "description",
+					order = 5,
+					name = sVersion,
+					cmdHidden = true
+				},
+				separator = {
+					order = 6,
+					type = "header",
+					width = "full",
+					name = "",
+				},
+				iconSize = {
+					type = "range",
+					order = 10,
+					name = string.format(ICON_TOKEN, 8, 16, 16),
+					desc = _G.TOKENS,
+					min = 1,
+					max = 32,
+					step = 1,
+					bigStep = 1,
+					set = setIconSize,
+				},
+				iconSizeGold = {
+					type = "range",
+					order = 10,
+					name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
+					desc = _G.MONEY,
+					min = 1,
+					max = 32,
+					step = 1,
+					bigStep = 1,
+					set = setIconSizeGold,
+				},
+				brokerDisplay = {
+					type = "group",
+					name = _G.DISPLAY,
+					order = 20,
+					args = {
+						showGold = {
+							type = "toggle",
+							name = ICON_GOLD,
+							desc = _G.MONEY,
+							order = 1,
+							width = "half",
+						},
+						showSilver = {
+							type = "toggle",
+							name = ICON_SILVER,
+							desc = _G.MONEY,
+							order = 2,
+							width = "half",
+						},
+						showCopper = {
+							type = "toggle",
+							name = ICON_COPPER,
+							desc = _G.MONEY,
+							order = 3,
+							width = "half",
+						},
+						color_header = {
+							order = 40,
+							type = "header",
+							name = _G.COLOR,
+						},
+						summaryColorDark = {
+							type = "color",
+							name = _G.BACKGROUND,
+							order = 41,
+							get = getColorValue,
+							set = setColorValue,
+							hasAlpha = true,
+						},
+						summaryColorLight = {
+							type = "color",
+							name = _G.HIGHLIGHTING,
+							order = 42,
+							get = getColorValue,
+							set = setColorValue,
+							hasAlpha = true,
+						},
+						statistics_header = {
+							order = 50,
+							type = "header",
+							name = _G.STATISTICS,
+						},
+						summaryPlayerSession = {
+							type = "toggle",
+							name = PLAYER_NAME,
+							order = 51,
+						},
+						summaryRealmToday = {
+							type = "toggle",
+							name = sToday,
+							order = 52,
+						},
+						summaryRealmYesterday = {
+							type = "toggle",
+							name = sYesterday,
+							order = 53,
+						},
+						summaryRealmThisWeek = {
+							type = "toggle",
+							name = sThisWeek,
+							order = 54,
+						},
+						summaryRealmLastWeek = {
+							type = "toggle",
+							name = sLastWeek,
+							order = 55,
+						},
+
 					},
 				},
-			},
-			statisticsDisplay = {
-				type = "group",
-				name = _G.STATISTICS,
-				order = 30,
-				inline = true,
-				childGroups = "tree",
-				args = {
-					summaryPlayerSession = {
-						type = "toggle",
-						name = PLAYER_NAME,
-						order = 1,
-						width = "full",
-					},
-					summaryRealmToday = {
-						type = "toggle",
-						name = sToday,
-						order = 2,
-						width = "full",
-					},
-					summaryRealmYesterday = {
-						type = "toggle",
-						name = sYesterday,
-						order = 3,
-						width = "full",
-					},
-					summaryRealmThisWeek = {
-						type = "toggle",
-						name = sThisWeek,
-						order = 4,
-						width = "full",
-					},
-					summaryRealmLastWeek = {
-						type = "toggle",
-						name = sLastWeek,
-						order = 5,
-						width = "full",
+				summaryDisplay = {
+					type = "group",
+					name = _G.ACHIEVEMENT_SUMMARY_CATEGORY,
+					order = 30,
+					args = {
+						summaryGold = {
+							type = "toggle",
+							name = ICON_GOLD,
+							desc = _G.MONEY,
+							order = 1,
+							width = "half",
+						},
+						summarySilver = {
+							type = "toggle",
+							name = ICON_SILVER,
+							desc = _G.MONEY,
+							order = 2,
+							width = "half",
+						},
+						summaryCopper = {
+							type = "toggle",
+							name = ICON_COPPER,
+							desc = _G.MONEY,
+							order = 3,
+							width = "half",
+						},
 					},
 				},
-			},
-			summaryDisplay = {
-				type = "group",
-				name = _G.ACHIEVEMENT_SUMMARY_CATEGORY,
-				order = 40,
-				inline = true,
-				childGroups = "tree",
-				args = {
-					summaryGold = {
-						type = "toggle",
-						name = ICON_GOLD,
-						desc = _G.MONEY,
-						order = 1,
-						width = "half",
-					},
-					summarySilver = {
-						type = "toggle",
-						name = ICON_SILVER,
-						desc = _G.MONEY,
-						order = 2,
-						width = "half",
-					},
-					summaryCopper = {
-						type = "toggle",
-						name = ICON_COPPER,
-						desc = _G.MONEY,
-						order = 3,
-						width = "half",
-					},
+--				statisticsDisplay = {
+--					type = "group",
+--					name = _G.STATISTICS,
+--					order = 40,
+--					args = {
+--						summaryPlayerSession = {
+--							type = "toggle",
+--							name = PLAYER_NAME,
+--							order = 1,
+--							width = "full",
+--						},
+--						summaryRealmToday = {
+--							type = "toggle",
+--							name = sToday,
+--							order = 2,
+--							width = "full",
+--						},
+--						summaryRealmYesterday = {
+--							type = "toggle",
+--							name = sYesterday,
+--							order = 3,
+--							width = "full",
+--						},
+--						summaryRealmThisWeek = {
+--							type = "toggle",
+--							name = sThisWeek,
+--							order = 4,
+--							width = "full",
+--						},
+--						summaryRealmLastWeek = {
+--							type = "toggle",
+--							name = sLastWeek,
+--							order = 5,
+--							width = "full",
+--						},
+--					},
+--				},
+				deleteCharacter = {
+					type = "group",
+					name = _G.CHARACTER,
+					order = 60,
+					args = {},
 				},
-			},
-			color = {
-				type = "group",
-				name = _G.COLOR,
-				order = 50,
-				inline = true,
-				childGroups = "tree",
-				args = {
-					summaryColorDark = {
-						type = "color",
-						name = _G.BACKGROUND,
-						order = 11,
-						get = getColorValue,
-						set = setColorValue,
-						hasAlpha = true,
-					},
-					summaryColorLight = {
-						type = "color",
-						name = _G.HIGHLIGHTING,
-						order = 12,
-						get = getColorValue,
-						set = setColorValue,
-						hasAlpha = true,
-					},
-				},
-			},
-			deleteCharacter = {
-				type = "group",
-				name = _G.DELETE,
-				order = 60,
-				inline = true,
-				childGroups = "tree",
-				args = {},
-			},
+			}
 		}
+
+		AceCfg:RegisterOptionsTable("Broker_Currency", Broker_Currency.options)
+		Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency", sName, "Broker")
 
 		-------------------------------------------------------------------------------
 		-- Check or initialize the character database.
@@ -1325,6 +1314,47 @@ do
 		end
 
 		-- Add delete settings so deleted characters can be removed
+		local function DeletePlayer(info)
+			local player_name = info[#info]
+			local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
+
+			deleteOptions[player_name] = nil
+			deleteOptions[player_name .. "Name"] = nil
+			deleteOptions[player_name .. "Spacer"] = nil
+			Broker_CurrencyDB.realm[REALM_NAME][player_name] = nil
+		end
+
+		-- Provide settings options for tokenInfo
+		local function DeleteOptions(player_name, player_infoList, index)
+			local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
+
+			if not deleteOptions[player_name] then
+				deleteOptions[player_name .. "Name"] = {
+					order = index * 3,
+					type = "description",
+					width = "half",
+					name = player_name,
+					fontSize = "medium",
+				}
+
+				deleteOptions[player_name] = {
+					order = index * 3 + 1,
+					type = "execute",
+					width = "half",
+					name = _G.DELETE,
+					desc = player_name,
+					func = DeletePlayer,
+				}
+
+				deleteOptions[player_name .. "Spacer"] = {
+					order = index * 3 + 2,
+					type = "description",
+					width = "full",
+					name = "",
+				}
+			end
+		end
+
 		local index = 1
 
 		for player_name in pairs(db.realm[REALM_NAME]) do
