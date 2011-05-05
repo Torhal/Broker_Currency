@@ -56,8 +56,6 @@ local fontLabel = CreateFont("Broker_CurrencyFontLabel")
 local PLAYER_NAME = UnitName("player")
 local REALM_NAME = GetRealmName()
 
-local sVersion = GetAddOnMetadata("Broker_Currency", "Version")
-
 local sToday = HONOR_TODAY
 local sYesterday = HONOR_YESTERDAY
 local sThisWeek = ARENA_THIS_WEEK
@@ -904,6 +902,19 @@ do
 			color.r, color.g, color.b, color.a = r, g, b, a
 			Broker_Currency:Update()
 		end
+		local addon_version = GetAddOnMetadata("Broker_Currency", "Version")
+		local debug_version = false
+		local alpha_version = false
+
+		-- @debug@
+		debug_version = true
+		-- @end-debug
+
+		-- @alpha@
+		alpha_version = true
+		-- @end-alpha@
+
+		addon_version = debug_version and "Development Version" or (alpha_version and addon_version .. "-Alpha") or addon_version
 
 		Broker_Currency.options = {
 			type = "group",
@@ -921,7 +932,8 @@ do
 					order = 6,
 					type = "header",
 					width = "full",
-					name = "",
+					name = addon_version,
+					cmdHidden = true
 				},
 				iconSize = {
 					type = "range",
