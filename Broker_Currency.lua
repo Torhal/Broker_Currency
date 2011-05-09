@@ -902,17 +902,18 @@ do
 			color.r, color.g, color.b, color.a = r, g, b, a
 			Broker_Currency:Update()
 		end
+
 		local addon_version = GetAddOnMetadata("Broker_Currency", "Version")
 		local debug_version = false
 		local alpha_version = false
 
-		-- @debug@
+		--@debug@
 		debug_version = true
-		-- @end-debug
+		--@end-debug
 
-		-- @alpha@
+		--@alpha@
 		alpha_version = true
-		-- @end-alpha@
+		--@end-alpha@
 
 		addon_version = debug_version and "Development Version" or (alpha_version and addon_version .. "-Alpha") or addon_version
 
