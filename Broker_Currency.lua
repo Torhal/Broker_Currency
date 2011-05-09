@@ -169,46 +169,6 @@ local function ShowOptionIcon(idnum)
 	return ("\124T" .. "Interface\\Icons\\" .. OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
 end
 
--- Provide settings options for non-money currencies
-local function SetOptions(brokerArgs, summaryArgs, idnum, index)
-	local currency_name = CURRENCY_NAMES[idnum]
-
-	if not currency_name or currency_name == "" then
-		return
-	end
-	local brokerName = GetKey(idnum, true)
-	local summaryName = GetKey(idnum, nil)
-
-	brokerArgs[brokerName] = {
-		type = "toggle",
-		order = index,
-		name = ShowOptionIcon(idnum),
-		desc = currency_name,
-		width = "half",
-		get = function()
-			return Broker_CurrencyCharDB[brokerName]
-		end,
-		set = function(info, value)
-			Broker_CurrencyCharDB[brokerName] = true and value or nil
-			Broker_Currency:Update()
-		end,
-	}
-	summaryArgs[summaryName] = {
-		type = "toggle",
-		order = index,
-		name = ShowOptionIcon(idnum),
-		desc = currency_name,
-		width = "half",
-		get = function()
-			return Broker_CurrencyCharDB[summaryName]
-		end,
-		set = function(info, value)
-			Broker_CurrencyCharDB[summaryName] = true and value or nil
-			Broker_Currency:Update()
-		end,
-	}
-end
-
 local AceCfgReg = LibStub("AceConfigRegistry-3.0")
 local AceCfg = LibStub("AceConfig-3.0")
 local brokerOptions = AceCfgReg:GetOptionsTable("Broker", "dialog", "LibDataBroker-1.1")
@@ -874,12 +834,51 @@ do
 		-------------------------------------------------------------------------------
 		local ICON_TOKEN = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. select(3, _G.GetCurrencyInfo(CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
 
+		-- Provide settings options for non-money currencies
+		local function SetOptions(brokerArgs, summaryArgs, idnum, index)
+			local currency_name = CURRENCY_NAMES[idnum]
+
+			if not currency_name or currency_name == "" then
+				return
+			end
+			local brokerName = GetKey(idnum, true)
+			local summaryName = GetKey(idnum, nil)
+
+			brokerArgs[brokerName] = {
+				type = "toggle",
+				order = index,
+				name = ShowOptionIcon(idnum),
+				desc = currency_name,
+				width = "half",
+				get = function()
+					return Broker_CurrencyCharDB[brokerName]
+				end,
+				set = function(info, value)
+					Broker_CurrencyCharDB[brokerName] = true and value or nil
+					Broker_Currency:Update()
+				end,
+			}
+			summaryArgs[summaryName] = {
+				type = "toggle",
+				order = index,
+				name = ShowOptionIcon(idnum),
+				desc = currency_name,
+				width = "half",
+				get = function()
+					return Broker_CurrencyCharDB[summaryName]
+				end,
+				set = function(info, value)
+					Broker_CurrencyCharDB[summaryName] = true and value or nil
+					Broker_Currency:Update()
+				end,
+			}
+		end
 
 		local function setIconSize(info, value)
 			local iconSize = Broker_CurrencyCharDB.iconSize
 
 			Broker_CurrencyCharDB[info[#info]] = true and value or nil
-			Broker_Currency.options.args.iconSize.name = string.format(ICON_TOKEN, 8, iconSize, iconSize)
+			Broker_Currency.options.args.iconSize.name = ICON_TOKEN:format(8, iconSize, iconSize)
 			Broker_Currency:Update()
 		end
 
