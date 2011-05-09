@@ -889,7 +889,7 @@ do
 			local iconSize = Broker_CurrencyCharDB.iconSizeGold
 
 			Broker_CurrencyCharDB[info[#info]] = true and value or nil
-			Broker_Currency.options.args.iconSizeGold.name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, iconSize, iconSize)
+			Broker_Currency.options.args.iconSizeGold.name = _G.GOLD_AMOUNT_TEXTURE:format(8, iconSize, iconSize)
 			Broker_Currency:Update()
 		end
 
@@ -1037,7 +1037,6 @@ do
 							name = sLastWeek,
 							order = 55,
 						},
-
 					},
 				},
 				summaryDisplay = {
@@ -1068,43 +1067,6 @@ do
 						},
 					},
 				},
---				statisticsDisplay = {
---					type = "group",
---					name = _G.STATISTICS,
---					order = 40,
---					args = {
---						summaryPlayerSession = {
---							type = "toggle",
---							name = PLAYER_NAME,
---							order = 1,
---							width = "full",
---						},
---						summaryRealmToday = {
---							type = "toggle",
---							name = sToday,
---							order = 2,
---							width = "full",
---						},
---						summaryRealmYesterday = {
---							type = "toggle",
---							name = sYesterday,
---							order = 3,
---							width = "full",
---						},
---						summaryRealmThisWeek = {
---							type = "toggle",
---							name = sThisWeek,
---							order = 4,
---							width = "full",
---						},
---						summaryRealmLastWeek = {
---							type = "toggle",
---							name = sLastWeek,
---							order = 5,
---							width = "full",
---						},
---					},
---				},
 				deleteCharacter = {
 					type = "group",
 					name = _G.CHARACTER,
