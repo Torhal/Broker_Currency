@@ -213,131 +213,134 @@ function Broker_Currency:ShowTooltip(button)
 		maxColumns = math.max(maxColumns, columns)
 	end
 
-	if maxColumns > 0 then
-		tooltipAlignment[1] = "LEFT"
+	if maxColumns <= 0 then
+		return
+	end
+	local char_db = Broker_CurrencyCharDB
 
-		for index = 2, maxColumns + 1 do
-			tooltipAlignment[index] = "RIGHT"
-		end
+	tooltipAlignment[1] = "LEFT"
 
-		for index = #tooltipAlignment, maxColumns + 2, -1 do
-			tooltipAlignment[index] = nil
-		end
+	for index = 2, maxColumns + 1 do
+		tooltipAlignment[index] = "RIGHT"
+	end
 
-		table.wipe(tooltipHeader)
-		tooltipHeader[1] = " "
+	for index = #tooltipAlignment, maxColumns + 2, -1 do
+		tooltipAlignment[index] = nil
+	end
 
-		for index = 1, NUM_CURRENCIES do
-			local idnum = ORDERED_CURRENCIES[index]
+	table.wipe(tooltipHeader)
+	tooltipHeader[1] = " "
 
-			if OPTION_ICONS[idnum] then
-				local key = GetKey(idnum, false)
+	for index = 1, NUM_CURRENCIES do
+		local idnum = ORDERED_CURRENCIES[index]
 
-				if Broker_CurrencyCharDB[key] then
-					tooltipHeader[#tooltipHeader + 1] = ShowOptionIcon(idnum)
-				end
+		if OPTION_ICONS[idnum] then
+			local key = GetKey(idnum, false)
+
+			if char_db[key] then
+				tooltipHeader[#tooltipHeader + 1] = ShowOptionIcon(idnum)
 			end
 		end
+	end
 
-		if Broker_CurrencyCharDB.summaryGold then
-			tooltipHeader[#tooltipHeader + 1] = ICON_GOLD
-		end
+	if char_db.summaryGold then
+		tooltipHeader[#tooltipHeader + 1] = ICON_GOLD
+	end
 
-		if Broker_CurrencyCharDB.summarySilver then
-			tooltipHeader[#tooltipHeader + 1] = ICON_SILVER
-		end
+	if char_db.summarySilver then
+		tooltipHeader[#tooltipHeader + 1] = ICON_SILVER
+	end
 
-		if Broker_CurrencyCharDB.summaryCopper then
-			tooltipHeader[#tooltipHeader + 1] = ICON_COPPER
-		end
+	if char_db.summaryCopper then
+		tooltipHeader[#tooltipHeader + 1] = ICON_COPPER
+	end
 
-		local tooltip = LibQTip:Acquire("Broker_CurrencyTooltip", maxColumns, unpack(tooltipAlignment))
-		tooltip:SetCellMarginH(1)
-		tooltip:SetCellMarginV(1)
+	local tooltip = LibQTip:Acquire("Broker_CurrencyTooltip", maxColumns, unpack(tooltipAlignment))
+	tooltip:SetCellMarginH(1)
+	tooltip:SetCellMarginV(1)
 
-		self.tooltip = tooltip
+	self.tooltip = tooltip
 
-		local fontName, fontHeight, fontFlags = tooltip:GetFont():GetFont()
+	local fontName, fontHeight, fontFlags = tooltip:GetFont():GetFont()
 
-		fontPlus:SetFont(fontName, fontHeight, fontFlags)
-		fontPlus:SetTextColor(0, 1, 0)
-		fontPlus:SetJustifyH("RIGHT")
-		fontPlus:SetJustifyV("MIDDLE")
+	fontPlus:SetFont(fontName, fontHeight, fontFlags)
+	fontPlus:SetTextColor(0, 1, 0)
+	fontPlus:SetJustifyH("RIGHT")
+	fontPlus:SetJustifyV("MIDDLE")
 
-		fontMinus:SetFont(fontName, fontHeight, fontFlags)
-		fontMinus:SetTextColor(1, 0, 0)
-		fontMinus:SetJustifyH("RIGHT")
-		fontMinus:SetJustifyV("MIDDLE")
+	fontMinus:SetFont(fontName, fontHeight, fontFlags)
+	fontMinus:SetTextColor(1, 0, 0)
+	fontMinus:SetJustifyH("RIGHT")
+	fontMinus:SetJustifyV("MIDDLE")
 
-		fontWhite:SetFont(fontName, fontHeight, fontFlags)
-		fontWhite:SetTextColor(1, 1, 1)
-		fontWhite:SetJustifyH("RIGHT")
-		fontWhite:SetJustifyV("MIDDLE")
+	fontWhite:SetFont(fontName, fontHeight, fontFlags)
+	fontWhite:SetTextColor(1, 1, 1)
+	fontWhite:SetJustifyH("RIGHT")
+	fontWhite:SetJustifyV("MIDDLE")
 
-		fontLabel:SetFont(fontName, fontHeight, fontFlags)
-		fontLabel:SetTextColor(1, 1, 0.5)
-		fontLabel:SetJustifyH("LEFT")
-		fontLabel:SetJustifyV("MIDDLE")
+	fontLabel:SetFont(fontName, fontHeight, fontFlags)
+	fontLabel:SetTextColor(1, 1, 0.5)
+	fontLabel:SetJustifyH("LEFT")
+	fontLabel:SetJustifyV("MIDDLE")
 
-		tooltip:AddHeader(unpack(tooltipHeader))
-		tooltip:SetFont(fontWhite)
+	tooltip:AddHeader(unpack(tooltipHeader))
+	tooltip:SetFont(fontWhite)
 
-		for index, rowList in pairs(tooltipLines) do
-			local label = rowList[1]
-			local currentRow = index + 1
+	for index, rowList in pairs(tooltipLines) do
+		local label = rowList[1]
+		local currentRow = index + 1
 
-			if label == " " then
-				tooltip:AddSeparator()
-			elseif label == PLAYER_NAME or label == sToday or label == sYesterday or label == sThisWeek or label == sLastWeek then
-				tooltip:AddHeader(unpack(tooltipHeader))
-				tooltip:SetCell(currentRow, 1, label, fontLabel)
-			else
-				tooltip:AddLine(unpack(rowList))
+		if label == " " then
+			tooltip:AddSeparator()
+		elseif label == PLAYER_NAME or label == sToday or label == sYesterday or label == sThisWeek or label == sLastWeek then
+			tooltip:AddHeader(unpack(tooltipHeader))
+			tooltip:SetCell(currentRow, 1, label, fontLabel)
+		else
+			tooltip:AddLine(unpack(rowList))
 
-				if label == sPlus then
-					for i, value in ipairs(rowList) do
-						tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontPlus)
-					end
-				elseif label == sMinus then
-					for i, value in ipairs(rowList) do
-						tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontMinus)
-					end
-				elseif label == sTotal then
-					for i, value in ipairs(rowList) do
-						if value and type(value) == "number" then
-							if value < 0 then
-								tooltip:SetCell(currentRow, i, -1 * value, fontMinus)
-							else
-								tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontPlus)
-							end
+			if label == sPlus then
+				for i, value in ipairs(rowList) do
+					tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontPlus)
+				end
+			elseif label == sMinus then
+				for i, value in ipairs(rowList) do
+					tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontMinus)
+				end
+			elseif label == sTotal then
+				for i, value in ipairs(rowList) do
+					if value and type(value) == "number" then
+						if value < 0 then
+							tooltip:SetCell(currentRow, i, -1 * value, fontMinus)
+						else
+							tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontPlus)
 						end
 					end
 				end
-				tooltip:SetCell(currentRow, 1, label, fontLabel)
 			end
+			tooltip:SetCell(currentRow, 1, label, fontLabel)
 		end
-
-		-- Color the even columns
-		local column
-		local summaryColorLight = Broker_CurrencyCharDB.summaryColorLight
-
-		if summaryColorLight.a > 0 then
-			for index = 2, maxColumns, 2 do
-				tooltip:SetColumnColor(index, summaryColorLight.r, summaryColorLight.g, summaryColorLight.b, summaryColorLight.a)
-			end
-		end
-		local summaryColorDark = Broker_CurrencyCharDB.summaryColorDark
-
-		if _G.TipTac and _G.TipTac.AddModifiedTip then
-			-- Pass true as second parameter because hooking OnHide causes C stack overflows
-			_G.TipTac:AddModifiedTip(tooltip, true)
-		elseif summaryColorDark.a > 0 then
-			tooltip:SetBackdrop(tooltipBackdrop)
-			tooltip:SetBackdropColor(summaryColorDark.r, summaryColorDark.g, summaryColorDark.b, summaryColorDark.a)
-		end
-		tooltip:SmartAnchorTo(button)
-		tooltip:Show()
 	end
+
+	-- Color the even columns
+	local column
+	local summaryColorLight = char_db.summaryColorLight
+
+	if summaryColorLight.a > 0 then
+		for index = 2, maxColumns, 2 do
+			tooltip:SetColumnColor(index, summaryColorLight.r, summaryColorLight.g, summaryColorLight.b, summaryColorLight.a)
+		end
+	end
+	local summaryColorDark = char_db.summaryColorDark
+
+	if _G.TipTac and _G.TipTac.AddModifiedTip then
+		-- Pass true as second parameter because hooking OnHide causes C stack overflows
+		_G.TipTac:AddModifiedTip(tooltip, true)
+	elseif summaryColorDark.a > 0 then
+		tooltip:SetBackdrop(tooltipBackdrop)
+		tooltip:SetBackdropColor(summaryColorDark.r, summaryColorDark.g, summaryColorDark.b, summaryColorDark.a)
+	end
+	tooltip:SmartAnchorTo(button)
+	tooltip:Show()
 end
 
 
