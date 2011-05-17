@@ -909,7 +909,7 @@ do
 
 		--@debug@
 		debug_version = true
-		--@end-debug
+		--@end-debug@
 
 		--@alpha@
 		alpha_version = true
