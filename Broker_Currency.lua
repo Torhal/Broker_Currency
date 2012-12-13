@@ -160,6 +160,7 @@ local BROKER_ICONS
 -- Variables
 -------------------------------------------------------------------------------
 local startupTimer
+local player_line_index
 
 -------------------------------------------------------------------------------
 -- Helper functions
@@ -335,6 +336,10 @@ function Broker_Currency:ShowTooltip(button)
 						end
 					end
 				end
+			end
+
+			if index == player_line_index then
+				tooltip:SetLineColor(currentRow, 1, 1, 1, 0.25)
 			end
 			tooltip:SetCell(currentRow, 1, label, fontLabel)
 		end
@@ -738,6 +743,9 @@ do
 		local charDB = Broker_CurrencyCharDB
 
 		for i, data in ipairs(sortedPlayerInfo) do
+			if data.player_name == PLAYER_NAME then
+				player_line_index = i
+			end
 			Broker_Currency:AddLine(string.format("%s: ", data.player_name), data.player_info, fontWhite)
 
 			-- Add counts from player_info to totalList according to the summary settings this character is interested in
