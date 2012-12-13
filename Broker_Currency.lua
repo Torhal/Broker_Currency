@@ -29,11 +29,12 @@ local unpack = _G.unpack
 -------------------------------------------------------------------------------
 -- AddOn namespace
 -------------------------------------------------------------------------------
+local LibStub = _G.LibStub
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 local LibQTip = LibStub("LibQTip-1.0")
 
-Broker_Currency = CreateFrame("frame", "Broker_CurrencyFrame")
-local Broker_Currency = Broker_Currency
+local Broker_Currency = _G.CreateFrame("frame", "Broker_CurrencyFrame")
+_G["Broker_Currency"] = Broker_Currency
 
 -- GLOBALS: Broker_CurrencyCharDB, Broker_CurrencyDB
 
@@ -48,18 +49,18 @@ local ICON_COPPER = "\124TInterface\\MoneyFrame\\UI-CopperIcon:20:20\124t"
 local DISPLAY_ICON_STRING1 = "%d\124T"
 local DISPLAY_ICON_STRING2 = ":%d:%d\124t"
 
-local fontWhite = CreateFont("Broker_CurrencyFontWhite")
-local fontPlus = CreateFont("Broker_CurrencyFontPlus")
-local fontMinus = CreateFont("Broker_CurrencyFontMinus")
-local fontLabel = CreateFont("Broker_CurrencyFontLabel")
+local fontWhite = _G.CreateFont("Broker_CurrencyFontWhite")
+local fontPlus = _G.CreateFont("Broker_CurrencyFontPlus")
+local fontMinus = _G.CreateFont("Broker_CurrencyFontMinus")
+local fontLabel = _G.CreateFont("Broker_CurrencyFontLabel")
 
-local PLAYER_NAME = UnitName("player")
-local REALM_NAME = GetRealmName()
+local PLAYER_NAME = _G.UnitName("player")
+local REALM_NAME = _G.GetRealmName()
 
-local sToday = HONOR_TODAY
-local sYesterday = HONOR_YESTERDAY
-local sThisWeek = ARENA_THIS_WEEK
-local sLastWeek = HONOR_LASTWEEK
+local sToday = _G.HONOR_TODAY
+local sYesterday = _G.HONOR_YESTERDAY
+local sThisWeek = _G.ARENA_THIS_WEEK
+local sLastWeek = _G.HONOR_LASTWEEK
 
 local sPlus = "+"
 local sMinus = "-"
@@ -159,7 +160,7 @@ local BROKER_ICONS
 -------------------------------------------------------------------------------
 -- Variables
 -------------------------------------------------------------------------------
-local startupTimer
+local init_timer_handle
 local player_line_index
 
 -------------------------------------------------------------------------------
@@ -188,10 +189,8 @@ local function ShowOptionIcon(idnum)
 	end
 	return ("\124T" .. "Interface\\Icons\\" .. OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
 end
-
-local AceCfgReg = LibStub("AceConfigRegistry-3.0")
 local AceCfg = LibStub("AceConfig-3.0")
-local brokerOptions = AceCfgReg:GetOptionsTable("Broker", "dialog", "LibDataBroker-1.1")
+local brokerOptions = LibStub("AceConfigRegistry-3.0"):GetOptionsTable("Broker", "dialog", "LibDataBroker-1.1")
 
 if not brokerOptions then
 	brokerOptions = {
@@ -215,11 +214,19 @@ local tooltipBackdrop = {
 		bottom = 2
 	},
 }
+
 local tooltipLines = {}
 local tooltipLinesRecycle = {}
 local tooltipAlignment = {}
 local tooltipHeader = {}
 local temp = {}
+
+local HEADER_LABELS = {
+	[sToday] = true,
+	[sYesterday] = true,
+	[sThisWeek] = true,
+	[sLastWeek] = true,
+}
 
 function Broker_Currency:ShowTooltip(button)
 	Broker_Currency:Update()
@@ -312,7 +319,7 @@ function Broker_Currency:ShowTooltip(button)
 
 		if label == " " then
 			tooltip:AddSeparator()
-		elseif label == PLAYER_NAME or label == sToday or label == sYesterday or label == sThisWeek or label == sLastWeek then
+		elseif label == PLAYER_NAME or HEADER_LABELS[label] then
 			tooltip:AddHeader(unpack(tooltipHeader))
 			tooltip:SetCell(currentRow, 1, label, fontLabel)
 		else
@@ -726,7 +733,7 @@ do
 
 	-- Handle mouse enter event in our button
 	function OnEnter(button)
-		if startupTimer then
+		if init_timer_handle then
 			return
 		end
 		local self = Broker_Currency
@@ -829,14 +836,14 @@ do
 
 	function Broker_Currency:InitializeSettings()
 		-- No hearthstone and no money means trouble
-		if startupTimer then
-			self:CancelTimer(startupTimer)
-			startupTimer = nil
+		if init_timer_handle then
+			self:CancelTimer(init_timer_handle)
+			init_timer_handle = nil
 		end
 
 		if _G.GetItemCount(HEARTHSTONE_IDNUM) < 1 and _G.GetMoney() == 0 then
 			if wtfDelay > 0 then
-				startupTimer = self:ScheduleTimer(self.InitializeSettings, wtfDelay, self)
+				init_timer_handle = self:ScheduleTimer(self.InitializeSettings, wtfDelay, self)
 				wtfDelay = wtfDelay - 1
 				return
 			end
@@ -1357,9 +1364,9 @@ do
 
 		self:UnregisterEvent("BAG_UPDATE")
 
-		if startupTimer then
-			self:CancelTimer(startupTimer)
-			startupTimer = nil
+		if init_timer_handle then
+			self:CancelTimer(init_timer_handle)
+			init_timer_handle = nil
 		end
 
 		-- Register for update events
@@ -1406,10 +1413,10 @@ end
 
 function Broker_Currency:Startup(event, ...)
 	if event == "BAG_UPDATE" then
-		if startupTimer then
-			self:CancelTimer(startupTimer)
+		if init_timer_handle then
+			self:CancelTimer(init_timer_handle)
 		end
-		startupTimer = self:ScheduleTimer(self.InitializeSettings, 4, self)
+		init_timer_handle = self:ScheduleTimer(self.InitializeSettings, 4, self)
 	end
 end
 
@@ -1422,5 +1429,5 @@ LibStub("AceTimer-3.0"):Embed(Broker_Currency)
 
 -- This is only necessary if AddonLoader is present, using the Delayed load. -Torhal
 if IsLoggedIn() then
-	startupTimer = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 1, Broker_Currency)
+	init_timer_handle = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 1, Broker_Currency)
 end
