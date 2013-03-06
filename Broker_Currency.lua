@@ -187,7 +187,7 @@ local function ShowOptionIcon(idnum)
 	if PHYSICAL_CURRENCIES[idnum] then
 		return ("\124T" .. OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
 	end
-	return ("\124T" .. "Interface\\Icons\\" .. OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
+	return ("\124T" ..  OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
 end
 local AceCfg = LibStub("AceConfig-3.0")
 local brokerOptions = LibStub("AceConfigRegistry-3.0"):GetOptionsTable("Broker", "dialog", "LibDataBroker-1.1")
@@ -869,7 +869,7 @@ do
 		-------------------------------------------------------------------------------
 		-- Initialize the configuration options.
 		-------------------------------------------------------------------------------
-		local ICON_TOKEN = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. select(3, _G.GetCurrencyInfo(CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
+		local ICON_TOKEN = DISPLAY_ICON_STRING1 .. select(3, _G.GetCurrencyInfo(CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
 
 		-- Provide settings options for non-money currencies
 		local function SetOptions(brokerArgs, summaryArgs, idnum, index)
@@ -1176,7 +1176,7 @@ do
 				if icon_name and icon_name ~= "" then
 					CURRENCY_NAMES[idnum] = name
 					OPTION_ICONS[idnum] = icon_name
-					BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. "Interface\\Icons\\" .. icon_name .. DISPLAY_ICON_STRING2
+					BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. icon_name .. DISPLAY_ICON_STRING2
 				end
 			end
 		end
