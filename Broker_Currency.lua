@@ -193,11 +193,7 @@ end
 
 local function ShowOptionIcon(idnum)
 	local size = Broker_CurrencyCharDB.iconSize
-
-	if PHYSICAL_CURRENCIES[idnum] then
-		return ("\124T" .. OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
-	end
-	return ("\124T" ..  OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
+	return ("\124T" .. OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
 end
 local AceCfg = LibStub("AceConfig-3.0")
 local brokerOptions = LibStub("AceConfigRegistry-3.0"):GetOptionsTable("Broker", "dialog", "LibDataBroker-1.1")
@@ -862,24 +858,22 @@ do
 		-------------------------------------------------------------------------------
 		-- Set defaults
 		-------------------------------------------------------------------------------
-		if not Broker_CurrencyCharDB then
-			Broker_CurrencyCharDB = {
-				showCopper = true,
-				showSilver = true,
-				showGold = true,
-				showToday = true,
-				showYesterday = true,
-				showLastWeek = true,
-				summaryGold = true,
-				summaryColorDark = { r = 0, g = 0, b = 0, a = 0 },
-				summaryColorLight = { r = 1, g = 1, b = 1, a = .3 },
-			}
-		end
+		Broker_CurrencyCharDB = Broker_CurrencyCharDB or {
+			showCopper = true,
+			showSilver = true,
+			showGold = true,
+			showToday = true,
+			showYesterday = true,
+			showLastWeek = true,
+			summaryGold = true,
+			summaryColorDark = { r = 0, g = 0, b = 0, a = 0 },
+			summaryColorLight = { r = 1, g = 1, b = 1, a = .3 },
+		}
 
 		-------------------------------------------------------------------------------
 		-- Initialize the configuration options.
 		-------------------------------------------------------------------------------
-		local ICON_TOKEN = DISPLAY_ICON_STRING1 .. select(3, _G.GetCurrencyInfo(CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
+		local ICON_TOKEN = DISPLAY_ICON_STRING1 .. select(3, _G.GetCurrencyInfo(CURRENCIES.CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
 
 		-- Provide settings options for non-money currencies
 		local function SetOptions(brokerArgs, summaryArgs, idnum, index)
