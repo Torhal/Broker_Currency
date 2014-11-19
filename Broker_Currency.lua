@@ -127,29 +127,32 @@ local ORDERED_CURRENCIES = {
 	-------------------------------------------------------------------------------
 	-- PvP
 	-------------------------------------------------------------------------------
+	CURRENCIES.ARTIFACT_FRAGMENT,
 	CURRENCIES.BLOODY_COIN,
 	CURRENCIES.CONQUEST_POINTS,
 	CURRENCIES.HONOR_POINTS,
 	-------------------------------------------------------------------------------
+	-- Bonus Roll
+	-------------------------------------------------------------------------------
+	CURRENCIES.ELDER_CHARM_OF_GOOD_FORTUNE,
+	CURRENCIES.LESSER_CHARM_OF_GOOD_FORTUNE,
+	CURRENCIES.MOGU_RUNE_OF_FATE,
+	CURRENCIES.WARFORGED_SEAL,
+	CURRENCIES.SEAL_OF_TEMPERED_FATE,
+	-------------------------------------------------------------------------------
 	-- Miscellaneous
 	-------------------------------------------------------------------------------
 	CURRENCIES.APEXIS_CRYSTAL,
-	CURRENCIES.ARTIFACT_FRAGMENT,
 	CURRENCIES.BLACK_IRON_FRAGMENT,
 	CURRENCIES.CHAMPIONS_SEAL,
 	CURRENCIES.DARKMOON_PRIZE_TICKET,
 	CURRENCIES.DINGY_IRON_COINS,
-	CURRENCIES.ELDER_CHARM_OF_GOOD_FORTUNE,
 	CURRENCIES.ESSENCE_DEATHWING,
 	CURRENCIES.GARRISON_RESOURCES,
-	CURRENCIES.LESSER_CHARM_OF_GOOD_FORTUNE,
 	CURRENCIES.MARK_OF_THE_WORLD_TREE,
-	CURRENCIES.MOGU_RUNE_OF_FATE,
 	CURRENCIES.MOTE_OF_DARKNESS,
-	CURRENCIES.SEAL_OF_TEMPERED_FATE,
 	CURRENCIES.TIMELESS_COIN,
 	CURRENCIES.TOL_BARAD_COMMENDATION,
-	CURRENCIES.WARFORGED_SEAL,
 	-------------------------------------------------------------------------------
 	-- Professions
 	-------------------------------------------------------------------------------
