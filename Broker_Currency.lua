@@ -119,9 +119,18 @@ local CURRENCIES = {
 	SECRET_OF_DRAENOR_BLACKSMITHING = 1020,
 }
 
-local COIN_OF_ANCESTRY = 21100
-local BREWFEST_PRIZE_TOKEN = 37829
-local LOVE_TOKEN = 49927
+local ITEM_CURRENCIES = {
+	COIN_OF_ANCESTRY = 21100,
+	BREWFEST_PRIZE_TOKEN = 37829,
+	LOVE_TOKEN = 49927,
+	DRAENIC_SEEDS = 116053,
+}
+
+local ITEM_CURRENCIES_BY_ID = {}
+for name, ID in pairs(ITEM_CURRENCIES) do
+	ITEM_CURRENCIES_BY_ID[ID] = name
+end
+
 
 local ORDERED_CURRENCIES = {
 	-------------------------------------------------------------------------------
@@ -187,18 +196,13 @@ local ORDERED_CURRENCIES = {
 	-------------------------------------------------------------------------------
 	-- Items
 	-------------------------------------------------------------------------------
-	BREWFEST_PRIZE_TOKEN,
-	COIN_OF_ANCESTRY,
-	LOVE_TOKEN,
+	ITEM_CURRENCIES.BREWFEST_PRIZE_TOKEN,
+	ITEM_CURRENCIES.DRAENIC_SEEDS,
+	ITEM_CURRENCIES.COIN_OF_ANCESTRY,
+	ITEM_CURRENCIES.LOVE_TOKEN,
 }
 
 local NUM_CURRENCIES = #ORDERED_CURRENCIES
-
-local PHYSICAL_CURRENCIES = {
-	[COIN_OF_ANCESTRY] = true,
-	[BREWFEST_PRIZE_TOKEN] = true,
-	[LOVE_TOKEN] = true,
-}
 
 -- Populated as needed.
 local CURRENCY_NAMES
@@ -588,7 +592,7 @@ do
 		if not VALID_CURRENCIES[idnum] then
 			return 0
 		end
-		return PHYSICAL_CURRENCIES[idnum] and _G.GetItemCount(idnum, true) or select(2, _G.GetCurrencyInfo(idnum))
+		return ITEM_CURRENCIES_BY_ID[idnum] and _G.GetItemCount(idnum, true) or select(2, _G.GetCurrencyInfo(idnum))
 	end
 end
 
@@ -1210,7 +1214,7 @@ do
 		for index = 1, NUM_CURRENCIES do
 			local idnum = ORDERED_CURRENCIES[index]
 
-			if PHYSICAL_CURRENCIES[idnum] then
+			if ITEM_CURRENCIES_BY_ID[idnum] then
 				local name, _, _, _, _, _, _, _, _, icon_path = _G.GetItemInfo(idnum)
 
 				if icon_path and icon_path ~= "" then
