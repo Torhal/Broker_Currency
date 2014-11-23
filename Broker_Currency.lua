@@ -29,9 +29,12 @@ local unpack = _G.unpack
 -------------------------------------------------------------------------------
 -- AddOn namespace
 -------------------------------------------------------------------------------
+local FOLDER_NAME, private = ...
+
 local LibStub = _G.LibStub
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 local LibQTip = LibStub("LibQTip-1.0")
+local AceConfig = LibStub("AceConfig-3.0")
 
 local Broker_Currency = _G.CreateFrame("frame", "Broker_CurrencyFrame")
 _G["Broker_Currency"] = Broker_Currency
@@ -243,19 +246,6 @@ local function ShowOptionIcon(idnum)
 	local size = Broker_CurrencyCharDB.iconSize
 	return ("\124T" .. OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
 end
-local AceCfg = LibStub("AceConfig-3.0")
-local brokerOptions = LibStub("AceConfigRegistry-3.0"):GetOptionsTable("Broker", "dialog", "LibDataBroker-1.1")
-
-if not brokerOptions then
-	brokerOptions = {
-		type = "group",
-		name = "Broker",
-		args = {}
-	}
-	AceCfg:RegisterOptionsTable("Broker", brokerOptions)
-	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker", "Broker")
-end
-
 
 local tooltipBackdrop = {
 	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
@@ -869,20 +859,19 @@ local function OnLeave()
 end
 
 -- Set up as a LibBroker data source
-Broker_Currency.ldb = LDB:NewDataObject("Broker Currency",
-	{
-		type = "data source",
-		label = _G.CURRENCY,
-		icon = "Interface\\MoneyFrame\\UI-GoldIcon",
-		text = "Initializing...",
-		OnClick = function(clickedframe, button)
-			if button == "RightButton" then
-				_G.InterfaceOptionsFrame_OpenToCategory(Broker_Currency.menu)
-			end
-		end,
-		OnEnter = OnEnter,
-		OnLeave = OnLeave,
-	})
+Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
+	type = "data source",
+	label = _G.CURRENCY,
+	icon = "Interface\\MoneyFrame\\UI-GoldIcon",
+	text = "Initializing...",
+	OnClick = function(clickedframe, button)
+		if button == "RightButton" then
+			_G.InterfaceOptionsFrame_OpenToCategory(Broker_Currency.menu)
+		end
+	end,
+	OnEnter = OnEnter,
+	OnLeave = OnLeave,
+})
 
 
 do
@@ -963,22 +952,6 @@ do
 			}
 		end
 
-		local function setIconSize(info, value)
-			local iconSize = Broker_CurrencyCharDB.iconSize
-
-			Broker_CurrencyCharDB[info[#info]] = true and value or nil
-			Broker_Currency.options.args.iconSize.name = ICON_TOKEN:format(8, iconSize, iconSize)
-			Broker_Currency:Update()
-		end
-
-		local function setIconSizeGold(info, value)
-			local iconSize = Broker_CurrencyCharDB.iconSizeGold
-
-			Broker_CurrencyCharDB[info[#info]] = true and value or nil
-			Broker_Currency.options.args.iconSizeGold.name = _G.GOLD_AMOUNT_TEXTURE:format(8, iconSize, iconSize)
-			Broker_Currency:Update()
-		end
-
 		local function getColorValue(info)
 			local color = Broker_CurrencyCharDB[info[#info]]
 			return color.r, color.g, color.b, color.a
@@ -1006,8 +979,8 @@ do
 		addon_version = debug_version and "Development Version" or (alpha_version and addon_version .. "-Alpha") or addon_version
 
 		Broker_Currency.options = {
+			name = ("%s - %s"):format(FOLDER_NAME, addon_version),
 			type = "group",
-			name = sName,
 			get = function(info)
 				return Broker_CurrencyCharDB[info[#info]]
 			end,
@@ -1017,35 +990,6 @@ do
 			end,
 			childGroups = "tab",
 			args = {
-				separator = {
-					order = 6,
-					type = "header",
-					width = "full",
-					name = addon_version,
-					cmdHidden = true
-				},
-				iconSize = {
-					type = "range",
-					order = 10,
-					name = string.format(ICON_TOKEN, 8, 16, 16),
-					desc = _G.TOKENS,
-					min = 1,
-					max = 32,
-					step = 1,
-					bigStep = 1,
-					set = setIconSize,
-				},
-				iconSizeGold = {
-					type = "range",
-					order = 10,
-					name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
-					desc = _G.MONEY,
-					min = 1,
-					max = 32,
-					step = 1,
-					bigStep = 1,
-					set = setIconSizeGold,
-				},
 				brokerDisplay = {
 					type = "group",
 					name = _G.DISPLAY,
@@ -1153,17 +1097,71 @@ do
 						},
 					},
 				},
-				deleteCharacter = {
-					type = "group",
-					name = _G.CHARACTER,
-					order = 60,
-					args = {},
+			},
+		}
+
+		AceConfig:RegisterOptionsTable(FOLDER_NAME, Broker_Currency.options)
+		Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(FOLDER_NAME)
+
+		Broker_Currency.deleteCharacter = {
+			name = _G.CHARACTER,
+			type = "group",
+			args = {},
+		}
+
+		AceConfig:RegisterOptionsTable("Broker_Currency_Character", Broker_Currency.deleteCharacter)
+		LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency_Character", _G.CHARACTER, FOLDER_NAME)
+
+		Broker_Currency.iconSettings = {
+			name = _G.EMBLEM_SYMBOL,
+			type = "group",
+			args = {
+				iconSize = {
+					type = "range",
+					order = 10,
+					name = string.format(ICON_TOKEN, 8, 16, 16),
+					desc = _G.TOKENS,
+					min = 1,
+					max = 32,
+					step = 1,
+					bigStep = 1,
+					get = function()
+						return Broker_CurrencyCharDB.iconSize
+					end,
+					set = function(info, value)
+						local iconSize = Broker_CurrencyCharDB.iconSize
+
+						Broker_CurrencyCharDB[info[#info]] = true and value or nil
+						Broker_Currency.iconSettings.args.iconSize.name = ICON_TOKEN:format(8, iconSize, iconSize)
+						Broker_Currency:Update()
+					end,
+				},
+				iconSizeGold = {
+					type = "range",
+					order = 10,
+					name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
+					desc = _G.MONEY,
+					min = 1,
+					max = 32,
+					step = 1,
+					bigStep = 1,
+					get = function()
+						return Broker_CurrencyCharDB.iconSizeGold
+					end,
+					set = function(info, value)
+						local iconSize = Broker_CurrencyCharDB.iconSizeGold
+
+						Broker_CurrencyCharDB[info[#info]] = true and value or nil
+						Broker_Currency.iconSettings.args.iconSizeGold.name = _G.GOLD_AMOUNT_TEXTURE:format(8, iconSize, iconSize)
+						Broker_Currency:Update()
+					end,
 				},
 			}
 		}
 
-		AceCfg:RegisterOptionsTable("Broker_Currency", Broker_Currency.options)
-		Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency", sName, "Broker")
+		AceConfig:RegisterOptionsTable("Broker_Currency_Icon", Broker_Currency.iconSettings)
+		LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency_Icon", _G.EMBLEM_SYMBOL, FOLDER_NAME)
+
 
 		-------------------------------------------------------------------------------
 		-- Check or initialize the character database.
@@ -1367,7 +1365,7 @@ do
 		-- Add delete settings so deleted characters can be removed
 		local function DeletePlayer(info)
 			local player_name = info[#info]
-			local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
+			local deleteOptions = Broker_Currency.deleteCharacter.args
 
 			deleteOptions[player_name] = nil
 			deleteOptions[player_name .. "Name"] = nil
@@ -1377,7 +1375,7 @@ do
 
 		-- Provide settings options for tokenInfo
 		local function DeleteOptions(player_name, player_infoList, index)
-			local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
+			local deleteOptions = Broker_Currency.deleteCharacter.args
 
 			if not deleteOptions[player_name] then
 				deleteOptions[player_name .. "Name"] = {
