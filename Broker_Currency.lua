@@ -46,7 +46,7 @@ local ICON_GOLD = "\124TInterface\\MoneyFrame\\UI-GoldIcon:20:20\124t"
 local ICON_SILVER = "\124TInterface\\MoneyFrame\\UI-SilverIcon:20:20\124t"
 local ICON_COPPER = "\124TInterface\\MoneyFrame\\UI-CopperIcon:20:20\124t"
 
-local DISPLAY_ICON_STRING1 = "%d\124T"
+local DISPLAY_ICON_STRING1 = "%d \124T"
 local DISPLAY_ICON_STRING2 = ":%d:%d\124t"
 
 local fontWhite = _G.CreateFont("Broker_CurrencyFontWhite")
