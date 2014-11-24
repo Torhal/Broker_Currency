@@ -1016,56 +1016,7 @@ do
 							order = 3,
 							width = "half",
 						},
-						color_header = {
-							order = 100,
-							type = "header",
-							name = _G.COLOR,
-						},
-						summaryColorDark = {
-							type = "color",
-							name = _G.BACKGROUND,
-							order = 101,
-							get = getColorValue,
-							set = setColorValue,
-							hasAlpha = true,
-						},
-						summaryColorLight = {
-							type = "color",
-							name = _G.HIGHLIGHTING,
-							order = 102,
-							get = getColorValue,
-							set = setColorValue,
-							hasAlpha = true,
-						},
-						statistics_header = {
-							order = 200,
-							type = "header",
-							name = _G.STATISTICS,
-						},
-						summaryPlayerSession = {
 							type = "toggle",
-							name = PLAYER_NAME,
-							order = 201,
-						},
-						summaryRealmToday = {
-							type = "toggle",
-							name = sToday,
-							order = 202,
-						},
-						summaryRealmYesterday = {
-							type = "toggle",
-							name = sYesterday,
-							order = 203,
-						},
-						summaryRealmThisWeek = {
-							type = "toggle",
-							name = sThisWeek,
-							order = 204,
-						},
-						summaryRealmLastWeek = {
-							type = "toggle",
-							name = sLastWeek,
-							order = 205,
 						},
 					},
 				},
@@ -1112,9 +1063,16 @@ do
 		AceConfig:RegisterOptionsTable("Broker_Currency_Character", Broker_Currency.deleteCharacter)
 		LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency_Character", _G.CHARACTER, FOLDER_NAME)
 
-		Broker_Currency.iconSettings = {
-			name = _G.EMBLEM_SYMBOL,
+		Broker_Currency.generalSettings = {
+			name = _G.GENERAL,
 			type = "group",
+			get = function(info)
+				return Broker_CurrencyCharDB[info[#info]]
+			end,
+			set = function(info, value)
+				Broker_CurrencyCharDB[info[#info]] = true and value or nil
+				Broker_Currency:Update()
+			end,
 			args = {
 				iconSize = {
 					type = "range",
@@ -1132,7 +1090,7 @@ do
 						local iconSize = Broker_CurrencyCharDB.iconSize
 
 						Broker_CurrencyCharDB[info[#info]] = true and value or nil
-						Broker_Currency.iconSettings.args.iconSize.name = ICON_TOKEN:format(8, iconSize, iconSize)
+						Broker_Currency.generalSettings.args.iconSize.name = ICON_TOKEN:format(8, iconSize, iconSize)
 						Broker_Currency:Update()
 					end,
 				},
@@ -1152,15 +1110,66 @@ do
 						local iconSize = Broker_CurrencyCharDB.iconSizeGold
 
 						Broker_CurrencyCharDB[info[#info]] = true and value or nil
-						Broker_Currency.iconSettings.args.iconSizeGold.name = _G.GOLD_AMOUNT_TEXTURE:format(8, iconSize, iconSize)
+						Broker_Currency.generalSettings.args.iconSizeGold.name = _G.GOLD_AMOUNT_TEXTURE:format(8, iconSize, iconSize)
 						Broker_Currency:Update()
 					end,
+				},
+				color_header = {
+					order = 100,
+					type = "header",
+					name = _G.COLOR,
+				},
+				summaryColorDark = {
+					type = "color",
+					name = _G.BACKGROUND,
+					order = 101,
+					get = getColorValue,
+					set = setColorValue,
+					hasAlpha = true,
+				},
+				summaryColorLight = {
+					type = "color",
+					name = _G.HIGHLIGHTING,
+					order = 102,
+					get = getColorValue,
+					set = setColorValue,
+					hasAlpha = true,
+				},
+				statistics_header = {
+					order = 200,
+					type = "header",
+					name = _G.STATISTICS,
+				},
+				summaryPlayerSession = {
+					type = "toggle",
+					name = PLAYER_NAME,
+					order = 201,
+				},
+				summaryRealmToday = {
+					type = "toggle",
+					name = sToday,
+					order = 202,
+				},
+				summaryRealmYesterday = {
+					type = "toggle",
+					name = sYesterday,
+					order = 203,
+				},
+				summaryRealmThisWeek = {
+					type = "toggle",
+					name = sThisWeek,
+					order = 204,
+				},
+				summaryRealmLastWeek = {
+					type = "toggle",
+					name = sLastWeek,
+					order = 205,
 				},
 			}
 		}
 
-		AceConfig:RegisterOptionsTable("Broker_Currency_Icon", Broker_Currency.iconSettings)
-		LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency_Icon", _G.EMBLEM_SYMBOL, FOLDER_NAME)
+		AceConfig:RegisterOptionsTable("Broker_Currency_General", Broker_Currency.generalSettings)
+		LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency_General", _G.GENERAL, FOLDER_NAME)
 
 
 		-------------------------------------------------------------------------------
