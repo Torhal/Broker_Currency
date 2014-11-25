@@ -1,14 +1,4 @@
 -------------------------------------------------------------------------------
--- Broker_Currency
--- Copyright 2008+ Toadkiller of Proudmoore for the non-statistics code.
--- The statistics code is 100% ckknight
---
--- LDB display of currencies, totals and money rate for all characters on a server.
--- The statistics stuff (total money today, yesterday, last week) is 100% from FuBar_MoneyFu, credit to ckknight
--- http://www.wowace.com/projects/broker-currency/
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
 -- Localized globals
 -------------------------------------------------------------------------------
 local _G = getfenv(0)
