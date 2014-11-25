@@ -113,10 +113,13 @@ local CURRENCY_IDS_BY_NAME = {
 }
 
 local ITEM_CURRENCY_IDS_BY_NAME = {
-	COIN_OF_ANCESTRY = 21100,
+	APEXIS_CRYSTAL = 32572,
 	BREWFEST_PRIZE_TOKEN = 37829,
-	LOVE_TOKEN = 49927,
+	COIN_OF_ANCESTRY = 21100,
 	DRAENIC_SEEDS = 116053,
+	HALAA_BATTLE_TOKEN = 26045,
+	HALAA_RESEARCH_TOKEN = 26044,
+	LOVE_TOKEN = 49927,
 }
 
 local ITEM_CURRENCY_NAMES_BY_ID = {}
@@ -185,9 +188,12 @@ local ARCHAEOLOGY_CURRENCY_IDS = {
 }
 
 local ITEM_CURRENCY_IDS = {
+	ITEM_CURRENCY_IDS_BY_NAME.APEXIS_CRYSTAL,
 	ITEM_CURRENCY_IDS_BY_NAME.BREWFEST_PRIZE_TOKEN,
-	ITEM_CURRENCY_IDS_BY_NAME.DRAENIC_SEEDS,
 	ITEM_CURRENCY_IDS_BY_NAME.COIN_OF_ANCESTRY,
+	ITEM_CURRENCY_IDS_BY_NAME.DRAENIC_SEEDS,
+	ITEM_CURRENCY_IDS_BY_NAME.HALAA_BATTLE_TOKEN,
+	ITEM_CURRENCY_IDS_BY_NAME.HALAA_RESEARCH_TOKEN,
 	ITEM_CURRENCY_IDS_BY_NAME.LOVE_TOKEN,
 }
 
@@ -244,7 +250,6 @@ local player_line_index
 -- There is separate settings for display of the broker, and the summary display on the tooltip
 local sName, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("Broker_Currency")
 local sName = GetAddOnMetadata("Broker_Currency", "X-BrokerName")
-
 
 local function GetKey(idnum, broker)
 	if broker then
