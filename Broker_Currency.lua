@@ -124,8 +124,7 @@ for name, ID in pairs(ITEM_CURRENCY_IDS_BY_NAME) do
 	ITEM_CURRENCY_NAMES_BY_ID[ID] = name
 end
 
-
-local ORDERED_CURRENCIES = {
+local ORDERED_CURRENCY_IDS = {
 	-------------------------------------------------------------------------------
 	-- PvP
 	-------------------------------------------------------------------------------
@@ -195,7 +194,7 @@ local ORDERED_CURRENCIES = {
 	ITEM_CURRENCY_IDS_BY_NAME.LOVE_TOKEN,
 }
 
-local NUM_CURRENCIES = #ORDERED_CURRENCIES
+local NUM_CURRENCIES = #ORDERED_CURRENCY_IDS
 
 -- Populated as needed.
 local CURRENCY_NAMES
@@ -293,7 +292,7 @@ function Broker_Currency:ShowTooltip(button)
 	tooltipHeader[1] = " "
 
 	for index = 1, NUM_CURRENCIES do
-		local idnum = ORDERED_CURRENCIES[index]
+		local idnum = ORDERED_CURRENCY_IDS[index]
 
 		if OPTION_ICONS[idnum] then
 			local key = GetKey(idnum, false)
@@ -429,7 +428,7 @@ function Broker_Currency:AddLine(label, currencyList)
 
 	-- Create Strings for the various currencies
 	for index = 1, NUM_CURRENCIES do
-		local idnum = ORDERED_CURRENCIES[index]
+		local idnum = ORDERED_CURRENCY_IDS[index]
 
 		if BROKER_ICONS[idnum] then
 			local key = GetKey(idnum, false)
@@ -520,7 +519,7 @@ do
 
 		if currencyList then
 			for index = 1, NUM_CURRENCIES do
-				local idnum = ORDERED_CURRENCIES[index]
+				local idnum = ORDERED_CURRENCY_IDS[index]
 				local broker_icon = BROKER_ICONS[idnum]
 
 				if broker_icon then
@@ -565,7 +564,7 @@ local GetCurrencyCount
 do
 	local VALID_CURRENCIES = {}
 	for index = 1, NUM_CURRENCIES do
-		VALID_CURRENCIES[ORDERED_CURRENCIES[index]] = true
+		VALID_CURRENCIES[ORDERED_CURRENCY_IDS[index]] = true
 	end
 
 	function GetCurrencyCount(idnum)
@@ -645,7 +644,7 @@ function Broker_Currency:Update(event)
 
 	-- Update Tokens
 	for index = 1, NUM_CURRENCIES do
-		local idnum = ORDERED_CURRENCIES[index]
+		local idnum = ORDERED_CURRENCY_IDS[index]
 
 		if BROKER_ICONS[idnum] then
 			local count = GetCurrencyCount(idnum)
@@ -702,7 +701,7 @@ do
 				spent_ref.money = (spent_ref.money or 0) + (spent[index] and spent[index].money or 0)
 
 				for index = 1, NUM_CURRENCIES do
-					local idnum = ORDERED_CURRENCIES[index]
+					local idnum = ORDERED_CURRENCY_IDS[index]
 					gained_ref[idnum] = (gained_ref[idnum] or 0) + (gained[index] and gained[index][idnum] or 0)
 					spent_ref[idnum] = (spent_ref[idnum] or 0) + (spent[index] and spent[index][idnum] or 0)
 				end
@@ -716,7 +715,7 @@ do
 		end
 
 		for index = 1, NUM_CURRENCIES do
-			local idnum = ORDERED_CURRENCIES[index]
+			local idnum = ORDERED_CURRENCY_IDS[index]
 			profit[idnum] = (gained_ref[idnum] or 0) - (spent_ref[idnum] or 0)
 		end
 		profit.money = (gained_ref.money or 0) - (spent_ref.money or 0)
@@ -1200,7 +1199,7 @@ do
 		BROKER_ICONS = db.brokerIcons
 
 		for index = 1, NUM_CURRENCIES do
-			local idnum = ORDERED_CURRENCIES[index]
+			local idnum = ORDERED_CURRENCY_IDS[index]
 
 			if ITEM_CURRENCY_NAMES_BY_ID[idnum] then
 				local name, _, _, _, _, _, _, _, _, icon_path = _G.GetItemInfo(idnum)
@@ -1267,7 +1266,7 @@ do
 		local last = self.last
 
 		for index = 1, NUM_CURRENCIES do
-			local idnum = ORDERED_CURRENCIES[index]
+			local idnum = ORDERED_CURRENCY_IDS[index]
 
 			if BROKER_ICONS[idnum] then
 				local count = GetCurrencyCount(idnum)
@@ -1347,7 +1346,7 @@ do
 		local brokerDisplay = self.options.args.brokerDisplay.args
 		local summaryDisplay = self.options.args.summaryDisplay.args
 
-		for index, idnum in ipairs(ORDERED_CURRENCIES) do
+		for index, idnum in ipairs(ORDERED_CURRENCY_IDS) do
 			-- Offset the index by three to ensure that gold, silver, and copper come first in the list.
 			SetOptions(brokerDisplay, summaryDisplay, idnum, index + 3)
 		end
