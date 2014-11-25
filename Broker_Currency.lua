@@ -935,9 +935,9 @@ do
 			local summaryName = GetKey(idnum, nil)
 
 			brokerArgs[brokerName] = {
-				type = "toggle",
-				order = index,
 				name = ("%s %s"):format(ShowOptionIcon(idnum), currency_name),
+				order = index,
+				type = "toggle",
 				width = "full",
 				get = function()
 					return Broker_CurrencyCharDB[brokerName]
@@ -948,9 +948,9 @@ do
 				end,
 			}
 			summaryArgs[summaryName] = {
-				type = "toggle",
-				order = index,
 				name = ("%s %s"):format(ShowOptionIcon(idnum), currency_name),
+				order = index,
+				type = "toggle",
 				width = "full",
 				get = function()
 					return Broker_CurrencyCharDB[summaryName]
@@ -1004,25 +1004,31 @@ do
 					name = _G.DISPLAY,
 					order = 1,
 					type = "group",
-					childGroups = "tab",
 					args = {
-						showGold = {
-							name = ("%s %s"):format(ICON_GOLD, _G.GOLD_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+						money = {
+							name = _G.MONEY,
 							order = 1,
-							type = "toggle",
-							width = "full",
-						},
-						showSilver = {
-							name = ("%s %s"):format(ICON_SILVER, _G.SILVER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
-							order = 2,
-							type = "toggle",
-							width = "full",
-						},
-						showCopper = {
-							name = ("%s %s"):format(ICON_COPPER, _G.COPPER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
-							order = 3,
-							type = "toggle",
-							width = "full",
+							type = "group",
+							args = {
+								showGold = {
+									name = ("%s %s"):format(ICON_GOLD, _G.GOLD_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+									order = 1,
+									type = "toggle",
+									width = "full",
+								},
+								showSilver = {
+									name = ("%s %s"):format(ICON_SILVER, _G.SILVER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+									order = 2,
+									type = "toggle",
+									width = "full",
+								},
+								showCopper = {
+									name = ("%s %s"):format(ICON_COPPER, _G.COPPER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+									order = 3,
+									type = "toggle",
+									width = "full",
+								},
+							},
 						},
 					},
 				},
@@ -1031,23 +1037,30 @@ do
 					name = _G.ACHIEVEMENT_SUMMARY_CATEGORY,
 					order = 2,
 					args = {
-						summaryGold = {
-							name = ("%s %s"):format(ICON_GOLD, _G.GOLD_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+						money = {
+							name = _G.MONEY,
 							order = 1,
-							type = "toggle",
-							width = "full",
-						},
-						summarySilver = {
-							name = ("%s %s"):format(ICON_SILVER, _G.SILVER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
-							order = 2,
-							type = "toggle",
-							width = "full",
-						},
-						summaryCopper = {
-							name = ("%s %s"):format(ICON_COPPER, _G.COPPER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
-							order = 3,
-							type = "toggle",
-							width = "full",
+							type = "group",
+							args = {
+								summaryGold = {
+									name = ("%s %s"):format(ICON_GOLD, _G.GOLD_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+									order = 1,
+									type = "toggle",
+									width = "full",
+								},
+								summarySilver = {
+									name = ("%s %s"):format(ICON_SILVER, _G.SILVER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+									order = 2,
+									type = "toggle",
+									width = "full",
+								},
+								summaryCopper = {
+									name = ("%s %s"):format(ICON_COPPER, _G.COPPER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+									order = 3,
+									type = "toggle",
+									width = "full",
+								},
+							},
 						},
 					},
 				},
@@ -1369,9 +1382,27 @@ do
 		local brokerDisplay = self.options.args.brokerDisplay.args
 		local summaryDisplay = self.options.args.summaryDisplay.args
 
-		for index, idnum in ipairs(ORDERED_CURRENCY_IDS) do
-			-- Offset the index by three to ensure that gold, silver, and copper come first in the list.
-			SetOptions(brokerDisplay, summaryDisplay, idnum, index + 3)
+		for group_index = 1, #ORDERED_CURRENCY_GROUPS do
+			local group = ORDERED_CURRENCY_GROUPS[group_index]
+			local option_group_name = "group" .. group_index
+
+			brokerDisplay[option_group_name] = {
+				name = CURRENCY_GROUP_LABELS[group_index],
+				order = group_index + 1, -- Money is first.
+				type = "group",
+				args = {}
+			}
+
+			summaryDisplay[option_group_name] = {
+				name = CURRENCY_GROUP_LABELS[group_index],
+				order = group_index + 1, -- Money is first.
+				type = "group",
+				args = {}
+			}
+
+			for id_index = 1, #group do
+				SetOptions(brokerDisplay[option_group_name].args, summaryDisplay[option_group_name].args, group[id_index], id_index)
+			end
 		end
 
 		-- Add delete settings so deleted characters can be removed
