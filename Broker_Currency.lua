@@ -712,7 +712,7 @@ do
 	local currency_spent = {}
 	local profit = {}
 
-	function Tooltip_AddTotals(label, gained, spent, start, finish)
+	function Tooltip_AddTotals(label, gained, spent, startTime, endTime)
 		local gained_ref, spent_ref
 
 		table.wipe(profit)
@@ -721,14 +721,14 @@ do
 		Broker_Currency:AddLine(label)
 		Broker_Currency:AddLine(" ")
 
-		if start and finish then
+		if startTime and endTime then
 			table.wipe(currency_gained)
 			table.wipe(currency_spent)
 
 			gained_ref = currency_gained
 			spent_ref = currency_spent
 
-			for index = start, finish do
+			for index = startTime, endTime do
 				gained_ref.money = (gained_ref.money or 0) + (gained[index] and gained[index].money or 0)
 				spent_ref.money = (spent_ref.money or 0) + (spent[index] and spent[index].money or 0)
 
@@ -738,9 +738,9 @@ do
 					spent_ref[idnum] = (spent_ref[idnum] or 0) + (spent[index] and spent[index][idnum] or 0)
 				end
 			end
-		elseif start then
-			gained_ref = gained[start]
-			spent_ref = spent[start]
+		elseif startTime then
+			gained_ref = gained[startTime]
+			spent_ref = spent[startTime]
 		else
 			gained_ref = gained
 			spent_ref = spent
