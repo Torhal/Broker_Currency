@@ -112,8 +112,10 @@ local CURRENCY_IDS_BY_NAME = {
 	SECRET_OF_DRAENOR_BLACKSMITHING = 1020,
 	OIL = 1101,
 	SEAL_OF_INEVITABLE_FATE = 1129,
+	ANCIENT_MANA = 1155,
 	TIMEWARPED_BADGE = 1166,
 	VALOR = 1191,
+	ORDER_RESOURCES = 1220,
 }
 
 local ITEM_CURRENCY_IDS_BY_NAME = {
@@ -154,6 +156,7 @@ local BONUS_ROLL_CURRENCY_IDS = {
 }
 
 local MISCELLANEOUS_CURRENCY_IDS = {
+	CURRENCY_IDS_BY_NAME.ANCIENT_MANA,
 	CURRENCY_IDS_BY_NAME.APEXIS_CRYSTAL,
 	CURRENCY_IDS_BY_NAME.BLACK_IRON_FRAGMENT,
 	CURRENCY_IDS_BY_NAME.CHAMPIONS_SEAL,
@@ -164,6 +167,7 @@ local MISCELLANEOUS_CURRENCY_IDS = {
 	CURRENCY_IDS_BY_NAME.MARK_OF_THE_WORLD_TREE,
 	CURRENCY_IDS_BY_NAME.MOTE_OF_DARKNESS,
 	CURRENCY_IDS_BY_NAME.OIL,
+	CURRENCY_IDS_BY_NAME.ORDER_RESOURCES,
 	CURRENCY_IDS_BY_NAME.TIMEWARPED_BADGE,
 	CURRENCY_IDS_BY_NAME.TIMELESS_COIN,
 	CURRENCY_IDS_BY_NAME.VALOR,
@@ -270,11 +274,7 @@ local sName, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("
 local sName = GetAddOnMetadata("Broker_Currency", "X-BrokerName")
 
 local function GetKey(idnum, broker)
-	if broker then
-		return "show" .. idnum
-	else
-		return "summary" .. idnum
-	end
+	return (broker and "show" or "summary") .. idnum
 end
 
 local function ShowOptionIcon(idnum)
