@@ -1,8 +1,6 @@
 -------------------------------------------------------------------------------
 -- Localized globals
 -------------------------------------------------------------------------------
-local _G = getfenv(0)
-
 local math = _G.math
 local string = _G.string
 local table = _G.table
@@ -256,10 +254,10 @@ local CURRENCY_GROUP_LABELS = {
 }
 
 local ORDERED_CURRENCY_IDS = {}
-for group_index = 1, #ORDERED_CURRENCY_GROUPS do
-	local group = ORDERED_CURRENCY_GROUPS[group_index]
-	for id_index = 1, #group do
-		ORDERED_CURRENCY_IDS[#ORDERED_CURRENCY_IDS + 1] = group[id_index]
+for groupIndex = 1, #ORDERED_CURRENCY_GROUPS do
+	local group = ORDERED_CURRENCY_GROUPS[groupIndex]
+	for idIndex = 1, #group do
+		ORDERED_CURRENCY_IDS[#ORDERED_CURRENCY_IDS + 1] = group[idIndex]
 	end
 end
 
