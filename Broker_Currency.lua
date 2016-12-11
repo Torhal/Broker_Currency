@@ -71,9 +71,7 @@ local CURRENCY_IDS_BY_NAME = {
 	ILLUSTRIOUS_JEWELCRAFTERS_TOKEN = 361,
 	DWARF_ARCHAEOLOGY_FRAGMENT = 384,
 	TROLL_ARCHAEOLOGY_FRAGMENT = 385,
-	CONQUEST_POINTS = 390,
 	TOL_BARAD_COMMENDATION = 391,
-	HONOR_POINTS = 392,
 	FOSSIL_ARCHAEOLOGY_FRAGMENT = 393,
 	NIGHTELF_ARCHAEOLOGY_FRAGMENT = 394,
 	ORC_ARCHAEOLOGY_FRAGMENT = 397,
@@ -148,8 +146,6 @@ end
 local PVP_CURRENCY_IDS = {
 	CURRENCY_IDS_BY_NAME.ARTIFACT_FRAGMENT,
 	CURRENCY_IDS_BY_NAME.BLOODY_COIN,
-	CURRENCY_IDS_BY_NAME.CONQUEST_POINTS,
-	CURRENCY_IDS_BY_NAME.HONOR_POINTS,
 	CURRENCY_IDS_BY_NAME.SIGHTLESS_EYE,
 	CURRENCY_IDS_BY_NAME.TOL_BARAD_COMMENDATION,
 }
@@ -959,7 +955,7 @@ do
 		-------------------------------------------------------------------------------
 		-- Initialize the configuration options.
 		-------------------------------------------------------------------------------
-		local ICON_TOKEN = DISPLAY_ICON_STRING1 .. select(3, _G.GetCurrencyInfo(CURRENCY_IDS_BY_NAME.CONQUEST_POINTS)) .. DISPLAY_ICON_STRING2
+		local ICON_TOKEN = DISPLAY_ICON_STRING1 .. select(3, _G.GetCurrencyInfo(CURRENCY_IDS_BY_NAME.CURIOUS_COIN)) .. DISPLAY_ICON_STRING2
 
 		-- Provide settings options for non-money currencies
 		local function SetOptions(brokerArgs, summaryArgs, idnum, index)
