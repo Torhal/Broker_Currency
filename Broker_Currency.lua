@@ -259,8 +259,8 @@ local NUM_CURRENCIES = #ORDERED_CURRENCY_IDS
 
 -- Populated as needed.
 local CURRENCY_NAMES
-local OPTION_ICONS
-local BROKER_ICONS
+local OPTION_ICONS = {}
+local BROKER_ICONS = {}
 
 -------------------------------------------------------------------------------
 -- If you want to send id numbers for currencies which are missing, run this
@@ -1257,34 +1257,25 @@ do
 		end
 		CURRENCY_NAMES = db.currencyNames
 
-		if not db.optionIcons then
-			db.optionIcons = {}
-		end
-		OPTION_ICONS = db.optionIcons
-
-		if not db.brokerIcons then
-			db.brokerIcons = {}
-		end
-		BROKER_ICONS = db.brokerIcons
-
 		for index = 1, NUM_CURRENCIES do
-			local idnum = ORDERED_CURRENCY_IDS[index]
+			local idNum = ORDERED_CURRENCY_IDS[index]
 
-			if ITEM_CURRENCY_NAMES_BY_ID[idnum] then
-				local name, _, _, _, _, _, _, _, _, icon_path = _G.GetItemInfo(idnum)
+			if ITEM_CURRENCY_NAMES_BY_ID[idNum] then
+				local _, _, _, _, iconFileDataID = _G.GetItemInfoInstant(idNum)
 
-				if icon_path and icon_path ~= "" then
-					CURRENCY_NAMES[idnum] = name
-					OPTION_ICONS[idnum] = icon_path
-					BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. icon_path .. DISPLAY_ICON_STRING2
+				if iconFileDataID and iconFileDataID ~= "" then
+					CURRENCY_NAMES[idNum] = _G.GetItemInfo(idNum)
+
+					OPTION_ICONS[idNum] = iconFileDataID
+					BROKER_ICONS[idNum] = DISPLAY_ICON_STRING1 .. iconFileDataID .. DISPLAY_ICON_STRING2
 				end
 			else
-				local name, _, icon_name = _G.GetCurrencyInfo(idnum)
+				local currencyName, _, iconFileDataID = _G.GetCurrencyInfo(idNum)
 
-				if icon_name and icon_name ~= "" then
-					CURRENCY_NAMES[idnum] = name
-					OPTION_ICONS[idnum] = icon_name
-					BROKER_ICONS[idnum] = DISPLAY_ICON_STRING1 .. icon_name .. DISPLAY_ICON_STRING2
+				if iconFileDataID and iconFileDataID ~= "" then
+					CURRENCY_NAMES[idNum] = currencyName
+					OPTION_ICONS[idNum] = iconFileDataID
+					BROKER_ICONS[idNum] = DISPLAY_ICON_STRING1 .. iconFileDataID .. DISPLAY_ICON_STRING2
 				end
 			end
 		end
