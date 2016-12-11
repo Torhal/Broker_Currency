@@ -959,11 +959,12 @@ do
 
 		-- Provide settings options for non-money currencies
 		local function SetOptions(brokerArgs, summaryArgs, idnum, index)
-			local currency_name = CURRENCY_NAMES[idnum]
+			local currency_name = CURRENCY_NAMES[idnum] or ITEM_CURRENCY_NAMES_BY_ID[idnum]
 
 			if not currency_name or currency_name == "" then
 				return
 			end
+
 			local brokerName = GetKey(idnum, true)
 			local summaryName = GetKey(idnum, nil)
 
