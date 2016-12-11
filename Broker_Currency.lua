@@ -263,6 +263,7 @@ local NUM_CURRENCIES = #ORDERED_CURRENCY_IDS
 
 -- Populated as needed.
 local CURRENCY_NAMES
+local CURRENCY_MAX_COUNT = {}
 local OPTION_ICONS = {}
 local BROKER_ICONS = {}
 
@@ -601,7 +602,14 @@ do
 					local size = char_db.iconSize
 
 					if count > 0 and char_db[key] then
-						concatList[#concatList + 1] = string.format(broker_icon, _G.BreakUpLargeNumbers(count), size, size)
+						local totalMax = CURRENCY_MAX_COUNT[idnum]
+
+						if totalMax then
+							concatList[#concatList + 1] = broker_icon:format(("%s/%s"):format(_G.BreakUpLargeNumbers(count), _G.BreakUpLargeNumbers(totalMax)), size, size)
+						else
+							concatList[#concatList + 1] = string.format(broker_icon, _G.BreakUpLargeNumbers(count), size, size)
+						end
+
 						concatList[#concatList + 1] = "  "
 					end
 				end
@@ -1297,10 +1305,15 @@ do
 					BROKER_ICONS[idNum] = DISPLAY_ICON_STRING1 .. iconFileDataID .. DISPLAY_ICON_STRING2
 				end
 			else
-				local currencyName, _, iconFileDataID = _G.GetCurrencyInfo(idNum)
+				local currencyName, _, iconFileDataID, _, _, totalMax = _G.GetCurrencyInfo(idNum)
 
 				if iconFileDataID and iconFileDataID ~= "" then
 					CURRENCY_NAMES[idNum] = currencyName
+
+					if totalMax > 0 then
+						CURRENCY_MAX_COUNT[idNum] = totalMax
+					end
+
 					OPTION_ICONS[idNum] = iconFileDataID
 					BROKER_ICONS[idNum] = DISPLAY_ICON_STRING1 .. iconFileDataID .. DISPLAY_ICON_STRING2
 				end
