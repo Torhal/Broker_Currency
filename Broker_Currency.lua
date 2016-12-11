@@ -1287,7 +1287,11 @@ do
 				local _, _, _, _, iconFileDataID = _G.GetItemInfoInstant(idNum)
 
 				if iconFileDataID and iconFileDataID ~= "" then
-					CURRENCY_NAMES[idNum] = _G.GetItemInfo(idNum)
+					local currencyName = _G.GetItemInfo(idNum)
+
+					if currencyName then
+						CURRENCY_NAMES[idNum] = currencyName
+					end
 
 					OPTION_ICONS[idNum] = iconFileDataID
 					BROKER_ICONS[idNum] = DISPLAY_ICON_STRING1 .. iconFileDataID .. DISPLAY_ICON_STRING2
