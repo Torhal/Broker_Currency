@@ -37,7 +37,7 @@ local ICON_GOLD = "\124TInterface\\MoneyFrame\\UI-GoldIcon:20:20\124t"
 local ICON_SILVER = "\124TInterface\\MoneyFrame\\UI-SilverIcon:20:20\124t"
 local ICON_COPPER = "\124TInterface\\MoneyFrame\\UI-CopperIcon:20:20\124t"
 
-local DISPLAY_ICON_STRING1 = "%d \124T"
+local DISPLAY_ICON_STRING1 = "%s \124T"
 local DISPLAY_ICON_STRING2 = ":%d:%d\124t"
 
 local fontWhite = _G.CreateFont("Broker_CurrencyFontWhite")
@@ -323,19 +323,23 @@ local HEADER_LABELS = {
 
 function Broker_Currency:ShowTooltip(button)
 	Broker_Currency:Update()
+
 	local maxColumns = 0
 
 	for index, rowList in pairs(tooltipLines) do
 		local columns = 0
+
 		for i in pairs(rowList) do
 			columns = columns + 1
 		end
+
 		maxColumns = math.max(maxColumns, columns)
 	end
 
 	if maxColumns <= 0 then
 		return
 	end
+
 	local char_db = Broker_CurrencyCharDB
 
 	tooltipAlignment[1] = "LEFT"
@@ -420,19 +424,19 @@ function Broker_Currency:ShowTooltip(button)
 
 			if label == sPlus then
 				for i, value in ipairs(rowList) do
-					tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontPlus)
+					tooltip:SetCell(currentRow, i, value, fontPlus)
 				end
 			elseif label == sMinus then
 				for i, value in ipairs(rowList) do
-					tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontMinus)
+					tooltip:SetCell(currentRow, i, value, fontMinus)
 				end
 			elseif label == sTotal then
 				for i, value in ipairs(rowList) do
 					if value and type(value) == "number" then
 						if value < 0 then
-							tooltip:SetCell(currentRow, i, -1 * value, fontMinus)
+							tooltip:SetCell(currentRow, i, -1 * _G.BreakUpLargeNumbers(value), fontMinus)
 						else
-							tooltip:SetCell(currentRow, i, value == 0 and " " or value, fontPlus)
+							tooltip:SetCell(currentRow, i, value == 0 and " " or _G.BreakUpLargeNumbers(value), fontPlus)
 						end
 					end
 				end
@@ -441,6 +445,7 @@ function Broker_Currency:ShowTooltip(button)
 			if index == player_line_index then
 				tooltip:SetLineColor(currentRow, 1, 1, 1, 0.25)
 			end
+
 			tooltip:SetCell(currentRow, 1, label, fontLabel)
 		end
 	end
@@ -454,6 +459,7 @@ function Broker_Currency:ShowTooltip(button)
 			tooltip:SetColumnColor(index, summaryColorLight.r, summaryColorLight.g, summaryColorLight.b, summaryColorLight.a)
 		end
 	end
+
 	local summaryColorDark = char_db.summaryColorDark
 
 	if _G.TipTac and _G.TipTac.AddModifiedTip then
@@ -463,6 +469,7 @@ function Broker_Currency:ShowTooltip(button)
 		tooltip:SetBackdrop(tooltipBackdrop)
 		tooltip:SetBackdropColor(summaryColorDark.r, summaryColorDark.g, summaryColorDark.b, summaryColorDark.a)
 	end
+
 	tooltip:SmartAnchorTo(button)
 	tooltip:Show()
 end
@@ -474,6 +481,7 @@ function Broker_Currency:AddLine(label, currencyList)
 	if not tooltipLinesRecycle[newIndex] then
 		tooltipLinesRecycle[newIndex] = {}
 	end
+
 	tooltipLines[newIndex] = tooltipLinesRecycle[newIndex]
 
 	local line = tooltipLines[newIndex]
@@ -484,6 +492,7 @@ function Broker_Currency:AddLine(label, currencyList)
 	if not currencyList then
 		return
 	end
+
 	local char_db = Broker_CurrencyCharDB
 
 	-- Create Strings for the various currencies
@@ -496,7 +505,7 @@ function Broker_Currency:AddLine(label, currencyList)
 
 			if char_db[key] then
 				if count ~= 0 then
-					line[#line + 1] = count
+					line[#line + 1] = _G.BreakUpLargeNumbers(count)
 				else
 					line[#line + 1] = " "
 				end
@@ -521,15 +530,15 @@ function Broker_Currency:AddLine(label, currencyList)
 
 	if gold + silver + copper ~= 0 then
 		if char_db.summaryGold then
-			line[#line + 1] = gold
+			line[#line + 1] = _G.BreakUpLargeNumbers(gold)
 		end
 
 		if char_db.summarySilver then
-			line[#line + 1] = silver
+			line[#line + 1] = _G.BreakUpLargeNumbers(silver)
 		end
 
 		if char_db.summaryCopper then
-			line[#line + 1] = copper
+			line[#line + 1] = _G.BreakUpLargeNumbers(copper)
 		end
 	end
 end
@@ -564,6 +573,10 @@ end
 
 local CreateMoneyString
 do
+	local GOLD_AMOUNT_TEXTURE = [[%s|TInterface\MoneyFrame\UI-GoldIcon:%d:%d:2:0|t]]
+	local SILVER_AMOUNT_TEXTURE = [[%s|TInterface\MoneyFrame\UI-SilverIcon:%d:%d:2:0|t]]
+	local COPPER_AMOUNT_TEXTURE = [[%s|TInterface\MoneyFrame\UI-CopperIcon:%d:%d:2:0|t]]
+
 	local concatList = {}
 
 	-- Create the display string for a single line
@@ -588,7 +601,7 @@ do
 					local size = char_db.iconSize
 
 					if count > 0 and char_db[key] then
-						concatList[#concatList + 1] = string.format(broker_icon, count, size, size)
+						concatList[#concatList + 1] = string.format(broker_icon, _G.BreakUpLargeNumbers(count), size, size)
 						concatList[#concatList + 1] = "  "
 					end
 				end
@@ -603,19 +616,20 @@ do
 		local gold = math.floor(money / 100)
 
 		if char_db.showGold and gold > 0 then
-			concatList[#concatList + 1] = string.format(_G.GOLD_AMOUNT_TEXTURE, gold, char_db.iconSizeGold, char_db.iconSizeGold)
+			concatList[#concatList + 1] = string.format(GOLD_AMOUNT_TEXTURE, _G.BreakUpLargeNumbers(gold), char_db.iconSizeGold, char_db.iconSizeGold)
 			concatList[#concatList + 1] = " "
 		end
 
 		if char_db.showSilver and gold + silver > 0 then
-			concatList[#concatList + 1] = string.format(_G.SILVER_AMOUNT_TEXTURE, silver, char_db.iconSizeGold, char_db.iconSizeGold)
+			concatList[#concatList + 1] = string.format(SILVER_AMOUNT_TEXTURE, _G.BreakUpLargeNumbers(silver), char_db.iconSizeGold, char_db.iconSizeGold)
 			concatList[#concatList + 1] = " "
 		end
 
 		if char_db.showCopper and gold + silver + copper > 0 then
-			concatList[#concatList + 1] = string.format(_G.COPPER_AMOUNT_TEXTURE, copper, char_db.iconSizeGold, char_db.iconSizeGold)
+			concatList[#concatList + 1] = string.format(COPPER_AMOUNT_TEXTURE, _G.BreakUpLargeNumbers(copper), char_db.iconSizeGold, char_db.iconSizeGold)
 			concatList[#concatList + 1] = " "
 		end
+
 		return table.concat(concatList)
 	end
 end
@@ -631,6 +645,7 @@ do
 		if not VALID_CURRENCIES[idnum] then
 			return 0
 		end
+
 		return ITEM_CURRENCY_NAMES_BY_ID[idnum] and _G.GetItemCount(idnum, true) or select(2, _G.GetCurrencyInfo(idnum))
 	end
 end
@@ -846,6 +861,7 @@ do
 			if data.player_name == PLAYER_NAME then
 				player_line_index = i
 			end
+
 			Broker_Currency:AddLine(string.format("%s: ", data.player_name), data.player_info, fontWhite)
 
 			-- Add counts from player_info to totalList according to the summary settings this character is interested in
@@ -857,8 +873,10 @@ do
 					totalList[countKey] = (totalList[countKey] or 0) + count
 				end
 			end
+
 			totalList.money = (totalList.money or 0) + (data.player_info.money or 0)
 		end
+
 		Broker_Currency:AddLine(" ")
 
 		-- Statistics
