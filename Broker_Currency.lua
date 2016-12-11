@@ -593,21 +593,21 @@ do
 
 		if currencyList then
 			for index = 1, NUM_CURRENCIES do
-				local idnum = ORDERED_CURRENCY_IDS[index]
-				local broker_icon = BROKER_ICONS[idnum]
+				local currencyID = ORDERED_CURRENCY_IDS[index]
+				local displayIcon = BROKER_ICONS[currencyID]
 
-				if broker_icon then
-					local key = GetKey(idnum, true)
-					local count = currencyList[idnum] or 0
+				if displayIcon then
+					local key = GetKey(currencyID, true)
+					local count = currencyList[currencyID] or 0
 					local size = char_db.iconSize
 
 					if count > 0 and char_db[key] then
-						local totalMax = CURRENCY_MAX_COUNT[idnum]
+						local totalMax = CURRENCY_MAX_COUNT[currencyID]
 
 						if totalMax then
-							concatList[#concatList + 1] = broker_icon:format(("%s/%s"):format(_G.BreakUpLargeNumbers(count), _G.BreakUpLargeNumbers(totalMax)), size, size)
+							concatList[#concatList + 1] = displayIcon:format(("%s/%s"):format(_G.BreakUpLargeNumbers(count), _G.BreakUpLargeNumbers(totalMax)), size, size)
 						else
-							concatList[#concatList + 1] = string.format(broker_icon, _G.BreakUpLargeNumbers(count), size, size)
+							concatList[#concatList + 1] = string.format(displayIcon, _G.BreakUpLargeNumbers(count), size, size)
 						end
 
 						concatList[#concatList + 1] = "  "
@@ -699,6 +699,7 @@ function Broker_Currency:Update(event)
 	if not self.lastTime then
 		self.lastTime = today
 	end
+
 	local cutoffDay = today - 14
 
 	if today > self.lastTime then
@@ -723,6 +724,7 @@ function Broker_Currency:Update(event)
 		player_info.spent[today].money = (player_info.spent[today].money or 0) + self.last.money - current_money
 		realmInfo.spent[today].money = (realmInfo.spent[today].money or 0) + self.last.money - current_money
 	end
+
 	self.last.money = current_money
 
 	-- Update Tokens
@@ -747,6 +749,7 @@ function Broker_Currency:Update(event)
 					realmInfo.spent[today][idnum] = (realmInfo.spent[today][idnum] or 0) + last_count - count
 				end
 			end
+
 			self.last[idnum] = count
 		end
 	end
@@ -1289,33 +1292,33 @@ do
 		CURRENCY_NAMES = db.currencyNames
 
 		for index = 1, NUM_CURRENCIES do
-			local idNum = ORDERED_CURRENCY_IDS[index]
+			local currencyID = ORDERED_CURRENCY_IDS[index]
 
-			if ITEM_CURRENCY_NAMES_BY_ID[idNum] then
-				local _, _, _, _, iconFileDataID = _G.GetItemInfoInstant(idNum)
+			if ITEM_CURRENCY_NAMES_BY_ID[currencyID] then
+				local _, _, _, _, iconFileDataID = _G.GetItemInfoInstant(currencyID)
 
 				if iconFileDataID and iconFileDataID ~= "" then
-					local currencyName = _G.GetItemInfo(idNum)
+					local currencyName = _G.GetItemInfo(currencyID)
 
 					if currencyName then
-						CURRENCY_NAMES[idNum] = currencyName
+						CURRENCY_NAMES[currencyID] = currencyName
 					end
 
-					OPTION_ICONS[idNum] = iconFileDataID
-					BROKER_ICONS[idNum] = DISPLAY_ICON_STRING1 .. iconFileDataID .. DISPLAY_ICON_STRING2
+					OPTION_ICONS[currencyID] = iconFileDataID
+					BROKER_ICONS[currencyID] = DISPLAY_ICON_STRING1 .. iconFileDataID .. DISPLAY_ICON_STRING2
 				end
 			else
-				local currencyName, _, iconFileDataID, _, _, totalMax = _G.GetCurrencyInfo(idNum)
+				local currencyName, _, iconFileDataID, _, _, totalMax = _G.GetCurrencyInfo(currencyID)
 
 				if iconFileDataID and iconFileDataID ~= "" then
-					CURRENCY_NAMES[idNum] = currencyName
+					CURRENCY_NAMES[currencyID] = currencyName
 
 					if totalMax > 0 then
-						CURRENCY_MAX_COUNT[idNum] = totalMax
+						CURRENCY_MAX_COUNT[currencyID] = totalMax
 					end
 
-					OPTION_ICONS[idNum] = iconFileDataID
-					BROKER_ICONS[idNum] = DISPLAY_ICON_STRING1 .. iconFileDataID .. DISPLAY_ICON_STRING2
+					OPTION_ICONS[currencyID] = iconFileDataID
+					BROKER_ICONS[currencyID] = DISPLAY_ICON_STRING1 .. iconFileDataID .. DISPLAY_ICON_STRING2
 				end
 			end
 		end
