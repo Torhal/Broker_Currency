@@ -602,13 +602,13 @@ do
 					local size = char_db.iconSize
 
 					if count > 0 and char_db[key] then
-						local totalMax = CURRENCY_MAX_COUNT[currencyID]
+--						local totalMax = CURRENCY_MAX_COUNT[currencyID]
 
-						if totalMax then
-							concatList[#concatList + 1] = displayIcon:format(("%s/%s"):format(_G.BreakUpLargeNumbers(count), _G.BreakUpLargeNumbers(totalMax)), size, size)
-						else
+--						if totalMax then
+--							concatList[#concatList + 1] = displayIcon:format(("%s/%s"):format(_G.BreakUpLargeNumbers(count), _G.BreakUpLargeNumbers(totalMax)), size, size)
+--						else
 							concatList[#concatList + 1] = string.format(displayIcon, _G.BreakUpLargeNumbers(count), size, size)
-						end
+--						end
 
 						concatList[#concatList + 1] = "  "
 					end
