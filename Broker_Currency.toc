@@ -31,4 +31,5 @@
 embeds.xml
 #@end-no-lib-strip@
 
+Currencies.lua
 Broker_Currency.lua
