@@ -259,8 +259,6 @@ for groupIndex = 1, #ORDERED_CURRENCY_GROUPS do
 	end
 end
 
-local NUM_CURRENCIES = #ORDERED_CURRENCY_IDS
-
 -- Populated as needed.
 local CURRENCY_NAMES
 local CURRENCY_MAX_COUNT = {}
@@ -356,7 +354,7 @@ function Broker_Currency:ShowTooltip(button)
 	table.wipe(tooltipHeader)
 	tooltipHeader[1] = " "
 
-	for index = 1, NUM_CURRENCIES do
+	for index = 1, #ORDERED_CURRENCY_IDS do
 		local idnum = ORDERED_CURRENCY_IDS[index]
 
 		if OPTION_ICONS[idnum] then
@@ -497,7 +495,7 @@ function Broker_Currency:AddLine(label, currencyList)
 	local char_db = Broker_CurrencyCharDB
 
 	-- Create Strings for the various currencies
-	for index = 1, NUM_CURRENCIES do
+	for index = 1, #ORDERED_CURRENCY_IDS do
 		local idnum = ORDERED_CURRENCY_IDS[index]
 
 		if BROKER_ICONS[idnum] then
@@ -592,7 +590,7 @@ do
 		table.wipe(concatList)
 
 		if currencyList then
-			for index = 1, NUM_CURRENCIES do
+			for index = 1, #ORDERED_CURRENCY_IDS do
 				local currencyID = ORDERED_CURRENCY_IDS[index]
 				local displayIcon = BROKER_ICONS[currencyID]
 
@@ -645,7 +643,7 @@ end
 local GetCurrencyCount
 do
 	local VALID_CURRENCIES = {}
-	for index = 1, NUM_CURRENCIES do
+	for index = 1, #ORDERED_CURRENCY_IDS do
 		VALID_CURRENCIES[ORDERED_CURRENCY_IDS[index]] = true
 	end
 
@@ -728,7 +726,7 @@ function Broker_Currency:Update(event)
 	self.last.money = current_money
 
 	-- Update Tokens
-	for index = 1, NUM_CURRENCIES do
+	for index = 1, #ORDERED_CURRENCY_IDS do
 		local idnum = ORDERED_CURRENCY_IDS[index]
 
 		if BROKER_ICONS[idnum] then
@@ -786,7 +784,7 @@ do
 				gained_ref.money = (gained_ref.money or 0) + (gained[index] and gained[index].money or 0)
 				spent_ref.money = (spent_ref.money or 0) + (spent[index] and spent[index].money or 0)
 
-				for index = 1, NUM_CURRENCIES do
+				for index = 1, #ORDERED_CURRENCY_IDS do
 					local idnum = ORDERED_CURRENCY_IDS[index]
 					gained_ref[idnum] = (gained_ref[idnum] or 0) + (gained[index] and gained[index][idnum] or 0)
 					spent_ref[idnum] = (spent_ref[idnum] or 0) + (spent[index] and spent[index][idnum] or 0)
@@ -800,7 +798,7 @@ do
 			spent_ref = spent
 		end
 
-		for index = 1, NUM_CURRENCIES do
+		for index = 1, #ORDERED_CURRENCY_IDS do
 			local idnum = ORDERED_CURRENCY_IDS[index]
 			profit[idnum] = (gained_ref[idnum] or 0) - (spent_ref[idnum] or 0)
 		end
@@ -1291,7 +1289,7 @@ do
 		end
 		CURRENCY_NAMES = db.currencyNames
 
-		for index = 1, NUM_CURRENCIES do
+		for index = 1, #ORDERED_CURRENCY_IDS do
 			local currencyID = ORDERED_CURRENCY_IDS[index]
 
 			if ITEM_CURRENCY_NAMES_BY_ID[currencyID] then
@@ -1368,7 +1366,7 @@ do
 		end
 		local last = self.last
 
-		for index = 1, NUM_CURRENCIES do
+		for index = 1, #ORDERED_CURRENCY_IDS do
 			local idnum = ORDERED_CURRENCY_IDS[index]
 
 			if BROKER_ICONS[idnum] then
