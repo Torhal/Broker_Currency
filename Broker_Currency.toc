@@ -1,7 +1,11 @@
-﻿## Interface: 70300
+﻿## Author: Torhal
+## DefaultState: enabled
+## Interface: 70300
+## LoadManagers: AddonLoader
+## OptionalDeps: Ace3, LibDataBroker-1.1, LibQTip-1.0, TipTac
+## SavedVariables: Broker_CurrencyDB
+## SavedVariablesPerCharacter: Broker_CurrencyCharDB
 ## Title: Broker: Currency
-## X-BrokerName: Currency
-## Author: Torhal
 ## Version:  @project-version@
 
 ## Notes: LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.
@@ -13,18 +17,10 @@
 ## Notes-zhCN: 一组LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.。
 ## Notes-zhTW: 一組LDB display of currencies, gold totals and session / daily / weekly statistics for all characters on a server.。
 
-## DefaultState: enabled
-## UIType: 动作条
-## UIType-zhTW: 動作條
+## X-BrokerName: Currency
 ## X-Category: Interface Enhancements
-## X-Website: http://www.wowace.com/projects/broker-currency
-
-## OptionalDeps: Ace3, LibDataBroker-1.1, LibQTip-1.0, TipTac
-## SavedVariablesPerCharacter: Broker_CurrencyCharDB
-## SavedVariables: Broker_CurrencyDB
-
-## LoadManagers: AddonLoader
 ## X-LoadOn-Always: Delayed
+## X-Website: http://www.wowace.com/projects/broker-currency
 
 #@no-lib-strip@
 # Libraries
