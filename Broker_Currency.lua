@@ -71,6 +71,11 @@ local CURRENCY_MAX_COUNT = {}
 local OPTION_ICONS = {}
 local BROKER_ICONS = {}
 
+local CURRENCY_DESCRIPTIONS = {}
+
+local DatamineTooltip = _G.CreateFrame("GameTooltip", "Broker_CurrencyDatamineTooltip", _G.UIParent, "GameTooltipTemplate")
+DatamineTooltip:SetOwner(_G.WorldFrame, "ANCHOR_NONE")
+
 -- ----------------------------------------------------------------------------
 -- Variables
 -- ----------------------------------------------------------------------------
@@ -754,6 +759,12 @@ do
 	local wtfDelay = 5 -- For stupid cases where Blizzard pretends a player has no loots, wait up to 15 seconds
 
 	function Broker_Currency:InitializeSettings()
+		for name, ID in pairs(CURRENCY_IDS_BY_NAME) do
+			DatamineTooltip:SetCurrencyTokenByID(ID)
+
+			CURRENCY_DESCRIPTIONS[ID] = _G["Broker_CurrencyDatamineTooltipTextLeft2"]:GetText()
+		end
+
 		-- No hearthstone and no money means trouble
 		if init_timer_handle then
 			self:CancelTimer(init_timer_handle)
@@ -801,6 +812,7 @@ do
 
 			brokerArgs[brokerName] = {
 				name = ("%s %s"):format(ShowOptionIcon(idnum), currency_name),
+				desc = CURRENCY_DESCRIPTIONS[idnum],
 				order = index,
 				type = "toggle",
 				width = "full",
@@ -812,8 +824,10 @@ do
 					Broker_Currency:Update()
 				end,
 			}
+
 			summaryArgs[summaryName] = {
 				name = ("%s %s"):format(ShowOptionIcon(idnum), currency_name),
+				desc = CURRENCY_DESCRIPTIONS[idnum],
 				order = index,
 				type = "toggle",
 				width = "full",
@@ -1374,6 +1388,7 @@ function Broker_Currency:Startup(event, ...)
 		if init_timer_handle then
 			self:CancelTimer(init_timer_handle)
 		end
+
 		init_timer_handle = self:ScheduleTimer(self.InitializeSettings, 4, self)
 	end
 end
