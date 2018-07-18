@@ -97,7 +97,8 @@ end
 
 local function ShowOptionIcon(idnum)
 	local size = Broker_CurrencyCharDB.iconSize
-	return ("\124T" .. OPTION_ICONS[idnum] .. DISPLAY_ICON_STRING2):format(size, size)
+	local icon = OPTION_ICONS[idnum] or ""
+	return ("\124T" .. icon .. DISPLAY_ICON_STRING2):format(size, size)
 end
 
 local tooltipBackdrop = {
@@ -116,7 +117,6 @@ local tooltipLines = {}
 local tooltipLinesRecycle = {}
 local tooltipAlignment = {}
 local tooltipHeader = {}
-local temp = {}
 
 local HEADER_LABELS = {
 	[sToday] = true,
@@ -130,10 +130,10 @@ function Broker_Currency:ShowTooltip(button)
 
 	local maxColumns = 0
 
-	for index, rowList in pairs(tooltipLines) do
+	for _, rowList in pairs(tooltipLines) do
 		local columns = 0
 
-		for i in pairs(rowList) do
+		for _ in pairs(rowList) do
 			columns = columns + 1
 		end
 
@@ -255,7 +255,6 @@ function Broker_Currency:ShowTooltip(button)
 	end
 
 	-- Color the even columns
-	local column
 	local summaryColorLight = char_db.summaryColorLight
 
 	if summaryColorLight.a > 0 then
@@ -745,7 +744,7 @@ Broker_Currency.ldb = LDB:NewDataObject("Broker Currency", {
 	label = _G.CURRENCY,
 	icon = "Interface\\MoneyFrame\\UI-GoldIcon",
 	text = "Initializing...",
-	OnClick = function(clickedframe, button)
+	OnClick = function(_, button)
 		if button == "RightButton" then
 			_G.InterfaceOptionsFrame_OpenToCategory(Broker_Currency.menu)
 		end
@@ -759,7 +758,7 @@ do
 	local wtfDelay = 5 -- For stupid cases where Blizzard pretends a player has no loots, wait up to 15 seconds
 
 	function Broker_Currency:InitializeSettings()
-		for name, ID in pairs(CURRENCY_IDS_BY_NAME) do
+		for _, ID in pairs(CURRENCY_IDS_BY_NAME) do
 			DatamineTooltip:SetCurrencyTokenByID(ID)
 
 			CURRENCY_DESCRIPTIONS[ID] = _G["Broker_CurrencyDatamineTooltipTextLeft2"]:GetText()
