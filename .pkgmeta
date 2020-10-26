@@ -10,7 +10,7 @@ externals:
     libs/LibDataBroker-1.1:
         url: https://repos.wowace.com/wow/libdatabroker-1-1
     libs/LibQTip-1.0:
-        url: https://repos.wowace.com/wow/libqtip-1-0/trunk
+        url: https://repos.wowace.com/wow/libqtip-1-0
     libs/AceConfig-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceConfig-3.0
     libs/AceTimer-3.0:
