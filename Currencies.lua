@@ -9,12 +9,6 @@ local pairs = _G.pairs
 local FOLDER_NAME, private = ...
 
 -- ----------------------------------------------------------------------------
--- If you want to send id numbers for currencies which are missing, run this
--- while in-game.
--- ----------------------------------------------------------------------------
--- /script for id = 1, 10000 do local name = GetCurrencyInfo(id); if name and name ~= "" then print(("%d - %s"):format(id, name)) end end
-
--- ----------------------------------------------------------------------------
 -- Currencies
 -- ----------------------------------------------------------------------------
 local CURRENCY_IDS_BY_NAME = {
@@ -93,6 +87,10 @@ local CURRENCY_IDS_BY_NAME = {
 	HONORBOUND_SERVICE_MEDAL = 1716,
 	SEVENTH_LEGION_SERVICE_MEDAL = 1717,
 	TITAN_RESIDUUM = 1718,
+	CORRUPTED_MEMENTO = 1719,
+	PRISMATIC_MANAPEARL = 1721
+	COALESCING_VISIONS = 1755,
+	ECHOES_OF_NYALOTHA = 1803,
 }
 
 private.CURRENCY_IDS_BY_NAME = CURRENCY_IDS_BY_NAME
@@ -102,6 +100,8 @@ local CURRENCY_NAMES_BY_ID = {}
 for name, id in pairs(CURRENCY_IDS_BY_NAME) do
 	CURRENCY_NAMES_BY_ID[id] = name
 end
+
+private.CURRENCY_NAMES_BY_ID = CURRENCY_NAMES_BY_ID
 
 local ITEM_CURRENCY_IDS_BY_NAME = {
 	APEXIS_CRYSTAL = 32572,
@@ -121,6 +121,7 @@ local ITEM_CURRENCY_IDS_BY_NAME = {
 	PET_CHARM = 116415,
 	PRIMAL_SARGERITE = 151568,
 	PRIMAL_SPIRIT = 120945,
+	VESSEL_OF_HORRIFIC_VISIONS = 173363,
 }
 
 local ITEM_CURRENCY_NAMES_BY_ID = {}
@@ -153,12 +154,16 @@ local BONUS_ROLL_CURRENCY_IDS = {
 
 local MISCELLANEOUS_CURRENCY_IDS = {
 	CURRENCY_IDS_BY_NAME.ANCIENT_MANA,
+	CURRENCY_IDS_BY_NAME.COALESCING_VISIONS,
+	CURRENCY_IDS_BY_NAME.CORRUPTED_MEMENTO,
 	CURRENCY_IDS_BY_NAME.DINGY_IRON_COINS,
+	CURRENCY_IDS_BY_NAME.ECHOES_OF_NYALOTHA,
 	CURRENCY_IDS_BY_NAME.GARRISON_RESOURCES,
 	CURRENCY_IDS_BY_NAME.HONORBOUND_SERVICE_MEDAL,
 	CURRENCY_IDS_BY_NAME.NETHERSHARD,
 	CURRENCY_IDS_BY_NAME.OIL,
 	CURRENCY_IDS_BY_NAME.ORDER_RESOURCES,
+	CURRENCY_IDS_BY_NAME.PRISMATIC_MANAPEARL,
 	CURRENCY_IDS_BY_NAME.RICH_AZERITE_FRAGMENT,
 	CURRENCY_IDS_BY_NAME.SEAFARERS_DUBLOON,
 	CURRENCY_IDS_BY_NAME.SEVENTH_LEGION_SERVICE_MEDAL,
@@ -224,6 +229,7 @@ local ITEM_CURRENCY_IDS = {
 	ITEM_CURRENCY_IDS_BY_NAME.PET_CHARM,
 	ITEM_CURRENCY_IDS_BY_NAME.PRIMAL_SARGERITE,
 	ITEM_CURRENCY_IDS_BY_NAME.PRIMAL_SPIRIT,
+	ITEM_CURRENCY_IDS_BY_NAME.VESSEL_OF_HORRIFIC_VISIONS,
 }
 
 local DUNGEONS_CURRENCY_IDS = {
