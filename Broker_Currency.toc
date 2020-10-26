@@ -22,10 +22,8 @@
 ## X-LoadOn-Always: Delayed
 ## X-Website: http://www.wowace.com/projects/broker-currency
 
-#@no-lib-strip@
 # Libraries
 embeds.xml
-#@end-no-lib-strip@
 
 Currencies.lua
 Broker_Currency.lua
