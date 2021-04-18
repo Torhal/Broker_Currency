@@ -36,7 +36,7 @@ local OrderedCurrencyGroups = {
         CurrencyIDByName.ZandalariArchaeologyFragment
     },
     -------------------------------------------------------------------------------
-    ---- BonusRolls
+    ---- Bonus Rolls
     -------------------------------------------------------------------------------
     {
         CurrencyIDByName.ElderCharmOfGoodFortune,
@@ -106,6 +106,7 @@ local OrderedCurrencyGroups = {
         CurrencyIDByName.Oil,
         CurrencyIDByName.OrderResources,
         CurrencyIDByName.PrismaticManapearl,
+        CurrencyIDByName.Phantasma,
         CurrencyIDByName.RichAzeriteFragment,
         CurrencyIDByName.SeafarersDubloon,
         CurrencyIDByName.SeventhLegionServiceMedal,

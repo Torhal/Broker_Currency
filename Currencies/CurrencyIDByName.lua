@@ -85,6 +85,7 @@ local CurrencyIDByName = {
     TitanResiduum = 1718,
     CorruptedMemento = 1719,
     PrismaticManapearl = 1721,
+    Phantasma = 1728,
     ArgentCommendation = 1754,
     CoalescingVisions = 1755,
     Stygia = 1767,
