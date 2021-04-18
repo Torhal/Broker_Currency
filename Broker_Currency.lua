@@ -92,7 +92,7 @@ end
 local function ShowOptionIcon(idnum)
     local size = Broker_CurrencyCharDB.iconSize
 
-    return ("\124T" .. OptionIcons[idnum] or "" .. DisplayIconString2):format(size, size)
+    return string.format("\124T%s%s", OptionIcons[idnum] or "", DisplayIconString2):format(size, size)
 end
 
 local tooltipBackdrop = {
