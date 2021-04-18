@@ -25,5 +25,6 @@
 # Libraries
 embeds.xml
 
-Currencies.lua
+Currencies\Manifest.xml
+
 Broker_Currency.lua
