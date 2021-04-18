@@ -1,6 +1,6 @@
--- ----------------------------------------------------------------------------
--- AddOn namespace
--- ----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+---- AddOn Namespace
+--------------------------------------------------------------------------------
 local AddOnFolderName, private = ...
 
 local LibStub = _G.LibStub
@@ -18,10 +18,21 @@ local ItemCurrencyNameByID = private.ItemCurrencyNameByID
 local OrderedCurrencyGroups = private.OrderedCurrencyGroups
 local OrderedCurrencyIDs = private.OrderedCurrencyIDs
 
--- ----------------------------------------------------------------------------
--- Constants
--- ----------------------------------------------------------------------------
--- The localization goal is to only use existing Blizzard strings and localized Title strings from the toc
+--------------------------------------------------------------------------------
+---- Constants
+--------------------------------------------------------------------------------
+local CurrencyGroupLabels = {
+    _G.PROFESSIONS_ARCHAEOLOGY,
+    _G.BONUS_ROLL_TOOLTIP_TITLE,
+    _G.COLLECTIONS,
+    _G.DUNGEONS,
+    _G.ITEMS,
+    _G.MISCELLANEOUS,
+    _G.TRADE_SKILLS,
+    _G.PVP,
+    _G.QUEST_OBJECTIVES
+}
+
 local GoldIcon = "\124TInterface\\MoneyFrame\\UI-GoldIcon:20:20\124t"
 local SilverIcon = "\124TInterface\\MoneyFrame\\UI-SilverIcon:20:20\124t"
 local CopperIcon = "\124TInterface\\MoneyFrame\\UI-CopperIcon:20:20\124t"
@@ -53,34 +64,24 @@ local BrokerIcons = {}
 
 local CurrencyDescriptions = {}
 
-local CurrencyGroupLabels = {
-    _G.PROFESSIONS_ARCHAEOLOGY,
-    _G.BONUS_ROLL_TOOLTIP_TITLE,
-    _G.COLLECTIONS,
-    _G.DUNGEONS,
-    _G.ITEMS,
-    _G.MISCELLANEOUS,
-    _G.TRADE_SKILLS,
-    _G.PVP,
-    _G.QUEST_OBJECTIVES
-}
-
 local DatamineTooltip =
     _G.CreateFrame("GameTooltip", "Broker_CurrencyDatamineTooltip", _G.UIParent, "GameTooltipTemplate")
 DatamineTooltip:SetOwner(_G.WorldFrame, "ANCHOR_NONE")
 
--- ----------------------------------------------------------------------------
--- Variables
--- ----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+---- Variables
+--------------------------------------------------------------------------------
 local init_timer_handle
 local player_line_index
 
--- ----------------------------------------------------------------------------
--- Helper functions
--- ----------------------------------------------------------------------------
--- Data is saved per realm/character in Broker_CurrencyDB
--- Options are saved per character in Broker_CurrencyCharDB
--- There is separate settings for display of the broker, and the summary display on the tooltip
+--------------------------------------------------------------------------------
+---- Helper Functions
+--------------------------------------------------------------------------------
+--[[
+    Data is saved per realm/character in Broker_CurrencyDB
+    Options are saved per character in Broker_CurrencyCharDB
+    There are separate settings for display of the broker, and the summary display on the tooltip
+]]
 local sName, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("Broker_Currency")
 local sName = GetAddOnMetadata("Broker_Currency", "X-BrokerName")
 
@@ -579,10 +580,10 @@ function Broker_Currency:Update(event)
 
     self.savedTime = time()
 
-    -- ----------------------------------------------------------------------------
-    -- If you want to send id numbers for currencies which are missing, /dump this
-    -- table while in-game.
-    -- ----------------------------------------------------------------------------
+    --------------------------------------------------------------------------------
+    ---- If you want to send id numbers for currencies which are missing, /dump
+    ---- these tables while in-game.
+    --------------------------------------------------------------------------------
     _G.BROKER_CURRENCY_UNKNOWN = {}
     _G.BROKER_CURRENCY_UNKNOWN_FORMATTED = {}
 
@@ -823,9 +824,9 @@ do
             end
         end
 
-        -- ----------------------------------------------------------------------------
-        -- Set defaults
-        -- ----------------------------------------------------------------------------
+        --------------------------------------------------------------------------------
+        ---- Set Defaults
+        --------------------------------------------------------------------------------
         Broker_CurrencyCharDB =
             Broker_CurrencyCharDB or
             {
@@ -840,9 +841,9 @@ do
                 summaryColorLight = {r = 1, g = 1, b = 1, a = .3}
             }
 
-        -- ----------------------------------------------------------------------------
-        -- Initialize the configuration options.
-        -- ----------------------------------------------------------------------------
+        --------------------------------------------------------------------------------
+        ---- Configuration Options
+        --------------------------------------------------------------------------------
         local iconToken =
             DisplayIconString1 ..
             _G.C_CurrencyInfo.GetCurrencyInfo(CurrencyIDByName.CuriousCoin).iconFileID .. DisplayIconString2
@@ -1116,9 +1117,9 @@ do
         AceConfig:RegisterOptionsTable("Broker_Currency_General", Broker_Currency.generalSettings)
         LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency_General", _G.GENERAL, AddOnFolderName)
 
-        -- ----------------------------------------------------------------------------
-        -- Check or initialize the character database.
-        -- ----------------------------------------------------------------------------
+        --------------------------------------------------------------------------------
+        ---- Check or Initialize Character Database
+        --------------------------------------------------------------------------------
         local char_db = Broker_CurrencyCharDB
 
         if not char_db.iconSize then
@@ -1139,9 +1140,9 @@ do
 
         Broker_CurrencyCharDB = char_db
 
-        -- ----------------------------------------------------------------------------
-        -- Check or initialize the database.
-        -- ----------------------------------------------------------------------------
+        --------------------------------------------------------------------------------
+        ---- Check or Initialize Database
+        --------------------------------------------------------------------------------
         if not Broker_CurrencyDB then
             Broker_CurrencyDB = {}
         end

@@ -1,18 +1,18 @@
-------------------------------------------------------------------------------
---AddOnNamespace
-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+---- AddOn Namespace
+--------------------------------------------------------------------------------
 local _, private = ...
 
 local CurrencyIDByName = private.CurrencyIDByName
 local ItemCurrencyIDByName = private.ItemCurrencyIDByName
 
-------------------------------------------------------------------------------
---Definitions
-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+---- Definitions
+--------------------------------------------------------------------------------
 local OrderedCurrencyGroups = {
-    ------------------------------------------------------------------------------
-    --Archaeology
-    ------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------
+    ---- Archaeology
+    --------------------------------------------------------------------------------
     {
         CurrencyIDByName.ArakkoaArchaelogoyFragment,
         CurrencyIDByName.DemonicArchaeologyFragment,
@@ -35,9 +35,9 @@ local OrderedCurrencyGroups = {
         CurrencyIDByName.VrykulArchaeologyFragment,
         CurrencyIDByName.ZandalariArchaeologyFragment
     },
-    -- ----------------------------------------------------------------------------
-    -- BonusRolls
-    -- ----------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    ---- BonusRolls
+    -------------------------------------------------------------------------------
     {
         CurrencyIDByName.ElderCharmOfGoodFortune,
         CurrencyIDByName.LesserCharmOfGoodFortune,
@@ -48,17 +48,17 @@ local OrderedCurrencyGroups = {
         CurrencyIDByName.SealOfWartornFate,
         CurrencyIDByName.WarforgedSeal
     },
-    -- ----------------------------------------------------------------------------
-    -- Collections
-    -- ----------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    ---- Collections
+    -------------------------------------------------------------------------------
     {
         CurrencyIDByName.GratefulOffering,
         CurrencyIDByName.InfusedRuby,
         CurrencyIDByName.ReservoirAnima
     },
-    -- ----------------------------------------------------------------------------
-    -- Dungeons
-    -- ----------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    ---- Dungeons
+    -------------------------------------------------------------------------------
     {
         CurrencyIDByName.EssenceDeathwing,
         CurrencyIDByName.MoteOfDarkness,
@@ -66,9 +66,9 @@ local OrderedCurrencyGroups = {
         CurrencyIDByName.TimewarpedBadge,
         CurrencyIDByName.Valor
     },
-    -- ----------------------------------------------------------------------------
-    -- Items
-    -- ----------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    ---- Items
+    -------------------------------------------------------------------------------
     {
         ItemCurrencyIDByName.ApexisCrystal,
         ItemCurrencyIDByName.ApexisShard,
@@ -89,9 +89,9 @@ local OrderedCurrencyGroups = {
         ItemCurrencyIDByName.PrimalSpirit,
         ItemCurrencyIDByName.VesselOfHorrificVisions
     },
-    -- ----------------------------------------------------------------------------
-    -- Miscellaneous
-    -- ----------------------------------------------------------------------------
+    --------------------------------------------------------------------------------
+    ---- Miscellaneous
+    --------------------------------------------------------------------------------
     {
         CurrencyIDByName.AncientMana,
         CurrencyIDByName.ArgentCommendation,
@@ -118,9 +118,9 @@ local OrderedCurrencyGroups = {
         CurrencyIDByName.WarResources,
         CurrencyIDByName.WarSupplies
     },
-    -- ----------------------------------------------------------------------------
-    -- Professions
-    -- ----------------------------------------------------------------------------
+    --------------------------------------------------------------------------------
+    ---- Professions
+    --------------------------------------------------------------------------------
     {
         CurrencyIDByName.DalaranJewelcraftersToken,
         CurrencyIDByName.EpicuriansAward,
@@ -132,9 +132,9 @@ local OrderedCurrencyGroups = {
         CurrencyIDByName.SecretOfDraenorLeatherworking,
         CurrencyIDByName.SecretOfDraenorTailoring
     },
-    -- ----------------------------------------------------------------------------
-    -- PVP
-    -- ----------------------------------------------------------------------------
+    --------------------------------------------------------------------------------
+    ----  PVP
+    --------------------------------------------------------------------------------
     {
         CurrencyIDByName.ArtifactFragment,
         CurrencyIDByName.BloodyCoin,
@@ -146,9 +146,9 @@ local OrderedCurrencyGroups = {
         CurrencyIDByName.SpiritShard,
         CurrencyIDByName.TolBaradCommendation
     },
-    -- ----------------------------------------------------------------------------
-    -- QuestObjectives
-    -- ----------------------------------------------------------------------------
+    -------------------------------------------------------------------------------
+    ---- Quest Objectives
+    -------------------------------------------------------------------------------
     {
         CurrencyIDByName.ApexisCrystal,
         CurrencyIDByName.ChampionsSeal,
