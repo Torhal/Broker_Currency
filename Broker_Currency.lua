@@ -589,11 +589,11 @@ function Broker_Currency:Update(event)
 
     for currencyID = 1, 10000 do
         local currencyInfo = _G.C_CurrencyInfo.GetCurrencyInfo(currencyID)
-        local name = currencyInfo and currencyInfo.name or nil
+        local name = currencyInfo and currencyInfo.name:gsub(" ", ""):gsub("'", "") or nil
 
         if name and name ~= "" and not CurrencyNameByID[currencyID] and not tContains(IgnoredCurrencyIDs, currencyID) then
             _G.BROKER_CURRENCY_UNKNOWN[currencyID] = name
-            _G.BROKER_CURRENCY_UNKNOWN_FORMATTED[name:gsub(" ", "")] = currencyID
+            _G.BROKER_CURRENCY_UNKNOWN_FORMATTED[name] = currencyID
         end
     end
 end
