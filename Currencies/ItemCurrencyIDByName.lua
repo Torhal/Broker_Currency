@@ -21,9 +21,10 @@ local ItemCurrencyIDByName = {
     LoveToken = 49927,
     MarkOfHonor = 137642,
     NatsLuckyCoin = 117397,
-    PetCharm = 116415,
+    ShinyPetCharm = 116415,
     PrimalSargerite = 151568,
     PrimalSpirit = 120945,
+    PolishedPetCharm = 163036,
     VesselOfHorrificVisions = 173363
 }
 
