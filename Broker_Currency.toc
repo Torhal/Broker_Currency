@@ -2,7 +2,7 @@
 ## DefaultState: enabled
 ## Interface: 90005
 ## LoadManagers: AddonLoader
-## OptionalDeps: Ace3, LibDataBroker-1.1, LibQTip-1.0, TipTac
+## OptionalDeps: Ace3, LibDataBroker-1.1, LibQTip-1.0, LibTextDump-1.0, TipTac
 ## SavedVariables: Broker_CurrencyDB
 ## SavedVariablesPerCharacter: Broker_CurrencyCharDB
 ## Title: Broker: Currency
@@ -20,11 +20,6 @@
 ## X-BrokerName: Currency
 ## X-Category: Interface Enhancements
 ## X-LoadOn-Always: Delayed
-## X-Website: http://www.wowace.com/projects/broker-currency
+## X-Website: https://www.curseforge.com/wow/addons/broker-currency
 
-# Libraries
-embeds.xml
-
-Currencies\Manifest.xml
-
-Broker_Currency.lua
+Manifest.xml
