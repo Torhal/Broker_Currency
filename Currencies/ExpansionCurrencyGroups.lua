@@ -126,6 +126,7 @@ local ExpansionCurrencyGroups = {
         CurrencyID.InfusedRuby,
         CurrencyID.MedallionOfService,
         CurrencyID.Phantasma,
+        CurrencyID.RedeemedSoul,
         CurrencyID.ReservoirAnima,
         CurrencyID.SinstoneFragments,
         CurrencyID.SoulAsh,

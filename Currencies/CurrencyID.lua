@@ -94,6 +94,7 @@ local CurrencyID = {
     Stygia = 1767,
     Honor = 1792,
     EchoesOfNyalotha = 1803,
+    RedeemedSoul = 1810,
     ReservoirAnima = 1813,
     SinstoneFragments = 1816,
     MedallionOfService = 1819,
