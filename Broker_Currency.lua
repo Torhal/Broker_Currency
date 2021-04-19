@@ -11,34 +11,45 @@ local AceConfig = LibStub("AceConfig-3.0")
 local Broker_Currency = _G.CreateFrame("frame", "Broker_CurrencyFrame")
 _G["Broker_Currency"] = Broker_Currency
 
-local CurrencyIDByName = private.CurrencyIDByName
-local CurrencyNameByID = private.CurrencyNameByID
+local CategoryCurrencyGroups = private.CategoryCurrencyGroups
+local ExpansionCurrencyGroups = private.ExpansionCurrencyGroups
+
+local CategoryCurrencyIDs = private.CategoryCurrencyIDs
+local ExpansionCurrencyIDs = private.ExpansionCurrencyIDs
 local IgnoredCurrencyIDs = private.IgnoredCurrencyIDs
-local ItemCurrencyNameByID = private.ItemCurrencyNameByID
-local OrderedCurrencyGroups = private.OrderedCurrencyGroups
-local OrderedCurrencyIDs = private.OrderedCurrencyIDs
+
+local CurrencyID = private.CurrencyID
+local CurrencyItemName = private.CurrencyItemName
+local CurrencyName = private.CurrencyName
 
 --------------------------------------------------------------------------------
 ---- Constants
 --------------------------------------------------------------------------------
-local CurrencyGroupLabels = {
-    _G.PROFESSIONS_ARCHAEOLOGY,
-    _G.BONUS_ROLL_TOOLTIP_TITLE,
-    _G.COLLECTIONS,
-    _G.DUNGEONS,
-    _G.ITEMS,
-    _G.MISCELLANEOUS,
-    _G.TRADE_SKILLS,
-    _G.PVP,
-    _G.QUEST_OBJECTIVES
+local CategoryGroupLabels = {
+    _G.PROFESSIONS_ARCHAEOLOGY, -- Archaeology
+    _G.BONUS_ROLL_TOOLTIP_TITLE, -- Bonus Loot
+    _G.COLLECTIONS, -- Collections
+    _G.CALENDAR_FILTER_HOLIDAYS, -- Holidays
+    _G.PVP -- PvP
+}
+
+local ExpansionGroupLabels = {
+    _G.EXPANSION_NAME1, -- The Burning Crusade
+    _G.EXPANSION_NAME2, -- Wrath of the Lich King
+    _G.EXPANSION_NAME3, -- Cataclysm
+    _G.EXPANSION_NAME4, -- Mists of Pandaria
+    _G.EXPANSION_NAME5, -- Warlords of Draenor
+    _G.EXPANSION_NAME6, -- Legion
+    _G.EXPANSION_NAME7, -- Battle for Azeroth
+    _G.EXPANSION_NAME8 -- Shadowlands
 }
 
 local GoldIcon = "\124TInterface\\MoneyFrame\\UI-GoldIcon:20:20\124t"
 local SilverIcon = "\124TInterface\\MoneyFrame\\UI-SilverIcon:20:20\124t"
 local CopperIcon = "\124TInterface\\MoneyFrame\\UI-CopperIcon:20:20\124t"
 
-local DisplayIconString1 = "%s \124T"
-local DisplayIconString2 = ":%d:%d\124t"
+local DisplayIconStringLeft = "%s \124T"
+local DisplayIconStringRight = ":%d:%d\124t"
 
 local fontWhite = _G.CreateFont("Broker_CurrencyFontWhite")
 local fontPlus = _G.CreateFont("Broker_CurrencyFontPlus")
@@ -58,7 +69,7 @@ local sMinus = "-"
 local sTotal = "="
 
 -- Populated as needed.
-local CurrencyNames
+local CurrencyNameCache
 local OptionIcons = {}
 local BrokerIcons = {}
 
@@ -71,8 +82,8 @@ DatamineTooltip:SetOwner(_G.WorldFrame, "ANCHOR_NONE")
 --------------------------------------------------------------------------------
 ---- Variables
 --------------------------------------------------------------------------------
-local init_timer_handle
-local player_line_index
+local initializationTimerHandle
+local playerLineIndex
 
 --------------------------------------------------------------------------------
 ---- Helper Functions
@@ -85,14 +96,42 @@ local player_line_index
 local sName, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("Broker_Currency")
 local sName = GetAddOnMetadata("Broker_Currency", "X-BrokerName")
 
-local function GetKey(idnum, broker)
-    return (broker and "show" or "summary") .. idnum
+local function GetKey(currencyID, broker)
+    return (broker and "show" or "summary") .. currencyID
 end
 
-local function ShowOptionIcon(idnum)
-    local size = Broker_CurrencyCharDB.iconSize
+local function ShowOptionIcon(currencyID)
+    local iconSize = Broker_CurrencyCharDB.iconSize
 
-    return string.format("\124T%s%s", OptionIcons[idnum] or "", DisplayIconString2):format(size, size)
+    return string.format("\124T%s%s", OptionIcons[currencyID] or "", DisplayIconStringRight):format(iconSize, iconSize)
+end
+
+local function AddTooltipCurrencyLines(currencyIDList, currencyList, tooltipLine)
+    for index = 1, #currencyIDList do
+        local currencyID = currencyIDList[index]
+
+        if BrokerIcons[currencyID] then
+            local currencyCount = currencyList[currencyID] or 0
+
+            if Broker_CurrencyCharDB[GetKey(currencyID, false)] then
+                if currencyCount == 0 then
+                    tooltipLine[#tooltipLine + 1] = " "
+                else
+                    tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(currencyCount)
+                end
+            end
+        end
+    end
+end
+
+local function AddTooltipHeaderColumns(currencyIDList, tooltipHeader)
+    for currencyIndex = 1, #currencyIDList do
+        local currencyID = currencyIDList[currencyIndex]
+
+        if OptionIcons[currencyID] and Broker_CurrencyCharDB[GetKey(currencyID, false)] then
+            tooltipHeader[#tooltipHeader + 1] = ShowOptionIcon(currencyID)
+        end
+    end
 end
 
 local tooltipBackdrop = {
@@ -112,7 +151,7 @@ local tooltipLinesRecycle = {}
 local tooltipAlignment = {}
 local tooltipHeader = {}
 
-local HEADER_LABELS = {
+local HeaderLabels = {
     [sToday] = true,
     [sYesterday] = true,
     [sThisWeek] = true,
@@ -138,7 +177,7 @@ function Broker_Currency:ShowTooltip(button)
         return
     end
 
-    local char_db = Broker_CurrencyCharDB
+    local characterDB = Broker_CurrencyCharDB
 
     tooltipAlignment[1] = "LEFT"
 
@@ -153,27 +192,18 @@ function Broker_Currency:ShowTooltip(button)
     table.wipe(tooltipHeader)
     tooltipHeader[1] = " "
 
-    for index = 1, #OrderedCurrencyIDs do
-        local idnum = OrderedCurrencyIDs[index]
+    AddTooltipHeaderColumns(CategoryCurrencyIDs, tooltipHeader)
+    AddTooltipHeaderColumns(ExpansionCurrencyIDs, tooltipHeader)
 
-        if OptionIcons[idnum] then
-            local key = GetKey(idnum, false)
-
-            if char_db[key] then
-                tooltipHeader[#tooltipHeader + 1] = ShowOptionIcon(idnum)
-            end
-        end
-    end
-
-    if char_db.summaryGold then
+    if characterDB.summaryGold then
         tooltipHeader[#tooltipHeader + 1] = GoldIcon
     end
 
-    if char_db.summarySilver then
+    if characterDB.summarySilver then
         tooltipHeader[#tooltipHeader + 1] = SilverIcon
     end
 
-    if char_db.summaryCopper then
+    if characterDB.summaryCopper then
         tooltipHeader[#tooltipHeader + 1] = CopperIcon
     end
 
@@ -214,29 +244,29 @@ function Broker_Currency:ShowTooltip(button)
 
         if label == " " then
             tooltip:AddSeparator()
-        elseif label == PlayerName or HEADER_LABELS[label] then
+        elseif label == PlayerName or HeaderLabels[label] then
             tooltip:AddHeader(unpack(tooltipHeader))
             tooltip:SetCell(currentRow, 1, label, fontLabel)
         else
             tooltip:AddLine(unpack(rowList))
 
             if label == sPlus then
-                for index, value in ipairs(rowList) do
-                    tooltip:SetCell(currentRow, index, value, fontPlus)
+                for rowValueIndex, value in ipairs(rowList) do
+                    tooltip:SetCell(currentRow, rowValueIndex, value, fontPlus)
                 end
             elseif label == sMinus then
-                for index, value in ipairs(rowList) do
-                    tooltip:SetCell(currentRow, index, value, fontMinus)
+                for rowValueIndex, value in ipairs(rowList) do
+                    tooltip:SetCell(currentRow, rowValueIndex, value, fontMinus)
                 end
             elseif label == sTotal then
-                for index, value in ipairs(rowList) do
+                for rowValueIndex, value in ipairs(rowList) do
                     if value and type(value) == "number" then
                         if value < 0 then
-                            tooltip:SetCell(currentRow, index, -1 * _G.BreakUpLargeNumbers(value), fontMinus)
+                            tooltip:SetCell(currentRow, rowValueIndex, -1 * _G.BreakUpLargeNumbers(value), fontMinus)
                         else
                             tooltip:SetCell(
                                 currentRow,
-                                index,
+                                rowValueIndex,
                                 value == 0 and " " or _G.BreakUpLargeNumbers(value),
                                 fontPlus
                             )
@@ -245,7 +275,7 @@ function Broker_Currency:ShowTooltip(button)
                 end
             end
 
-            if index == player_line_index then
+            if index == playerLineIndex then
                 tooltip:SetLineColor(currentRow, 1, 1, 1, 0.25)
             end
 
@@ -254,7 +284,7 @@ function Broker_Currency:ShowTooltip(button)
     end
 
     -- Color the even columns
-    local summaryColorLight = char_db.summaryColorLight
+    local summaryColorLight = characterDB.summaryColorLight
 
     if summaryColorLight.a > 0 then
         for index = 2, maxColumns, 2 do
@@ -268,7 +298,7 @@ function Broker_Currency:ShowTooltip(button)
         end
     end
 
-    local summaryColorDark = char_db.summaryColorDark
+    local summaryColorDark = characterDB.summaryColorDark
 
     if _G.TipTac and _G.TipTac.AddModifiedTip then
         -- Pass true as second parameter because hooking OnHide causes C stack overflows
@@ -291,36 +321,21 @@ function Broker_Currency:AddLine(label, currencyList)
 
     tooltipLines[newIndex] = tooltipLinesRecycle[newIndex]
 
-    local line = tooltipLines[newIndex]
-    table.wipe(line)
+    local tooltipLine = tooltipLines[newIndex]
+    table.wipe(tooltipLine)
 
-    line[1] = label
+    tooltipLine[1] = label
 
     if not currencyList then
         return
     end
 
-    local char_db = Broker_CurrencyCharDB
+    AddTooltipCurrencyLines(CategoryCurrencyIDs, currencyList, tooltipLine)
+    AddTooltipCurrencyLines(ExpansionCurrencyIDs, currencyList, tooltipLine)
 
-    -- Create Strings for the various currencies
-    for index = 1, #OrderedCurrencyIDs do
-        local idnum = OrderedCurrencyIDs[index]
-
-        if BrokerIcons[idnum] then
-            local key = GetKey(idnum, false)
-            local count = currencyList[idnum] or 0
-
-            if char_db[key] then
-                if count ~= 0 then
-                    line[#line + 1] = _G.BreakUpLargeNumbers(count)
-                else
-                    line[#line + 1] = " "
-                end
-            end
-        end
-    end
-
-    -- Create Strings for gold, silver, copper
+    --------------------------------------------------------------------------------
+    ---- Create Strings for gold, silver, copper
+    --------------------------------------------------------------------------------
     local money = currencyList.money or 0
     local moneySign = (money < 0) and -1 or 1
     money = money * moneySign
@@ -335,17 +350,19 @@ function Broker_Currency:AddLine(label, currencyList)
     silver = silver * moneySign
     copper = copper * moneySign
 
+    local characterDB = Broker_CurrencyCharDB
+
     if gold + silver + copper ~= 0 then
-        if char_db.summaryGold then
-            line[#line + 1] = _G.BreakUpLargeNumbers(gold)
+        if characterDB.summaryGold then
+            tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(gold)
         end
 
-        if char_db.summarySilver then
-            line[#line + 1] = _G.BreakUpLargeNumbers(silver)
+        if characterDB.summarySilver then
+            tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(silver)
         end
 
-        if char_db.summaryCopper then
-            line[#line + 1] = _G.BreakUpLargeNumbers(copper)
+        if characterDB.summaryCopper then
+            tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(copper)
         end
     end
 end
@@ -357,6 +374,7 @@ do
         if offset then
             return offset
         end
+
         local serverHour, serverMinute = _G.GetGameTime()
         local utcHour = tonumber(date("!%H"))
         local utcMinute = tonumber(date("!%M"))
@@ -370,6 +388,7 @@ do
         elseif offset < -12 then
             offset = offset + 24
         end
+
         return offset
     end
 end
@@ -386,35 +405,41 @@ do
 
     local concatList = {}
 
+    local function ConcatenateMoneyString(currencyTotals, currencyIDList)
+        local characterDB = Broker_CurrencyCharDB
+        local iconSize = characterDB.iconSize
+
+        for index = 1, #currencyIDList do
+            local currencyID = currencyIDList[index]
+            local displayIcon = BrokerIcons[currencyID]
+
+            if displayIcon then
+                local count = currencyTotals[currencyID] or 0
+
+                if count > 0 and characterDB[GetKey(currencyID, true)] then
+                    concatList[#concatList + 1] =
+                        string.format(displayIcon, _G.BreakUpLargeNumbers(count), iconSize, iconSize)
+
+                    concatList[#concatList + 1] = "  "
+                end
+            end
+        end
+    end
+
     -- Create the display string for a single line
     -- money is the gold.silver.copper amount
     -- broker is true if it is the broker string, nil if it is the tooltip summary string
-    -- currencyList contains totals for the set of currencies
-    function CreateMoneyString(currencyList)
-        local money = currencyList.money
-        local char_db = Broker_CurrencyCharDB
+    -- currencyTotals contains totals for the set of currencies
+    function CreateMoneyString(currencyTotals)
+        local money = currencyTotals.money
+        local characterDB = Broker_CurrencyCharDB
 
         -- Create Strings for the various currencies
         table.wipe(concatList)
 
-        if currencyList then
-            for index = 1, #OrderedCurrencyIDs do
-                local currencyID = OrderedCurrencyIDs[index]
-                local displayIcon = BrokerIcons[currencyID]
-
-                if displayIcon then
-                    local key = GetKey(currencyID, true)
-                    local count = currencyList[currencyID] or 0
-                    local size = char_db.iconSize
-
-                    if count > 0 and char_db[key] then
-                        concatList[#concatList + 1] =
-                            string.format(displayIcon, _G.BreakUpLargeNumbers(count), size, size)
-
-                        concatList[#concatList + 1] = "  "
-                    end
-                end
-            end
+        if currencyTotals then
+            ConcatenateMoneyString(currencyTotals, CategoryCurrencyIDs)
+            ConcatenateMoneyString(currencyTotals, ExpansionCurrencyIDs)
         end
 
         -- Create Strings for gold, silver, copper
@@ -424,36 +449,39 @@ do
         local silver = money % 100
         local gold = math.floor(money / 100)
 
-        if char_db.showGold and gold > 0 then
+        if characterDB.showGold and gold > 0 then
             concatList[#concatList + 1] =
                 string.format(
                 GoldAmountTexture,
                 _G.BreakUpLargeNumbers(gold),
-                char_db.iconSizeGold,
-                char_db.iconSizeGold
+                characterDB.iconSizeGold,
+                characterDB.iconSizeGold
             )
+
             concatList[#concatList + 1] = " "
         end
 
-        if char_db.showSilver and gold + silver > 0 then
+        if characterDB.showSilver and gold + silver > 0 then
             concatList[#concatList + 1] =
                 string.format(
                 SilverAmountTexture,
                 _G.BreakUpLargeNumbers(silver),
-                char_db.iconSizeGold,
-                char_db.iconSizeGold
+                characterDB.iconSizeGold,
+                characterDB.iconSizeGold
             )
+
             concatList[#concatList + 1] = " "
         end
 
-        if char_db.showCopper and gold + silver + copper > 0 then
+        if characterDB.showCopper and gold + silver + copper > 0 then
             concatList[#concatList + 1] =
                 string.format(
                 CopperAmountTexture,
                 _G.BreakUpLargeNumbers(copper),
-                char_db.iconSizeGold,
-                char_db.iconSizeGold
+                characterDB.iconSizeGold,
+                characterDB.iconSizeGold
             )
+
             concatList[#concatList + 1] = " "
         end
 
@@ -465,17 +493,54 @@ local GetCurrencyCount
 do
     local validCurrencies = {}
 
-    for index = 1, #OrderedCurrencyIDs do
-        validCurrencies[OrderedCurrencyIDs[index]] = true
+    for index = 1, #CategoryCurrencyIDs do
+        validCurrencies[CategoryCurrencyIDs[index]] = true
     end
 
-    function GetCurrencyCount(idnum)
-        if not validCurrencies[idnum] then
+    for index = 1, #ExpansionCurrencyIDs do
+        validCurrencies[ExpansionCurrencyIDs[index]] = true
+    end
+
+    function GetCurrencyCount(currencyID)
+        if not validCurrencies[currencyID] then
             return 0
         end
 
-        return ItemCurrencyNameByID[idnum] and _G.GetItemCount(idnum, true) or
-            _G.C_CurrencyInfo.GetCurrencyInfo(idnum).quantity
+        return CurrencyItemName[currencyID] and _G.GetItemCount(currencyID, true) or
+            _G.C_CurrencyInfo.GetCurrencyInfo(currencyID).quantity
+    end
+end
+
+local function UpdateTokens(currencyIDList, playerInfo, realmInfo, today)
+    for index = 1, #currencyIDList do
+        local currencyID = currencyIDList[index]
+
+        if BrokerIcons[currencyID] then
+            local count = GetCurrencyCount(currencyID)
+
+            playerInfo[currencyID] = count
+
+            local lastCount = Broker_Currency.last[currencyID]
+
+            if lastCount then
+                if lastCount < count then
+                    Broker_Currency.gained[currencyID] = (Broker_Currency.gained[currencyID] or 0) + count - lastCount
+
+                    playerInfo.gained[today][currencyID] =
+                        (playerInfo.gained[today][currencyID] or 0) + count - lastCount
+
+                    realmInfo.gained[today][currencyID] = (realmInfo.gained[today][currencyID] or 0) + count - lastCount
+                elseif lastCount > count then
+                    Broker_Currency.spent[currencyID] = (Broker_Currency.spent[currencyID] or 0) + lastCount - count
+
+                    playerInfo.spent[today][currencyID] = (playerInfo.spent[today][currencyID] or 0) + lastCount - count
+
+                    realmInfo.spent[today][currencyID] = (realmInfo.spent[today][currencyID] or 0) + lastCount - count
+                end
+            end
+
+            Broker_Currency.last[currencyID] = count
+        end
     end
 end
 
@@ -503,16 +568,15 @@ function Broker_Currency:Update(event)
     end
 
     if _G.GetMoney() == 0 then
-        -- ToDo: check all items for nil?
         return
     end
 
     local realmInfo = Broker_CurrencyDB.realmInfo[RealmName]
-    local player_info = Broker_CurrencyDB.realm[RealmName][PlayerName]
-    local current_money = _G.GetMoney()
+    local playerInfo = Broker_CurrencyDB.realm[RealmName][PlayerName]
+    local currentMoney = _G.GetMoney()
 
     -- Update the current player info
-    player_info.money = current_money
+    playerInfo.money = currentMoney
 
     -- Update Statistics
     local today = GetToday(self)
@@ -524,59 +588,35 @@ function Broker_Currency:Update(event)
     local cutoffDay = today - 14
 
     if today > self.lastTime then
-        player_info.gained[cutoffDay] = nil
-        player_info.spent[cutoffDay] = nil
+        playerInfo.gained[cutoffDay] = nil
+        playerInfo.spent[cutoffDay] = nil
         realmInfo.gained[cutoffDay] = nil
         realmInfo.spent[cutoffDay] = nil
-        player_info.gained[today] = player_info.gained[today] or {money = 0}
-        player_info.spent[today] = player_info.spent[today] or {money = 0}
+        playerInfo.gained[today] = playerInfo.gained[today] or {money = 0}
+        playerInfo.spent[today] = playerInfo.spent[today] or {money = 0}
         realmInfo.gained[today] = realmInfo.gained[today] or {money = 0}
         realmInfo.spent[today] = realmInfo.spent[today] or {money = 0}
         self.lastTime = today
     end
 
     -- Update Money
-    if self.last.money < current_money then
-        self.gained.money = (self.gained.money or 0) + current_money - self.last.money
-        player_info.gained[today].money = (player_info.gained[today].money or 0) + current_money - self.last.money
-        realmInfo.gained[today].money = (realmInfo.gained[today].money or 0) + current_money - self.last.money
-    elseif self.last.money > current_money then
-        self.spent.money = (self.spent.money or 0) + self.last.money - current_money
-        player_info.spent[today].money = (player_info.spent[today].money or 0) + self.last.money - current_money
-        realmInfo.spent[today].money = (realmInfo.spent[today].money or 0) + self.last.money - current_money
+    if self.last.money < currentMoney then
+        self.gained.money = (self.gained.money or 0) + currentMoney - self.last.money
+        playerInfo.gained[today].money = (playerInfo.gained[today].money or 0) + currentMoney - self.last.money
+        realmInfo.gained[today].money = (realmInfo.gained[today].money or 0) + currentMoney - self.last.money
+    elseif self.last.money > currentMoney then
+        self.spent.money = (self.spent.money or 0) + self.last.money - currentMoney
+        playerInfo.spent[today].money = (playerInfo.spent[today].money or 0) + self.last.money - currentMoney
+        realmInfo.spent[today].money = (realmInfo.spent[today].money or 0) + self.last.money - currentMoney
     end
 
-    self.last.money = current_money
+    self.last.money = currentMoney
 
-    -- Update Tokens
-    for index = 1, #OrderedCurrencyIDs do
-        local idnum = OrderedCurrencyIDs[index]
-
-        if BrokerIcons[idnum] then
-            local count = GetCurrencyCount(idnum)
-
-            player_info[idnum] = count
-
-            local last_count = self.last[idnum]
-
-            if last_count then
-                if last_count < count then
-                    self.gained[idnum] = (self.gained[idnum] or 0) + count - last_count
-                    player_info.gained[today][idnum] = (player_info.gained[today][idnum] or 0) + count - last_count
-                    realmInfo.gained[today][idnum] = (realmInfo.gained[today][idnum] or 0) + count - last_count
-                elseif last_count > count then
-                    self.spent[idnum] = (self.spent[idnum] or 0) + last_count - count
-                    player_info.spent[today][idnum] = (player_info.spent[today][idnum] or 0) + last_count - count
-                    realmInfo.spent[today][idnum] = (realmInfo.spent[today][idnum] or 0) + last_count - count
-                end
-            end
-
-            self.last[idnum] = count
-        end
-    end
+    UpdateTokens(CategoryCurrencyIDs, playerInfo, realmInfo, today)
+    UpdateTokens(ExpansionCurrencyIDs, playerInfo, realmInfo, today)
 
     -- Display the money string according to the broker settings
-    self.ldb.text = CreateMoneyString(player_info)
+    self.ldb.text = CreateMoneyString(playerInfo)
 
     self.savedTime = time()
 
@@ -589,67 +629,83 @@ function Broker_Currency:Update(event)
 
     for currencyID = 1, 10000 do
         local currencyInfo = _G.C_CurrencyInfo.GetCurrencyInfo(currencyID)
-        local name = currencyInfo and currencyInfo.name:gsub(" ", ""):gsub("'", "") or nil
+        local formattedName = currencyInfo and currencyInfo.name:gsub(" ", ""):gsub("'", "") or nil
 
-        if name and name ~= "" and not CurrencyNameByID[currencyID] and not tContains(IgnoredCurrencyIDs, currencyID) then
-            _G.BROKER_CURRENCY_UNKNOWN[currencyID] = name
-            _G.BROKER_CURRENCY_UNKNOWN_FORMATTED[name] = currencyID
+        if
+            formattedName and formattedName ~= "" and not CurrencyName[currencyID] and
+                not tContains(IgnoredCurrencyIDs, currencyID)
+         then
+            _G.BROKER_CURRENCY_UNKNOWN[currencyID] = formattedName
+            _G.BROKER_CURRENCY_UNKNOWN_FORMATTED[formattedName] = currencyID
         end
     end
 end
 
 local Tooltip_AddTotals
 do
-    local currency_gained = {}
-    local currency_spent = {}
-    local profit = {}
+    local function UpdateGainedAndSpent(currencyIDList, gained, gainedReference, spent, spentReference)
+        for index = 1, #currencyIDList do
+            local currencyID = currencyIDList[index]
+
+            gainedReference[currencyID] =
+                (gainedReference[currencyID] or 0) + (gained[index] and gained[index][currencyID] or 0)
+
+            spentReference[currencyID] =
+                (spentReference[currencyID] or 0) + (spent[index] and spent[index][currencyID] or 0)
+        end
+    end
+
+    local function UpdateProfit(currencyIDList, profitTable, gainedReference, spentReference)
+        for index = 1, #currencyIDList do
+            local currencyID = currencyIDList[index]
+            profitTable[currencyID] = (gainedReference[currencyID] or 0) - (spentReference[currencyID] or 0)
+        end
+    end
+
+    local currencyGained = {}
+    local currencySpent = {}
+    local profitTable = {}
 
     function Tooltip_AddTotals(label, gained, spent, startTime, endTime)
-        local gained_ref, spent_ref
+        local gainedReference
+        local spentReference
 
-        table.wipe(profit)
+        table.wipe(profitTable)
 
         Broker_Currency:AddLine(" ")
         Broker_Currency:AddLine(label)
         Broker_Currency:AddLine(" ")
 
         if startTime and endTime then
-            table.wipe(currency_gained)
-            table.wipe(currency_spent)
+            table.wipe(currencyGained)
+            table.wipe(currencySpent)
 
-            gained_ref = currency_gained
-            spent_ref = currency_spent
+            gainedReference = currencyGained
+            spentReference = currencySpent
 
             for index = startTime, endTime do
-                gained_ref.money = (gained_ref.money or 0) + (gained[index] and gained[index].money or 0)
-                spent_ref.money = (spent_ref.money or 0) + (spent[index] and spent[index].money or 0)
+                gainedReference.money = (gainedReference.money or 0) + (gained[index] and gained[index].money or 0)
+                spentReference.money = (spentReference.money or 0) + (spent[index] and spent[index].money or 0)
 
-                for orderedIndex = 1, #OrderedCurrencyIDs do
-                    local idnum = OrderedCurrencyIDs[orderedIndex]
-                    gained_ref[idnum] =
-                        (gained_ref[idnum] or 0) + (gained[orderedIndex] and gained[orderedIndex][idnum] or 0)
-                    spent_ref[idnum] =
-                        (spent_ref[idnum] or 0) + (spent[orderedIndex] and spent[orderedIndex][idnum] or 0)
-                end
+                UpdateGainedAndSpent(CategoryCurrencyIDs, gained, gainedReference, spent, spentReference)
+                UpdateGainedAndSpent(ExpansionCurrencyIDs, gained, gainedReference, spent, spentReference)
             end
         elseif startTime then
-            gained_ref = gained[startTime]
-            spent_ref = spent[startTime]
+            gainedReference = gained[startTime]
+            spentReference = spent[startTime]
         else
-            gained_ref = gained
-            spent_ref = spent
+            gainedReference = gained
+            spentReference = spent
         end
 
-        for index = 1, #OrderedCurrencyIDs do
-            local idnum = OrderedCurrencyIDs[index]
-            profit[idnum] = (gained_ref[idnum] or 0) - (spent_ref[idnum] or 0)
-        end
+        UpdateProfit(CategoryCurrencyIDs, profitTable, gainedReference, spentReference)
+        UpdateProfit(ExpansionCurrencyIDs, profitTable, gainedReference, spentReference)
 
-        profit.money = (gained_ref.money or 0) - (spent_ref.money or 0)
+        profitTable.money = (gainedReference.money or 0) - (spentReference.money or 0)
 
-        Broker_Currency:AddLine(sPlus, gained_ref)
-        Broker_Currency:AddLine(sMinus, spent_ref)
-        Broker_Currency:AddLine(sTotal, profit)
+        Broker_Currency:AddLine(sPlus, gainedReference)
+        Broker_Currency:AddLine(sMinus, spentReference)
+        Broker_Currency:AddLine(sTotal, profitTable)
     end
 end -- do-block
 
@@ -674,13 +730,13 @@ do
     local function GetSortedPlayerInfo()
         local index = 1
 
-        for player_name, player_info in pairs(Broker_CurrencyDB.realm[RealmName]) do
+        for playerName, playerInfo in pairs(Broker_CurrencyDB.realm[RealmName]) do
             if not sortMoneyList[index] then
                 sortMoneyList[index] = {}
             end
 
-            sortMoneyList[index].player_name = player_name
-            sortMoneyList[index].player_info = player_info
+            sortMoneyList[index].player_name = playerName
+            sortMoneyList[index].player_info = playerInfo
             index = index + 1
         end
 
@@ -695,7 +751,7 @@ do
 
     -- Handle mouse enter event in our button
     function OnEnter(button)
-        if init_timer_handle then
+        if initializationTimerHandle then
             return
         end
 
@@ -715,7 +771,7 @@ do
 
         for i, data in ipairs(sortedPlayerInfo) do
             if data.player_name == PlayerName then
-                player_line_index = i
+                playerLineIndex = i
             end
 
             Broker_Currency:AddLine(string.format("%s: ", data.player_name), data.player_info, fontWhite)
@@ -801,24 +857,227 @@ Broker_Currency.ldb =
 )
 
 do
+    --------------------------------------------------------------------------------
+    ---- Constants
+    --------------------------------------------------------------------------------
     local wtfDelay = 5 -- For stupid cases where Blizzard pretends a player has no loots, wait up to 15 seconds
+    local iconToken =
+        DisplayIconStringLeft ..
+        _G.C_CurrencyInfo.GetCurrencyInfo(CurrencyID.CuriousCoin).iconFileID .. DisplayIconStringRight
 
+    local metadataVersion = GetAddOnMetadata("Broker_Currency", "Version")
+    local IsDevelopmentVersion = false
+    local IsAlphaVersion = false
+
+    --@debug@
+    IsDevelopmentVersion = true
+    --@end-debug@
+
+    --@alpha@
+    IsAlphaVersion = true
+    --@end-alpha@
+
+    local BuildVersion =
+        IsDevelopmentVersion and "Development Version" or (IsAlphaVersion and metadataVersion .. "-Alpha") or
+        metadataVersion
+
+    --------------------------------------------------------------------------------
+    ---- Helper Functions
+    --------------------------------------------------------------------------------
+    local function getColorValue(info)
+        local color = Broker_CurrencyCharDB[info[#info]]
+
+        return color.r, color.g, color.b, color.a
+    end
+
+    local function setColorValue(info, r, g, b, a)
+        local color = Broker_CurrencyCharDB[info[#info]]
+
+        color.r, color.g, color.b, color.a = r, g, b, a
+        Broker_Currency:Update()
+    end
+
+    local function BuildOptionSection(sectionName, currencyID, currencyName, displayOrder)
+        return {
+            name = ("%s %s"):format(ShowOptionIcon(currencyID), currencyName),
+            desc = CurrencyDescriptions[currencyID],
+            order = displayOrder,
+            type = "toggle",
+            width = "full",
+            get = function()
+                return Broker_CurrencyCharDB[sectionName]
+            end,
+            set = function(_, value)
+                Broker_CurrencyCharDB[sectionName] = true and value or nil
+                Broker_Currency:Update()
+            end
+        }
+    end
+
+    local function SetOptions(brokerArgs, summaryArgs, currencyID, displayOrder)
+        local currencyName = CurrencyNameCache[currencyID] or CurrencyItemName[currencyID] or CurrencyName[currencyID]
+
+        if not currencyName or currencyName == "" then
+            return
+        end
+
+        local brokerName = GetKey(currencyID, true)
+        local summaryName = GetKey(currencyID, nil)
+
+        brokerArgs[brokerName] = BuildOptionSection(brokerName, currencyID, currencyName, displayOrder)
+        summaryArgs[summaryName] = BuildOptionSection(summaryName, currencyID, currencyName, displayOrder)
+    end
+
+    local function AddGroupOptions(groupName, groupList, groupLabels, offset)
+        local brokerDisplay = Broker_Currency.options.args.brokerDisplay.args
+        local summaryDisplay = Broker_Currency.options.args.summaryDisplay.args
+
+        for groupListIndex = 1, #groupList do
+            local group = groupList[groupListIndex]
+            local optionGroupName = groupName .. groupListIndex
+
+            brokerDisplay[optionGroupName] = {
+                name = groupLabels[groupListIndex],
+                order = groupListIndex + offset,
+                type = "group",
+                args = {}
+            }
+
+            summaryDisplay[optionGroupName] = {
+                name = groupLabels[groupListIndex],
+                order = groupListIndex + offset,
+                type = "group",
+                args = {}
+            }
+
+            for groupIndex = 1, #group do
+                SetOptions(
+                    brokerDisplay[optionGroupName].args,
+                    summaryDisplay[optionGroupName].args,
+                    group[groupIndex],
+                    groupIndex
+                )
+            end
+        end
+    end
+
+    -- Add delete settings so deleted characters can be removed
+    local function DeletePlayer(info)
+        local playerName = info[#info]
+        local deleteOptions = Broker_Currency.deleteCharacter.args
+
+        deleteOptions[playerName] = nil
+        deleteOptions[playerName .. "Name"] = nil
+        deleteOptions[playerName .. "Spacer"] = nil
+        Broker_CurrencyDB.realm[RealmName][playerName] = nil
+    end
+
+    local function AddDeleteOptions(playerName, playerInfoList, index)
+        local deleteOptions = Broker_Currency.deleteCharacter.args
+
+        if not deleteOptions[playerName] then
+            deleteOptions[playerName .. "Name"] = {
+                order = index * 3,
+                type = "description",
+                width = "half",
+                name = playerName,
+                fontSize = "medium"
+            }
+
+            deleteOptions[playerName] = {
+                order = index * 3 + 1,
+                type = "execute",
+                width = "half",
+                name = _G.DELETE,
+                desc = playerName,
+                func = DeletePlayer
+            }
+
+            deleteOptions[playerName .. "Spacer"] = {
+                order = index * 3 + 2,
+                type = "description",
+                width = "full",
+                name = ""
+            }
+        end
+    end
+
+    local function SetCacheValuesFromCurrency(currencyID)
+        local currencyInfo = _G.C_CurrencyInfo.GetCurrencyInfo(currencyID)
+        local currencyName = currencyInfo.name
+
+        if currencyName and currencyName ~= "" then
+            CurrencyNameCache[currencyID] = currencyName
+        end
+
+        local iconFileID = currencyInfo.iconFileID
+
+        if iconFileID and iconFileID ~= "" then
+            OptionIcons[currencyID] = iconFileID
+            BrokerIcons[currencyID] = DisplayIconStringLeft .. iconFileID .. DisplayIconStringRight
+        end
+    end
+
+    local function SetCacheValuesFromItem(currencyID)
+        local _, _, _, _, iconFileDataID = _G.GetItemInfoInstant(currencyID)
+
+        if iconFileDataID and iconFileDataID ~= "" then
+            local itemName = _G.GetItemInfo(currencyID)
+
+            if itemName then
+                CurrencyNameCache[currencyID] = itemName
+            end
+
+            OptionIcons[currencyID] = iconFileDataID
+            BrokerIcons[currencyID] = DisplayIconStringLeft .. iconFileDataID .. DisplayIconStringRight
+        end
+    end
+
+    local function SetCacheValues(currencyIDList)
+        for index = 1, #currencyIDList do
+            local currencyID = currencyIDList[index]
+
+            if CurrencyItemName[currencyID] then
+                SetCacheValuesFromItem(currencyID)
+            else
+                SetCacheValuesFromCurrency(currencyID)
+            end
+        end
+    end
+
+    local function UpdatePlayerAndLastCounts(currencyIDList, playerInfo)
+        local last = Broker_Currency.last
+
+        for index = 1, #currencyIDList do
+            local currencyID = currencyIDList[index]
+
+            if BrokerIcons[currencyID] then
+                local count = GetCurrencyCount(currencyID)
+
+                playerInfo[currencyID] = count
+                last[currencyID] = count
+            end
+        end
+    end
+    --------------------------------------------------------------------------------
+    ---- Preferences
+    --------------------------------------------------------------------------------
     function Broker_Currency:InitializeSettings()
-        for _, ID in pairs(CurrencyIDByName) do
-            DatamineTooltip:SetCurrencyTokenByID(ID)
+        for _, currencyID in pairs(CurrencyID) do
+            DatamineTooltip:SetCurrencyTokenByID(currencyID)
 
-            CurrencyDescriptions[ID] = _G["Broker_CurrencyDatamineTooltipTextLeft2"]:GetText()
+            CurrencyDescriptions[currencyID] = _G["Broker_CurrencyDatamineTooltipTextLeft2"]:GetText()
         end
 
         -- No money means trouble
-        if init_timer_handle then
-            self:CancelTimer(init_timer_handle)
-            init_timer_handle = nil
+        if initializationTimerHandle then
+            self:CancelTimer(initializationTimerHandle)
+            initializationTimerHandle = nil
         end
 
         if _G.GetMoney() == 0 then
             if wtfDelay > 0 then
-                init_timer_handle = self:ScheduleTimer(self.InitializeSettings, wtfDelay, self)
+                initializationTimerHandle = self:ScheduleTimer(self.InitializeSettings, wtfDelay, self)
                 wtfDelay = wtfDelay - 1
                 return
             end
@@ -844,82 +1103,10 @@ do
         --------------------------------------------------------------------------------
         ---- Configuration Options
         --------------------------------------------------------------------------------
-        local iconToken =
-            DisplayIconString1 ..
-            _G.C_CurrencyInfo.GetCurrencyInfo(CurrencyIDByName.CuriousCoin).iconFileID .. DisplayIconString2
-
-        -- Provide settings options for non-money currencies
-        local function SetOptions(brokerArgs, summaryArgs, idnum, index)
-            local currency_name = CurrencyNames[idnum] or ItemCurrencyNameByID[idnum]
-
-            if not currency_name or currency_name == "" then
-                return
-            end
-
-            local brokerName = GetKey(idnum, true)
-            local summaryName = GetKey(idnum, nil)
-
-            brokerArgs[brokerName] = {
-                name = ("%s %s"):format(ShowOptionIcon(idnum), currency_name),
-                desc = CurrencyDescriptions[idnum],
-                order = index,
-                type = "toggle",
-                width = "full",
-                get = function()
-                    return Broker_CurrencyCharDB[brokerName]
-                end,
-                set = function(_, value)
-                    Broker_CurrencyCharDB[brokerName] = true and value or nil
-                    Broker_Currency:Update()
-                end
-            }
-
-            summaryArgs[summaryName] = {
-                name = ("%s %s"):format(ShowOptionIcon(idnum), currency_name),
-                desc = CurrencyDescriptions[idnum],
-                order = index,
-                type = "toggle",
-                width = "full",
-                get = function()
-                    return Broker_CurrencyCharDB[summaryName]
-                end,
-                set = function(_, value)
-                    Broker_CurrencyCharDB[summaryName] = true and value or nil
-                    Broker_Currency:Update()
-                end
-            }
-        end
-
-        local function getColorValue(info)
-            local color = Broker_CurrencyCharDB[info[#info]]
-            return color.r, color.g, color.b, color.a
-        end
-
-        local function setColorValue(info, r, g, b, a)
-            local color = Broker_CurrencyCharDB[info[#info]]
-
-            color.r, color.g, color.b, color.a = r, g, b, a
-            Broker_Currency:Update()
-        end
-
-        local addon_version = GetAddOnMetadata("Broker_Currency", "Version")
-        local debug_version = false
-        local alpha_version = false
-
-        --@debug@
-        debug_version = true
-        --@end-debug@
-
-        --@alpha@
-        alpha_version = true
-        --@end-alpha@
-
-        addon_version =
-            debug_version and "Development Version" or (alpha_version and addon_version .. "-Alpha") or addon_version
-
         Broker_Currency.options = {
-            name = ("%s - %s"):format(AddOnFolderName, addon_version),
+            name = ("%s - %s"):format(AddOnFolderName, BuildVersion),
             type = "group",
+            childGroups = "tab",
             get = function(info)
                 return Broker_CurrencyCharDB[info[#info]]
             end,
@@ -927,7 +1114,6 @@ do
                 Broker_CurrencyCharDB[info[#info]] = true and value or nil
                 Broker_Currency:Update()
             end,
-            childGroups = "tab",
             args = {
                 brokerDisplay = {
                     name = _G.DISPLAY,
@@ -1006,6 +1192,7 @@ do
         }
 
         AceConfig:RegisterOptionsTable("Broker_Currency_Character", Broker_Currency.deleteCharacter)
+
         LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency_Character", _G.CHARACTER, AddOnFolderName)
 
         Broker_Currency.generalSettings = {
@@ -1115,30 +1302,31 @@ do
         }
 
         AceConfig:RegisterOptionsTable("Broker_Currency_General", Broker_Currency.generalSettings)
+
         LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency_General", _G.GENERAL, AddOnFolderName)
 
         --------------------------------------------------------------------------------
         ---- Check or Initialize Character Database
         --------------------------------------------------------------------------------
-        local char_db = Broker_CurrencyCharDB
+        local characterDB = Broker_CurrencyCharDB
 
-        if not char_db.iconSize then
-            char_db.iconSize = 16
+        if not characterDB.iconSize then
+            characterDB.iconSize = 16
         end
 
-        if not char_db.iconSizeGold then
-            char_db.iconSizeGold = 16
+        if not characterDB.iconSizeGold then
+            characterDB.iconSizeGold = 16
         end
 
-        if not char_db.summaryColorDark then
-            char_db.summaryColorDark = {r = 0, g = 0, b = 0, a = 0}
+        if not characterDB.summaryColorDark then
+            characterDB.summaryColorDark = {r = 0, g = 0, b = 0, a = 0}
         end
 
-        if not char_db.summaryColorLight then
-            char_db.summaryColorLight = {r = 1, g = 1, b = 1, a = .3}
+        if not characterDB.summaryColorLight then
+            characterDB.summaryColorLight = {r = 1, g = 1, b = 1, a = .3}
         end
 
-        Broker_CurrencyCharDB = char_db
+        Broker_CurrencyCharDB = characterDB
 
         --------------------------------------------------------------------------------
         ---- Check or Initialize Database
@@ -1154,36 +1342,10 @@ do
             db.currencyNames = {}
         end
 
-        CurrencyNames = db.currencyNames
+        CurrencyNameCache = db.currencyNames
 
-        for index = 1, #OrderedCurrencyIDs do
-            local currencyID = OrderedCurrencyIDs[index]
-
-            if ItemCurrencyNameByID[currencyID] then
-                local _, _, _, _, iconFileDataID = _G.GetItemInfoInstant(currencyID)
-
-                if iconFileDataID and iconFileDataID ~= "" then
-                    local currencyName = _G.GetItemInfo(currencyID)
-
-                    if currencyName then
-                        CurrencyNames[currencyID] = currencyName
-                    end
-
-                    OptionIcons[currencyID] = iconFileDataID
-                    BrokerIcons[currencyID] = DisplayIconString1 .. iconFileDataID .. DisplayIconString2
-                end
-            else
-                local currencyInfo = _G.C_CurrencyInfo.GetCurrencyInfo(currencyID)
-                local currencyName = currencyInfo.name
-                local iconFileID = currencyInfo.iconFileID
-
-                if iconFileID and iconFileID ~= "" then
-                    CurrencyNames[currencyID] = currencyName
-                    OptionIcons[currencyID] = iconFileID
-                    BrokerIcons[currencyID] = DisplayIconString1 .. iconFileID .. DisplayIconString2
-                end
-            end
-        end
+        SetCacheValues(CategoryCurrencyIDs)
+        SetCacheValues(ExpansionCurrencyIDs)
 
         if not db.realm then
             db.realm = {}
@@ -1215,32 +1377,22 @@ do
             realmInfo.spent = {}
         end
 
-        local player_info = db.realm[RealmName][PlayerName]
+        local playerInfo = db.realm[RealmName][PlayerName]
 
-        if not player_info.gained or type(player_info.gained) ~= "table" then
-            player_info.gained = {}
+        if not playerInfo.gained or type(playerInfo.gained) ~= "table" then
+            playerInfo.gained = {}
         end
 
-        if not player_info.spent or type(player_info.spent) ~= "table" then
-            player_info.spent = {}
+        if not playerInfo.spent or type(playerInfo.spent) ~= "table" then
+            playerInfo.spent = {}
         end
 
         if not self.last then
             self.last = {}
         end
 
-        local last = self.last
-
-        for index = 1, #OrderedCurrencyIDs do
-            local idnum = OrderedCurrencyIDs[index]
-
-            if BrokerIcons[idnum] then
-                local count = GetCurrencyCount(idnum)
-
-                player_info[idnum] = count
-                last[idnum] = count
-            end
-        end
+        UpdatePlayerAndLastCounts(CategoryCurrencyIDs, playerInfo)
+        UpdatePlayerAndLastCounts(ExpansionCurrencyIDs, playerInfo)
 
         -- Initialize statistics
         self.last.money = _G.GetMoney()
@@ -1248,15 +1400,15 @@ do
 
         local lastWeek = self.lastTime - 13
 
-        for day in pairs(player_info.gained) do
+        for day in pairs(playerInfo.gained) do
             if day < lastWeek then
-                player_info.gained[day] = nil
+                playerInfo.gained[day] = nil
             end
         end
 
-        for day in pairs(player_info.spent) do
+        for day in pairs(playerInfo.spent) do
             if day < lastWeek then
-                player_info.spent[day] = nil
+                playerInfo.spent[day] = nil
             end
         end
 
@@ -1273,14 +1425,14 @@ do
         end
 
         for i = self.lastTime - 13, self.lastTime do
-            if not player_info.gained[i] or type(player_info.gained[i]) ~= "table" then
-                player_info.gained[i] = {
+            if not playerInfo.gained[i] or type(playerInfo.gained[i]) ~= "table" then
+                playerInfo.gained[i] = {
                     money = 0
                 }
             end
 
-            if not player_info.spent[i] or type(player_info.spent[i]) ~= "table" then
-                player_info.spent[i] = {
+            if not playerInfo.spent[i] or type(playerInfo.spent[i]) ~= "table" then
+                playerInfo.spent[i] = {
                     money = 0
                 }
             end
@@ -1310,92 +1462,25 @@ do
         self.savedTime = time()
 
         -- Add settings for the various currencies
-        local brokerDisplay = self.options.args.brokerDisplay.args
-        local summaryDisplay = self.options.args.summaryDisplay.args
-
-        for group_index = 1, #OrderedCurrencyGroups do
-            local group = OrderedCurrencyGroups[group_index]
-            local option_group_name = "group" .. group_index
-
-            brokerDisplay[option_group_name] = {
-                name = CurrencyGroupLabels[group_index],
-                order = group_index + 1, -- Money is first.
-                type = "group",
-                args = {}
-            }
-
-            summaryDisplay[option_group_name] = {
-                name = CurrencyGroupLabels[group_index],
-                order = group_index + 1, -- Money is first.
-                type = "group",
-                args = {}
-            }
-
-            for id_index = 1, #group do
-                SetOptions(
-                    brokerDisplay[option_group_name].args,
-                    summaryDisplay[option_group_name].args,
-                    group[id_index],
-                    id_index
-                )
-            end
-        end
-
-        -- Add delete settings so deleted characters can be removed
-        local function DeletePlayer(info)
-            local player_name = info[#info]
-            local deleteOptions = Broker_Currency.deleteCharacter.args
-
-            deleteOptions[player_name] = nil
-            deleteOptions[player_name .. "Name"] = nil
-            deleteOptions[player_name .. "Spacer"] = nil
-            Broker_CurrencyDB.realm[RealmName][player_name] = nil
-        end
+        AddGroupOptions("group", CategoryCurrencyGroups, CategoryGroupLabels, 1)
+        AddGroupOptions("expansionGroup", ExpansionCurrencyGroups, ExpansionGroupLabels, 50)
 
         -- Provide settings options for tokenInfo
-        local function DeleteOptions(player_name, player_infoList, index)
-            local deleteOptions = Broker_Currency.deleteCharacter.args
-
-            if not deleteOptions[player_name] then
-                deleteOptions[player_name .. "Name"] = {
-                    order = index * 3,
-                    type = "description",
-                    width = "half",
-                    name = player_name,
-                    fontSize = "medium"
-                }
-
-                deleteOptions[player_name] = {
-                    order = index * 3 + 1,
-                    type = "execute",
-                    width = "half",
-                    name = _G.DELETE,
-                    desc = player_name,
-                    func = DeletePlayer
-                }
-
-                deleteOptions[player_name .. "Spacer"] = {
-                    order = index * 3 + 2,
-                    type = "description",
-                    width = "full",
-                    name = ""
-                }
-            end
-        end
-
         local index = 1
 
-        for player_name in pairs(db.realm[RealmName]) do
-            DeleteOptions(player_name, db.realm[RealmName], index)
+        for playerName in pairs(db.realm[RealmName]) do
+            AddDeleteOptions(playerName, db.realm[RealmName], index)
+
             index = index + 1
         end
+
         Broker_CurrencyDB = db
 
         self:UnregisterEvent("BAG_UPDATE")
 
-        if init_timer_handle then
-            self:CancelTimer(init_timer_handle)
-            init_timer_handle = nil
+        if initializationTimerHandle then
+            self:CancelTimer(initializationTimerHandle)
+            initializationTimerHandle = nil
         end
 
         -- Register for update events
@@ -1439,11 +1524,11 @@ end
 
 function Broker_Currency:Startup(event, ...)
     if event == "BAG_UPDATE" then
-        if init_timer_handle then
-            self:CancelTimer(init_timer_handle)
+        if initializationTimerHandle then
+            self:CancelTimer(initializationTimerHandle)
         end
 
-        init_timer_handle = self:ScheduleTimer(self.InitializeSettings, 4, self)
+        initializationTimerHandle = self:ScheduleTimer(self.InitializeSettings, 4, self)
     end
 end
 
@@ -1456,5 +1541,5 @@ LibStub("AceTimer-3.0"):Embed(Broker_Currency)
 
 -- This is only necessary if AddonLoader is present, using the Delayed load. -Torhal
 if IsLoggedIn() then
-    init_timer_handle = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 1, Broker_Currency)
+    initializationTimerHandle = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 1, Broker_Currency)
 end

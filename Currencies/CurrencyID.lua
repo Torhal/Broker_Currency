@@ -6,7 +6,7 @@ local _, private = ...
 --------------------------------------------------------------------------------
 ---- Definitions
 --------------------------------------------------------------------------------
-local CurrencyIDByName = {
+local CurrencyID = {
     DalaranJewelcraftersToken = 61,
     EpicuriansAward = 81,
     ChampionsSeal = 241,
@@ -51,6 +51,7 @@ local CurrencyIDByName = {
     Oil = 1101,
     SealOfInevitableFate = 1129,
     SightlessEye = 1149,
+    ShadowyCoins = 1154,
     AncientMana = 1155,
     TimewarpedBadge = 1166,
     HighborneArchaeologyFragment = 1172,
@@ -62,8 +63,10 @@ local CurrencyIDByName = {
     TimewornArtifact = 1268,
     SealOfBrokenFate = 1273,
     CuriousCoin = 1275,
+    BrawlersGold = 1299,
     LingeringSoulFragment = 1314,
     LegionfallWarSupplies = 1342,
+    Felessence = 1355,
     EchoesOfBattle = 1356,
     EchoesOfDomination = 1357,
     TrialOfStyleToken = 1379,
@@ -99,12 +102,11 @@ local CurrencyIDByName = {
     GratefulOffering = 1885
 }
 
-private.CurrencyIDByName = CurrencyIDByName
+private.CurrencyID = CurrencyID
 
-local CurrencyNameByID = {}
+local CurrencyName = {}
+private.CurrencyName = CurrencyName
 
-for name, currencyID in pairs(CurrencyIDByName) do
-    CurrencyNameByID[currencyID] = name
+for name, currencyID in pairs(CurrencyID) do
+    CurrencyName[currencyID] = name
 end
-
-private.CurrencyNameByID = CurrencyNameByID

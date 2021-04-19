@@ -6,7 +6,7 @@ local _, private = ...
 -- ----------------------------------------------------------------------------
 -- Definition
 -- ----------------------------------------------------------------------------
-local ItemCurrencyIDByName = {
+local CurrencyItemID = {
     ApexisCrystal = 32572,
     ApexisShard = 32569,
     BlackfangClaw = 124099,
@@ -28,11 +28,11 @@ local ItemCurrencyIDByName = {
     VesselOfHorrificVisions = 173363
 }
 
-private.ItemCurrencyIDByName = ItemCurrencyIDByName
+private.CurrencyItemID = CurrencyItemID
 
-local ItemCurrencyNameByID = {}
-private.ItemCurrencyNameByID = ItemCurrencyNameByID
+local CurrencyItemName = {}
+private.CurrencyItemName = CurrencyItemName
 
-for name, ID in pairs(ItemCurrencyIDByName) do
-    ItemCurrencyNameByID[ID] = name
+for name, ID in pairs(CurrencyItemID) do
+    CurrencyItemName[ID] = name
 end
