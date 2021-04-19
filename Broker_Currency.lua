@@ -834,6 +834,7 @@ end -- do-block
 
 local function OnLeave()
     LibQTip:Release(Broker_Currency.tooltip)
+
     Broker_Currency.tooltip = nil
 end
 
@@ -1104,16 +1105,6 @@ do
         ---- Configuration Options
         --------------------------------------------------------------------------------
         Broker_Currency.options = {
-            name = ("%s - %s"):format(AddOnFolderName, BuildVersion),
-            type = "group",
-            childGroups = "tab",
-            get = function(info)
-                return Broker_CurrencyCharDB[info[#info]]
-            end,
-            set = function(info, value)
-                Broker_CurrencyCharDB[info[#info]] = true and value or nil
-                Broker_Currency:Update()
-            end,
             args = {
                 brokerDisplay = {
                     name = _G.DISPLAY,
@@ -1179,7 +1170,17 @@ do
                         }
                     }
                 }
-            }
+            },
+            name = ("%s - %s"):format(AddOnFolderName, BuildVersion),
+            type = "group",
+            childGroups = "tab",
+            get = function(info)
+                return Broker_CurrencyCharDB[info[#info]]
+            end,
+            set = function(info, value)
+                Broker_CurrencyCharDB[info[#info]] = true and value or nil
+                Broker_Currency:Update()
+            end
         }
 
         AceConfig:RegisterOptionsTable(AddOnFolderName, Broker_Currency.options)
