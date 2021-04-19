@@ -60,7 +60,7 @@ local OrderedCurrencyGroups = {
     ---- Dungeons
     -------------------------------------------------------------------------------
     {
-        CurrencyIDByName.EssenceDeathwing,
+        CurrencyIDByName.EssenceOfCorruptedDeathwing,
         CurrencyIDByName.MoteOfDarkness,
         CurrencyIDByName.SoulAsh,
         CurrencyIDByName.TimewarpedBadge,
