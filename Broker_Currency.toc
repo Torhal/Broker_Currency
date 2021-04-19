@@ -22,4 +22,7 @@
 ## X-LoadOn-Always: Delayed
 ## X-Website: https://www.curseforge.com/wow/addons/broker-currency
 
+## X-Curse-Project-ID: 16142
+## X-WoWI-ID: 18307
+
 Manifest.xml
