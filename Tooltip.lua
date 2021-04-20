@@ -1,13 +1,11 @@
-----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 ---- AddOn Namespace
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 local AddOnFolderName, private = ...
 
 local LibStub = _G.LibStub
 local LibQTip = LibStub("LibQTip-1.0")
 local Broker_Currency = LibStub("AceAddon-3.0"):GetAddon(AddOnFolderName)
-
-local InitializationTimerHandle = private.InitializationTimerHandle
 
 local CategoryCurrencyIDs = private.CategoryCurrencyIDs
 local ExpansionCurrencyIDs = private.ExpansionCurrencyIDs
@@ -231,10 +229,6 @@ function DataObject:OnClick(button)
 end
 
 function DataObject:OnEnter()
-    if InitializationTimerHandle then
-        return
-    end
-
     table.wipe(TooltipLines)
     table.wipe(TotalList)
 

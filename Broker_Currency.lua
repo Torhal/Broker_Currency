@@ -7,7 +7,7 @@ local LibStub = _G.LibStub
 local AceConfig = LibStub("AceConfig-3.0")
 
 local Broker_Currency =
-    LibStub("AceAddon-3.0"):NewAddon(AddOnFolderName, "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
+    LibStub("AceAddon-3.0"):NewAddon(AddOnFolderName, "AceBucket-3.0", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
 
 _G["Broker_Currency"] = Broker_Currency
 
@@ -83,11 +83,6 @@ local CurrencyDescriptions = {}
 local DatamineTooltip =
     _G.CreateFrame("GameTooltip", "Broker_CurrencyDatamineTooltip", _G.UIParent, "GameTooltipTemplate")
 DatamineTooltip:SetOwner(_G.WorldFrame, "ANCHOR_NONE")
-
---------------------------------------------------------------------------------
----- Variables
---------------------------------------------------------------------------------
-local InitializationTimerHandle
 
 --------------------------------------------------------------------------------
 ---- Helper Functions
@@ -324,39 +319,14 @@ local function UpdateTokens(currencyIDList, playerInfo, realmInfo, today)
     end
 end
 
-function Broker_Currency:BAG_UPDATE()
-    if InitializationTimerHandle then
-        self:CancelTimer(InitializationTimerHandle)
-    end
-
-    InitializationTimerHandle = self:ScheduleTimer(self.InitializeSettings, 4, self)
-end
-
-function Broker_Currency:PLAYER_ENTERING_WORLD()
-    self:RegisterEvents()
-end
-
-function Broker_Currency:PLAYER_LEAVING_WORLD()
-    self:UnregisterEvents()
-end
-
-function Broker_Currency:PLAYER_REGEN_DISABLED()
-    self:UnregisterEvent("BAG_UPDATE")
-end
-
-function Broker_Currency:PLAYER_REGEN_ENABLED()
-    self:RegisterEvent("BAG_UPDATE", "Update")
-end
-
 function Broker_Currency:OnEnable()
+    UpdateCurrencyDescriptions()
+
+    self:RegisterBucketEvent("BAG_UPDATE", 0.5, "Update")
     self:RegisterEvents()
 end
 
 function Broker_Currency:Update()
-    if _G.GetMoney() == 0 then
-        return
-    end
-
     local realmInfo = Broker_CurrencyDB.realmInfo[RealmName]
     local playerInfo = Broker_CurrencyDB.realm[RealmName][PlayerName]
     local currentMoney = _G.GetMoney()
@@ -642,20 +612,6 @@ do
         self.last = {}
 
         UpdateCurrencyDescriptions()
-
-        -- No money means trouble
-        if InitializationTimerHandle then
-            self:CancelTimer(InitializationTimerHandle)
-            InitializationTimerHandle = nil
-        end
-
-        if _G.GetMoney() == 0 then
-            if wtfDelay > 0 then
-                InitializationTimerHandle = self:ScheduleTimer(self.InitializeSettings, wtfDelay, self)
-                wtfDelay = wtfDelay - 1
-                return
-            end
-        end
 
         --------------------------------------------------------------------------------
         ---- Set Defaults
@@ -1045,19 +1001,6 @@ do
         end
 
         Broker_CurrencyDB = db
-
-        self:UnregisterEvent("BAG_UPDATE")
-
-        if InitializationTimerHandle then
-            self:CancelTimer(InitializationTimerHandle)
-            InitializationTimerHandle = nil
-        end
-
-        -- Register for update events
-        self:RegisterEvent("PLAYER_ENTERING_WORLD", "Update")
-        self:RegisterEvent("PLAYER_LEAVING_WORLD", "Update")
-
-        self:Update()
     end
 end -- do-block
 
@@ -1066,6 +1009,8 @@ local UpdateEventNames = {
     "CURRENCY_DISPLAY_UPDATE",
     "MERCHANT_CLOSED",
     "PLAYER_MONEY",
+    "PLAYER_ENTERING_WORLD",
+    "PLAYER_LEAVING_WORLD",
     "PLAYER_REGEN_DISABLED",
     "PLAYER_REGEN_ENABLED",
     "PLAYER_TRADE_MONEY",
@@ -1087,10 +1032,3 @@ function Broker_Currency:UnregisterEvents()
 end
 
 LibStub("AceTimer-3.0"):Embed(Broker_Currency)
-
--- This is only necessary if AddonLoader is present, using the Delayed load. -Torhal
-if IsLoggedIn() then
-    InitializationTimerHandle = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 1, Broker_Currency)
-
-    private.InitializationTimerHandle = InitializationTimerHandle
-end
