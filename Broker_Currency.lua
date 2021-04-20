@@ -1028,5 +1028,3 @@ do
         Broker_CurrencyDB = db
     end
 end -- do-block
-
-LibStub("AceTimer-3.0"):Embed(Broker_Currency)
