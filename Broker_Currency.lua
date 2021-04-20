@@ -283,7 +283,7 @@ local function UpdateCurrencyDescriptions()
                     end
                 end
 
-                CurrencyDescriptions[currencyID] = description
+                CurrencyDescriptions[currencyID] = ("%s %s"):format(description, _G.PARENS_TEMPLATE:format(_G.ITEMS))
             end
         end
     end
