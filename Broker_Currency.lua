@@ -322,11 +322,31 @@ local function UpdateTokens(currencyIDList, playerInfo, realmInfo, today)
     end
 end
 
-function Broker_Currency:OnEnable()
-    UpdateCurrencyDescriptions()
+local UpdateEventNames = {
+    "BANKFRAME_OPENED",
+    "CHAT_MSG_CURRENCY",
+    "CHAT_MSG_LOOT",
+    "CURRENCY_DISPLAY_UPDATE",
+    "MERCHANT_CLOSED",
+    "PLAYER_MONEY",
+    "PLAYER_ENTERING_WORLD",
+    "PLAYER_LEAVING_WORLD",
+    "PLAYER_REGEN_DISABLED",
+    "PLAYER_REGEN_ENABLED",
+    "PLAYER_TRADE_MONEY",
+    "SEND_MAIL_COD_CHANGED",
+    "SEND_MAIL_MONEY_CHANGED",
+    "TRADE_MONEY_CHANGED"
+}
 
+function Broker_Currency:OnEnable()
     self:RegisterBucketEvent("BAG_UPDATE", 0.5, "Update")
-    self:RegisterEvents()
+
+    for index = 1, #UpdateEventNames do
+        self:RegisterEvent(UpdateEventNames[index], "Update")
+    end
+
+    UpdateCurrencyDescriptions()
 end
 
 function Broker_Currency:Update()
@@ -1006,32 +1026,5 @@ do
         Broker_CurrencyDB = db
     end
 end -- do-block
-
-local UpdateEventNames = {
-    "BAG_UPDATE",
-    "CURRENCY_DISPLAY_UPDATE",
-    "MERCHANT_CLOSED",
-    "PLAYER_MONEY",
-    "PLAYER_ENTERING_WORLD",
-    "PLAYER_LEAVING_WORLD",
-    "PLAYER_REGEN_DISABLED",
-    "PLAYER_REGEN_ENABLED",
-    "PLAYER_TRADE_MONEY",
-    "SEND_MAIL_COD_CHANGED",
-    "SEND_MAIL_MONEY_CHANGED",
-    "TRADE_MONEY_CHANGED"
-}
-
-function Broker_Currency:RegisterEvents()
-    for index = 1, #UpdateEventNames do
-        self:RegisterEvent(UpdateEventNames[index], "Update")
-    end
-end
-
-function Broker_Currency:UnregisterEvents()
-    for index = 1, #UpdateEventNames do
-        self:UnregisterEvent(UpdateEventNames[index])
-    end
-end
 
 LibStub("AceTimer-3.0"):Embed(Broker_Currency)
