@@ -26,7 +26,6 @@ private.IgnoredCurrencyIDs = {
     810, -- Black Iron Fragment
     830, -- n/a
     897, -- UNUSED
-    1154, -- Shadowy Coins
     1347, -- Legionfall Building - Personal Tracker - Mage Tower (Hidden)
     1349, -- Legionfall Building - Personal Tracker - Command Tower (Hidden)
     1350, -- Legionfall Building - Personal Tracker - Nether Tower (Hidden)
