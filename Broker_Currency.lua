@@ -267,16 +267,19 @@ local function UpdateCurrencyDescriptions()
             if itemHyperlink then
                 DatamineTooltip:SetHyperlink(itemHyperlink)
 
-                local left3 = _G["Broker_CurrencyDatamineTooltipTextLeft3"]:GetText()
-                local left4 = _G["Broker_CurrencyDatamineTooltipTextLeft4"]:GetText()
+                local left3 = _G["Broker_CurrencyDatamineTooltipTextLeft3"]
+                local left3Text = left3 and left3:GetText() or nil
+
+                local left4 = _G["Broker_CurrencyDatamineTooltipTextLeft4"]
+                local left4Text = left4:GetText() or nil
 
                 local description
 
-                if left3 and left3 ~= "" then
-                    if left4 and left4 ~= "" then
-                        description = ("%s\n\n%s"):format(left3, left4)
+                if left3Text and left3Text ~= "" then
+                    if left4Text and left4Text ~= "" then
+                        description = ("%s\n\n%s"):format(left3Text, left4Text)
                     else
-                        description = left3
+                        description = left3Text
                     end
                 end
 
