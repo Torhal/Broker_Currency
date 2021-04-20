@@ -468,7 +468,9 @@ do
     local function BuildOptionSection(sectionName, currencyID, currencyName, displayOrder)
         return {
             name = ("%s %s"):format(ShowOptionIcon(currencyID), currencyName),
-            desc = CurrencyDescriptions[currencyID],
+            desc = function()
+                return CurrencyDescriptions[currencyID]
+            end,
             order = displayOrder,
             type = "toggle",
             width = "full",
