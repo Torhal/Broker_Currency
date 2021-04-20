@@ -273,7 +273,7 @@ local function UpdateCurrencyDescriptions()
                 local left4 = _G["Broker_CurrencyDatamineTooltipTextLeft4"]
                 local left4Text = left4:GetText() or nil
 
-                local description
+                local description = _G.SEARCH_LOADING_TEXT
 
                 if left3Text and left3Text ~= "" then
                     if left4Text and left4Text ~= "" then
