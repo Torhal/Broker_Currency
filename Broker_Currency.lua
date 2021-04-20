@@ -19,6 +19,8 @@ local ExpansionCurrencyIDs = private.ExpansionCurrencyIDs
 local IgnoredCurrencyIDs = private.IgnoredCurrencyIDs
 
 local CurrencyID = private.CurrencyID
+local CurrencyItemID = private.CurrencyItemID
+
 local CurrencyItemName = private.CurrencyItemName
 local CurrencyName = private.CurrencyName
 
@@ -254,6 +256,41 @@ do
     end
 end
 
+local function UpdateCurrencyDescriptions()
+    for _, currencyID in pairs(CurrencyID) do
+        DatamineTooltip:SetCurrencyTokenByID(currencyID)
+
+        CurrencyDescriptions[currencyID] = _G["Broker_CurrencyDatamineTooltipTextLeft2"]:GetText()
+    end
+
+    for _, currencyID in pairs(CurrencyItemID) do
+        local _, _, _, _, iconFileDataID = _G.GetItemInfoInstant(currencyID)
+
+        if iconFileDataID and iconFileDataID ~= "" then
+            local _, itemHyperlink = _G.GetItemInfo(currencyID)
+
+            if itemHyperlink then
+                DatamineTooltip:SetHyperlink(itemHyperlink)
+
+                local left3 = _G["Broker_CurrencyDatamineTooltipTextLeft3"]:GetText()
+                local left4 = _G["Broker_CurrencyDatamineTooltipTextLeft4"]:GetText()
+
+                local description
+
+                if left3 and left3 ~= "" then
+                    if left4 and left4 ~= "" then
+                        description = ("%s\n\n%s"):format(left3, left4)
+                    else
+                        description = left3
+                    end
+                end
+
+                CurrencyDescriptions[currencyID] = description
+            end
+        end
+    end
+end
+
 local function UpdateTokens(currencyIDList, playerInfo, realmInfo, today)
     for index = 1, #currencyIDList do
         local currencyID = currencyIDList[index]
@@ -323,6 +360,8 @@ function Broker_Currency:Update()
     local realmInfo = Broker_CurrencyDB.realmInfo[RealmName]
     local playerInfo = Broker_CurrencyDB.realm[RealmName][PlayerName]
     local currentMoney = _G.GetMoney()
+
+    UpdateCurrencyDescriptions()
 
     -- Update the current player info
     playerInfo.money = currentMoney
@@ -595,17 +634,14 @@ do
             end
         end
     end
+
     --------------------------------------------------------------------------------
     ---- Preferences
     --------------------------------------------------------------------------------
     function Broker_Currency:OnInitialize()
         self.last = {}
 
-        for _, currencyID in pairs(CurrencyID) do
-            DatamineTooltip:SetCurrencyTokenByID(currencyID)
-
-            CurrencyDescriptions[currencyID] = _G["Broker_CurrencyDatamineTooltipTextLeft2"]:GetText()
-        end
+        UpdateCurrencyDescriptions()
 
         -- No money means trouble
         if InitializationTimerHandle then
