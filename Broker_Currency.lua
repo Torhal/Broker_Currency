@@ -4,11 +4,11 @@
 local AddOnFolderName, private = ...
 
 local LibStub = _G.LibStub
-local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
-local LibQTip = LibStub("LibQTip-1.0")
 local AceConfig = LibStub("AceConfig-3.0")
 
-local Broker_Currency = _G.CreateFrame("frame", "Broker_CurrencyFrame")
+local Broker_Currency =
+    LibStub("AceAddon-3.0"):NewAddon(AddOnFolderName, "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
+
 _G["Broker_Currency"] = Broker_Currency
 
 local CategoryCurrencyGroups = private.CategoryCurrencyGroups
@@ -45,28 +45,31 @@ local ExpansionGroupLabels = {
 }
 
 local GoldIcon = "\124TInterface\\MoneyFrame\\UI-GoldIcon:20:20\124t"
+private.GoldIcon = GoldIcon
+
 local SilverIcon = "\124TInterface\\MoneyFrame\\UI-SilverIcon:20:20\124t"
+private.SilverIcon = SilverIcon
+
 local CopperIcon = "\124TInterface\\MoneyFrame\\UI-CopperIcon:20:20\124t"
+private.CopperIcon = CopperIcon
+
+local TodayLabel = _G.HONOR_TODAY
+private.TodayLabel = TodayLabel
+
+local YesterdayLabel = _G.HONOR_YESTERDAY
+private.YesterdayLabel = YesterdayLabel
+
+local ThisWeekLabel = _G.ARENA_THIS_WEEK
+private.ThisWeekLabel = ThisWeekLabel
+
+local LastWeekLabel = _G.HONOR_LASTWEEK
+private.LastWeekLabel = LastWeekLabel
 
 local DisplayIconStringLeft = "%s \124T"
 local DisplayIconStringRight = ":%d:%d\124t"
 
-local fontWhite = _G.CreateFont("Broker_CurrencyFontWhite")
-local fontPlus = _G.CreateFont("Broker_CurrencyFontPlus")
-local fontMinus = _G.CreateFont("Broker_CurrencyFontMinus")
-local fontLabel = _G.CreateFont("Broker_CurrencyFontLabel")
-
 local PlayerName = _G.UnitName("player")
 local RealmName = _G.GetRealmName()
-
-local sToday = _G.HONOR_TODAY
-local sYesterday = _G.HONOR_YESTERDAY
-local sThisWeek = _G.ARENA_THIS_WEEK
-local sLastWeek = _G.HONOR_LASTWEEK
-
-local sPlus = "+"
-local sMinus = "-"
-local sTotal = "="
 
 -- Populated as needed.
 local CurrencyNameCache
@@ -82,8 +85,7 @@ DatamineTooltip:SetOwner(_G.WorldFrame, "ANCHOR_NONE")
 --------------------------------------------------------------------------------
 ---- Variables
 --------------------------------------------------------------------------------
-local initializationTimerHandle
-local playerLineIndex
+local InitializationTimerHandle
 
 --------------------------------------------------------------------------------
 ---- Helper Functions
@@ -96,276 +98,17 @@ local playerLineIndex
 local sName, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("Broker_Currency")
 local sName = GetAddOnMetadata("Broker_Currency", "X-BrokerName")
 
-local function GetKey(currencyID, broker)
-    return (broker and "show" or "summary") .. currencyID
+local function GetKey(currencyID, isForBroker)
+    return (isForBroker and "show" or "summary") .. currencyID
 end
+private.GetKey = GetKey
 
 local function ShowOptionIcon(currencyID)
     local iconSize = Broker_CurrencyCharDB.iconSize
 
     return string.format("\124T%s%s", OptionIcons[currencyID] or "", DisplayIconStringRight):format(iconSize, iconSize)
 end
-
-local function AddTooltipCurrencyLines(currencyIDList, currencyList, tooltipLine)
-    for index = 1, #currencyIDList do
-        local currencyID = currencyIDList[index]
-
-        if BrokerIcons[currencyID] then
-            local currencyCount = currencyList[currencyID] or 0
-
-            if Broker_CurrencyCharDB[GetKey(currencyID, false)] then
-                if currencyCount == 0 then
-                    tooltipLine[#tooltipLine + 1] = " "
-                else
-                    tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(currencyCount)
-                end
-            end
-        end
-    end
-end
-
-local function AddTooltipHeaderColumns(currencyIDList, tooltipHeader)
-    for currencyIndex = 1, #currencyIDList do
-        local currencyID = currencyIDList[currencyIndex]
-
-        if OptionIcons[currencyID] and Broker_CurrencyCharDB[GetKey(currencyID, false)] then
-            tooltipHeader[#tooltipHeader + 1] = ShowOptionIcon(currencyID)
-        end
-    end
-end
-
-local tooltipBackdrop = {
-    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-    tile = false,
-    tileSize = 16,
-    insets = {
-        left = 0,
-        right = 0,
-        top = 2,
-        bottom = 2
-    }
-}
-
-local tooltipLines = {}
-local tooltipLinesRecycle = {}
-local tooltipAlignment = {}
-local tooltipHeader = {}
-
-local HeaderLabels = {
-    [sToday] = true,
-    [sYesterday] = true,
-    [sThisWeek] = true,
-    [sLastWeek] = true
-}
-
-function Broker_Currency:ShowTooltip(button)
-    Broker_Currency:Update()
-
-    local maxColumns = 0
-
-    for _, rowList in pairs(tooltipLines) do
-        local columns = 0
-
-        for _ in pairs(rowList) do
-            columns = columns + 1
-        end
-
-        maxColumns = math.max(maxColumns, columns)
-    end
-
-    if maxColumns <= 0 then
-        return
-    end
-
-    local characterDB = Broker_CurrencyCharDB
-
-    tooltipAlignment[1] = "LEFT"
-
-    for index = 2, maxColumns + 1 do
-        tooltipAlignment[index] = "RIGHT"
-    end
-
-    for index = #tooltipAlignment, maxColumns + 2, -1 do
-        tooltipAlignment[index] = nil
-    end
-
-    table.wipe(tooltipHeader)
-    tooltipHeader[1] = " "
-
-    AddTooltipHeaderColumns(CategoryCurrencyIDs, tooltipHeader)
-    AddTooltipHeaderColumns(ExpansionCurrencyIDs, tooltipHeader)
-
-    if characterDB.summaryGold then
-        tooltipHeader[#tooltipHeader + 1] = GoldIcon
-    end
-
-    if characterDB.summarySilver then
-        tooltipHeader[#tooltipHeader + 1] = SilverIcon
-    end
-
-    if characterDB.summaryCopper then
-        tooltipHeader[#tooltipHeader + 1] = CopperIcon
-    end
-
-    local tooltip = LibQTip:Acquire("Broker_CurrencyTooltip", maxColumns, unpack(tooltipAlignment))
-    tooltip:SetCellMarginH(1)
-    tooltip:SetCellMarginV(1)
-
-    self.tooltip = tooltip
-
-    local fontName, fontHeight, fontFlags = tooltip:GetFont():GetFont()
-
-    fontPlus:SetFont(fontName, fontHeight, fontFlags)
-    fontPlus:SetTextColor(0, 1, 0)
-    fontPlus:SetJustifyH("RIGHT")
-    fontPlus:SetJustifyV("MIDDLE")
-
-    fontMinus:SetFont(fontName, fontHeight, fontFlags)
-    fontMinus:SetTextColor(1, 0, 0)
-    fontMinus:SetJustifyH("RIGHT")
-    fontMinus:SetJustifyV("MIDDLE")
-
-    fontWhite:SetFont(fontName, fontHeight, fontFlags)
-    fontWhite:SetTextColor(1, 1, 1)
-    fontWhite:SetJustifyH("RIGHT")
-    fontWhite:SetJustifyV("MIDDLE")
-
-    fontLabel:SetFont(fontName, fontHeight, fontFlags)
-    fontLabel:SetTextColor(1, 1, 0.5)
-    fontLabel:SetJustifyH("LEFT")
-    fontLabel:SetJustifyV("MIDDLE")
-
-    tooltip:AddHeader(unpack(tooltipHeader))
-    tooltip:SetFont(fontWhite)
-
-    for index, rowList in pairs(tooltipLines) do
-        local label = rowList[1]
-        local currentRow = index + 1
-
-        if label == " " then
-            tooltip:AddSeparator()
-        elseif label == PlayerName or HeaderLabels[label] then
-            tooltip:AddHeader(unpack(tooltipHeader))
-            tooltip:SetCell(currentRow, 1, label, fontLabel)
-        else
-            tooltip:AddLine(unpack(rowList))
-
-            if label == sPlus then
-                for rowValueIndex, value in ipairs(rowList) do
-                    tooltip:SetCell(currentRow, rowValueIndex, value, fontPlus)
-                end
-            elseif label == sMinus then
-                for rowValueIndex, value in ipairs(rowList) do
-                    tooltip:SetCell(currentRow, rowValueIndex, value, fontMinus)
-                end
-            elseif label == sTotal then
-                for rowValueIndex, value in ipairs(rowList) do
-                    if value and type(value) == "number" then
-                        if value < 0 then
-                            tooltip:SetCell(currentRow, rowValueIndex, -1 * _G.BreakUpLargeNumbers(value), fontMinus)
-                        else
-                            tooltip:SetCell(
-                                currentRow,
-                                rowValueIndex,
-                                value == 0 and " " or _G.BreakUpLargeNumbers(value),
-                                fontPlus
-                            )
-                        end
-                    end
-                end
-            end
-
-            if index == playerLineIndex then
-                tooltip:SetLineColor(currentRow, 1, 1, 1, 0.25)
-            end
-
-            tooltip:SetCell(currentRow, 1, label, fontLabel)
-        end
-    end
-
-    -- Color the even columns
-    local summaryColorLight = characterDB.summaryColorLight
-
-    if summaryColorLight.a > 0 then
-        for index = 2, maxColumns, 2 do
-            tooltip:SetColumnColor(
-                index,
-                summaryColorLight.r,
-                summaryColorLight.g,
-                summaryColorLight.b,
-                summaryColorLight.a
-            )
-        end
-    end
-
-    local summaryColorDark = characterDB.summaryColorDark
-
-    if _G.TipTac and _G.TipTac.AddModifiedTip then
-        -- Pass true as second parameter because hooking OnHide causes C stack overflows
-        _G.TipTac:AddModifiedTip(tooltip, true)
-    elseif summaryColorDark.a > 0 then
-        tooltip:SetBackdrop(tooltipBackdrop)
-        tooltip:SetBackdropColor(summaryColorDark.r, summaryColorDark.g, summaryColorDark.b, summaryColorDark.a)
-    end
-
-    tooltip:SmartAnchorTo(button)
-    tooltip:Show()
-end
-
-function Broker_Currency:AddLine(label, currencyList)
-    local newIndex = #tooltipLines + 1
-
-    if not tooltipLinesRecycle[newIndex] then
-        tooltipLinesRecycle[newIndex] = {}
-    end
-
-    tooltipLines[newIndex] = tooltipLinesRecycle[newIndex]
-
-    local tooltipLine = tooltipLines[newIndex]
-    table.wipe(tooltipLine)
-
-    tooltipLine[1] = label
-
-    if not currencyList then
-        return
-    end
-
-    AddTooltipCurrencyLines(CategoryCurrencyIDs, currencyList, tooltipLine)
-    AddTooltipCurrencyLines(ExpansionCurrencyIDs, currencyList, tooltipLine)
-
-    --------------------------------------------------------------------------------
-    ---- Create Strings for gold, silver, copper
-    --------------------------------------------------------------------------------
-    local money = currencyList.money or 0
-    local moneySign = (money < 0) and -1 or 1
-    money = money * moneySign
-
-    local copper = money % 100
-    money = (money - copper) / 100
-
-    local silver = money % 100
-    local gold = math.floor(money / 100)
-
-    gold = gold * moneySign
-    silver = silver * moneySign
-    copper = copper * moneySign
-
-    local characterDB = Broker_CurrencyCharDB
-
-    if gold + silver + copper ~= 0 then
-        if characterDB.summaryGold then
-            tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(gold)
-        end
-
-        if characterDB.summarySilver then
-            tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(silver)
-        end
-
-        if characterDB.summaryCopper then
-            tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(copper)
-        end
-    end
-end
+private.ShowOptionIcon = ShowOptionIcon
 
 do
     local offset
@@ -544,29 +287,35 @@ local function UpdateTokens(currencyIDList, playerInfo, realmInfo, today)
     end
 end
 
-function Broker_Currency:Update(event)
-    if event == "PLAYER_ENTERING_WORLD" then
-        self:RegisterEvents()
+function Broker_Currency:BAG_UPDATE()
+    if InitializationTimerHandle then
+        self:CancelTimer(InitializationTimerHandle)
     end
 
-    if event == "PLAYER_LEAVING_WORLD" then
-        self:UnregisterEvents()
-        return
-    end
+    InitializationTimerHandle = self:ScheduleTimer(self.InitializeSettings, 4, self)
+end
 
-    if self.InitializeSettings then
-        self:InitializeSettings()
-    end
+function Broker_Currency:PLAYER_ENTERING_WORLD()
+    self:RegisterEvents()
+end
 
-    if event == "PLAYER_REGEN_ENABLED" then
-        self:RegisterEvent("BAG_UPDATE", "Update")
-    end
+function Broker_Currency:PLAYER_LEAVING_WORLD()
+    self:UnregisterEvents()
+end
 
-    if event == "PLAYER_REGEN_DISABLED" then
-        self:UnregisterEvent("BAG_UPDATE")
-        return
-    end
+function Broker_Currency:PLAYER_REGEN_DISABLED()
+    self:UnregisterEvent("BAG_UPDATE")
+end
 
+function Broker_Currency:PLAYER_REGEN_ENABLED()
+    self:RegisterEvent("BAG_UPDATE", "Update")
+end
+
+function Broker_Currency:OnEnable()
+    self:RegisterEvents()
+end
+
+function Broker_Currency:Update()
     if _G.GetMoney() == 0 then
         return
     end
@@ -616,7 +365,9 @@ function Broker_Currency:Update(event)
     UpdateTokens(ExpansionCurrencyIDs, playerInfo, realmInfo, today)
 
     -- Display the money string according to the broker settings
-    self.ldb.text = CreateMoneyString(playerInfo)
+    if private.DataObject then
+        private.DataObject.text = CreateMoneyString(playerInfo)
+    end
 
     self.savedTime = time()
 
@@ -640,222 +391,6 @@ function Broker_Currency:Update(event)
         end
     end
 end
-
-local Tooltip_AddTotals
-do
-    local function UpdateGainedAndSpent(currencyIDList, gained, gainedReference, spent, spentReference)
-        for index = 1, #currencyIDList do
-            local currencyID = currencyIDList[index]
-
-            gainedReference[currencyID] =
-                (gainedReference[currencyID] or 0) + (gained[index] and gained[index][currencyID] or 0)
-
-            spentReference[currencyID] =
-                (spentReference[currencyID] or 0) + (spent[index] and spent[index][currencyID] or 0)
-        end
-    end
-
-    local function UpdateProfit(currencyIDList, profitTable, gainedReference, spentReference)
-        for index = 1, #currencyIDList do
-            local currencyID = currencyIDList[index]
-            profitTable[currencyID] = (gainedReference[currencyID] or 0) - (spentReference[currencyID] or 0)
-        end
-    end
-
-    local currencyGained = {}
-    local currencySpent = {}
-    local profitTable = {}
-
-    function Tooltip_AddTotals(label, gained, spent, startTime, endTime)
-        local gainedReference
-        local spentReference
-
-        table.wipe(profitTable)
-
-        Broker_Currency:AddLine(" ")
-        Broker_Currency:AddLine(label)
-        Broker_Currency:AddLine(" ")
-
-        if startTime and endTime then
-            table.wipe(currencyGained)
-            table.wipe(currencySpent)
-
-            gainedReference = currencyGained
-            spentReference = currencySpent
-
-            for index = startTime, endTime do
-                gainedReference.money = (gainedReference.money or 0) + (gained[index] and gained[index].money or 0)
-                spentReference.money = (spentReference.money or 0) + (spent[index] and spent[index].money or 0)
-
-                UpdateGainedAndSpent(CategoryCurrencyIDs, gained, gainedReference, spent, spentReference)
-                UpdateGainedAndSpent(ExpansionCurrencyIDs, gained, gainedReference, spent, spentReference)
-            end
-        elseif startTime then
-            gainedReference = gained[startTime]
-            spentReference = spent[startTime]
-        else
-            gainedReference = gained
-            spentReference = spent
-        end
-
-        UpdateProfit(CategoryCurrencyIDs, profitTable, gainedReference, spentReference)
-        UpdateProfit(ExpansionCurrencyIDs, profitTable, gainedReference, spentReference)
-
-        profitTable.money = (gainedReference.money or 0) - (spentReference.money or 0)
-
-        Broker_Currency:AddLine(sPlus, gainedReference)
-        Broker_Currency:AddLine(sMinus, spentReference)
-        Broker_Currency:AddLine(sTotal, profitTable)
-    end
-end -- do-block
-
-local OnEnter
-do
-    local totalList = {}
-    local sortMoneyList = {}
-
-    -- Sorting is in descending order of money
-    local function SortByMoneyDescending(a, b)
-        if a.player_info.money and b.player_info.money then
-            return a.player_info.money > b.player_info.money
-        elseif a.player_info.money then
-            return true
-        elseif b.player_info.money then
-            return false
-        else
-            return true
-        end
-    end
-
-    local function GetSortedPlayerInfo()
-        local index = 1
-
-        for playerName, playerInfo in pairs(Broker_CurrencyDB.realm[RealmName]) do
-            if not sortMoneyList[index] then
-                sortMoneyList[index] = {}
-            end
-
-            sortMoneyList[index].player_name = playerName
-            sortMoneyList[index].player_info = playerInfo
-            index = index + 1
-        end
-
-        for i = #sortMoneyList, index, -1 do
-            sortMoneyList[i] = nil
-        end
-
-        table.sort(sortMoneyList, SortByMoneyDescending)
-
-        return sortMoneyList
-    end
-
-    -- Handle mouse enter event in our button
-    function OnEnter(button)
-        if initializationTimerHandle then
-            return
-        end
-
-        local self = Broker_Currency
-
-        if Broker_Currency.InitializeSettings then
-            Broker_Currency:InitializeSettings()
-        end
-
-        table.wipe(tooltipLines)
-
-        -- Display the money string according to the summary settings
-        table.wipe(totalList)
-
-        local sortedPlayerInfo = GetSortedPlayerInfo()
-        local charDB = Broker_CurrencyCharDB
-
-        for i, data in ipairs(sortedPlayerInfo) do
-            if data.player_name == PlayerName then
-                playerLineIndex = i
-            end
-
-            Broker_Currency:AddLine(string.format("%s: ", data.player_name), data.player_info, fontWhite)
-
-            -- Add counts from player_info to totalList according to the summary settings this character is interested in
-            for summaryName in pairs(charDB) do
-                local countKey = tonumber(string.match(summaryName, "summary(%d+)"))
-                local count = data.player_info[countKey]
-
-                if count then
-                    totalList[countKey] = (totalList[countKey] or 0) + count
-                end
-            end
-
-            totalList.money = (totalList.money or 0) + (data.player_info.money or 0)
-        end
-
-        Broker_Currency:AddLine(" ")
-
-        -- Statistics
-        -- Session totals
-        local gained = self.gained
-        local spent = self.spent
-
-        if charDB.summaryPlayerSession then
-            Tooltip_AddTotals(PlayerName, gained, spent, nil, nil)
-        end
-
-        -- Today totals
-        local realmInfo = Broker_CurrencyDB.realmInfo[RealmName]
-        gained = realmInfo.gained
-        spent = realmInfo.spent
-
-        if charDB.summaryRealmToday then
-            Tooltip_AddTotals(sToday, gained, spent, self.lastTime, nil)
-        end
-
-        -- Yesterday totals
-        if charDB.summaryRealmYesterday then
-            Tooltip_AddTotals(sYesterday, gained, spent, self.lastTime - 1, nil)
-        end
-
-        -- This Week totals
-        if charDB.summaryRealmThisWeek then
-            Tooltip_AddTotals(sThisWeek, gained, spent, self.lastTime - 6, self.lastTime)
-        end
-
-        -- Last Week totals
-        if charDB.summaryRealmLastWeek then
-            Tooltip_AddTotals(sLastWeek, gained, spent, self.lastTime - 13, self.lastTime - 7)
-        end
-
-        -- Totals
-        Broker_Currency:AddLine(" ")
-        Broker_Currency:AddLine(_G.ACHIEVEMENT_SUMMARY_CATEGORY, totalList)
-
-        Broker_Currency:ShowTooltip(button)
-    end
-end -- do-block
-
-local function OnLeave()
-    LibQTip:Release(Broker_Currency.tooltip)
-
-    Broker_Currency.tooltip = nil
-end
-
--- Set up as a LibBroker data source
-Broker_Currency.ldb =
-    LDB:NewDataObject(
-    "Broker Currency",
-    {
-        type = "data source",
-        label = _G.CURRENCY,
-        icon = "Interface\\MoneyFrame\\UI-GoldIcon",
-        text = "Initializing...",
-        OnClick = function(_, button)
-            if button == "RightButton" then
-                _G.InterfaceOptionsFrame_OpenToCategory(Broker_Currency.menu)
-            end
-        end,
-        OnEnter = OnEnter,
-        OnLeave = OnLeave
-    }
-)
 
 do
     --------------------------------------------------------------------------------
@@ -1063,7 +598,9 @@ do
     --------------------------------------------------------------------------------
     ---- Preferences
     --------------------------------------------------------------------------------
-    function Broker_Currency:InitializeSettings()
+    function Broker_Currency:OnInitialize()
+        self.last = {}
+
         for _, currencyID in pairs(CurrencyID) do
             DatamineTooltip:SetCurrencyTokenByID(currencyID)
 
@@ -1071,14 +608,14 @@ do
         end
 
         -- No money means trouble
-        if initializationTimerHandle then
-            self:CancelTimer(initializationTimerHandle)
-            initializationTimerHandle = nil
+        if InitializationTimerHandle then
+            self:CancelTimer(InitializationTimerHandle)
+            InitializationTimerHandle = nil
         end
 
         if _G.GetMoney() == 0 then
             if wtfDelay > 0 then
-                initializationTimerHandle = self:ScheduleTimer(self.InitializeSettings, wtfDelay, self)
+                InitializationTimerHandle = self:ScheduleTimer(self.InitializeSettings, wtfDelay, self)
                 wtfDelay = wtfDelay - 1
                 return
             end
@@ -1281,22 +818,22 @@ do
                 },
                 summaryRealmToday = {
                     type = "toggle",
-                    name = sToday,
+                    name = TodayLabel,
                     order = 202
                 },
                 summaryRealmYesterday = {
                     type = "toggle",
-                    name = sYesterday,
+                    name = YesterdayLabel,
                     order = 203
                 },
                 summaryRealmThisWeek = {
                     type = "toggle",
-                    name = sThisWeek,
+                    name = ThisWeekLabel,
                     order = 204
                 },
                 summaryRealmLastWeek = {
                     type = "toggle",
-                    name = sLastWeek,
+                    name = LastWeekLabel,
                     order = 205
                 }
             }
@@ -1388,10 +925,6 @@ do
             playerInfo.spent = {}
         end
 
-        if not self.last then
-            self.last = {}
-        end
-
         UpdatePlayerAndLastCounts(CategoryCurrencyIDs, playerInfo)
         UpdatePlayerAndLastCounts(ExpansionCurrencyIDs, playerInfo)
 
@@ -1479,36 +1012,30 @@ do
 
         self:UnregisterEvent("BAG_UPDATE")
 
-        if initializationTimerHandle then
-            self:CancelTimer(initializationTimerHandle)
-            initializationTimerHandle = nil
+        if InitializationTimerHandle then
+            self:CancelTimer(InitializationTimerHandle)
+            InitializationTimerHandle = nil
         end
 
         -- Register for update events
-        self:RegisterEvents()
-
         self:RegisterEvent("PLAYER_ENTERING_WORLD", "Update")
         self:RegisterEvent("PLAYER_LEAVING_WORLD", "Update")
-
-        -- Done initializing
-        self:SetScript("OnEvent", Broker_Currency.Update)
-        self.InitializeSettings = nil
 
         self:Update()
     end
 end -- do-block
 
 local UpdateEventNames = {
+    "BAG_UPDATE",
     "CURRENCY_DISPLAY_UPDATE",
     "MERCHANT_CLOSED",
     "PLAYER_MONEY",
-    "PLAYER_TRADE_MONEY",
-    "TRADE_MONEY_CHANGED",
-    "SEND_MAIL_MONEY_CHANGED",
-    "SEND_MAIL_COD_CHANGED",
-    "PLAYER_REGEN_ENABLED",
     "PLAYER_REGEN_DISABLED",
-    "BAG_UPDATE"
+    "PLAYER_REGEN_ENABLED",
+    "PLAYER_TRADE_MONEY",
+    "SEND_MAIL_COD_CHANGED",
+    "SEND_MAIL_MONEY_CHANGED",
+    "TRADE_MONEY_CHANGED"
 }
 
 function Broker_Currency:RegisterEvents()
@@ -1523,24 +1050,11 @@ function Broker_Currency:UnregisterEvents()
     end
 end
 
-function Broker_Currency:Startup(event, ...)
-    if event == "BAG_UPDATE" then
-        if initializationTimerHandle then
-            self:CancelTimer(initializationTimerHandle)
-        end
-
-        initializationTimerHandle = self:ScheduleTimer(self.InitializeSettings, 4, self)
-    end
-end
-
--- Initialize after end of BAG_UPDATE events
-Broker_Currency:RegisterEvent("BAG_UPDATE")
-Broker_Currency:RegisterEvent("PLAYER_MONEY")
-Broker_Currency:SetScript("OnEvent", Broker_Currency.Startup)
-
 LibStub("AceTimer-3.0"):Embed(Broker_Currency)
 
 -- This is only necessary if AddonLoader is present, using the Delayed load. -Torhal
 if IsLoggedIn() then
-    initializationTimerHandle = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 1, Broker_Currency)
+    InitializationTimerHandle = Broker_Currency:ScheduleTimer(Broker_Currency.InitializeSettings, 1, Broker_Currency)
+
+    private.InitializationTimerHandle = InitializationTimerHandle
 end

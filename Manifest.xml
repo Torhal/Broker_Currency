@@ -4,4 +4,5 @@
     <Include file="Currencies\Manifest.xml"/>
     <Script file="Debugger.lua"/>
     <Script file="Broker_Currency.lua"/>
+    <Script file="Tooltip.lua"/>
 </Ui>
