@@ -106,34 +106,26 @@ local function ShowOptionIcon(currencyID)
 end
 private.ShowOptionIcon = ShowOptionIcon
 
-do
-    local offset
+local function GetServerOffset()
+    local serverHour, serverMinute = _G.GetGameTime()
+    local utcHour = tonumber(date("!%H"))
+    local utcMinute = tonumber(date("!%M"))
+    local ser = serverHour + serverMinute / 60
+    local utc = utcHour + utcMinute / 60
 
-    function Broker_Currency:GetServerOffset()
-        if offset then
-            return offset
-        end
+    local offset = math.floor((ser - utc) * 2 + 0.5) / 2
 
-        local serverHour, serverMinute = _G.GetGameTime()
-        local utcHour = tonumber(date("!%H"))
-        local utcMinute = tonumber(date("!%M"))
-        local ser = serverHour + serverMinute / 60
-        local utc = utcHour + utcMinute / 60
-
-        offset = math.floor((ser - utc) * 2 + 0.5) / 2
-
-        if offset >= 12 then
-            offset = offset - 24
-        elseif offset < -12 then
-            offset = offset + 24
-        end
-
-        return offset
+    if offset >= 12 then
+        offset = offset - 24
+    elseif offset < -12 then
+        offset = offset + 24
     end
+
+    return offset
 end
 
-local function GetToday(self)
-    return math.floor((time() / 60 / 60 + self:GetServerOffset()) / 24)
+local function GetToday()
+    return math.floor((time() / 60 / 60 + GetServerOffset()) / 24)
 end
 
 local CreateMoneyString
@@ -360,7 +352,7 @@ function Broker_Currency:Update()
     playerInfo.money = currentMoney
 
     -- Update Statistics
-    local today = GetToday(self)
+    local today = GetToday()
 
     if not self.lastTime then
         self.lastTime = today
@@ -946,7 +938,7 @@ do
 
         -- Initialize statistics
         self.last.money = _G.GetMoney()
-        self.lastTime = GetToday(self)
+        self.lastTime = GetToday()
 
         local lastWeek = self.lastTime - 13
 
