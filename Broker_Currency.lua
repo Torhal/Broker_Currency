@@ -525,7 +525,7 @@ do
     -- Add delete settings so deleted characters can be removed
     local function DeletePlayer(info)
         local playerName = info[#info]
-        local deleteOptions = Broker_Currency.deleteCharacter.args
+        local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
 
         deleteOptions[playerName] = nil
         deleteOptions[playerName .. "Name"] = nil
@@ -534,7 +534,7 @@ do
     end
 
     local function AddDeleteOptions(playerName, playerInfoList, index)
-        local deleteOptions = Broker_Currency.deleteCharacter.args
+        local deleteOptions = Broker_Currency.options.args.deleteCharacter.args
 
         if not deleteOptions[playerName] then
             deleteOptions[playerName .. "Name"] = {
@@ -651,10 +651,120 @@ do
         --------------------------------------------------------------------------------
         Broker_Currency.options = {
             args = {
-                brokerDisplay = {
-                    name = _G.DISPLAY,
+                deleteCharacter = {
+                    args = {},
+                    order = 4,
+                    name = _G.CHARACTER,
+                    type = "group"
+                },
+                generalSettings = {
+                    args = {
+                        iconSize = {
+                            type = "range",
+                            order = 10,
+                            name = string.format(iconToken, 8, 16, 16),
+                            desc = _G.TOKENS,
+                            min = 1,
+                            max = 32,
+                            step = 1,
+                            bigStep = 1,
+                            get = function()
+                                return Broker_CurrencyCharDB.iconSize
+                            end,
+                            set = function(info, value)
+                                local iconSize = Broker_CurrencyCharDB.iconSize
+
+                                Broker_CurrencyCharDB[info[#info]] = true and value or nil
+                                Broker_Currency.generalSettings.args.iconSize.name =
+                                    iconToken:format(8, iconSize, iconSize)
+                                Broker_Currency:Update()
+                            end
+                        },
+                        iconSizeGold = {
+                            type = "range",
+                            order = 10,
+                            name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
+                            desc = _G.MONEY,
+                            min = 1,
+                            max = 32,
+                            step = 1,
+                            bigStep = 1,
+                            get = function()
+                                return Broker_CurrencyCharDB.iconSizeGold
+                            end,
+                            set = function(info, value)
+                                local iconSize = Broker_CurrencyCharDB.iconSizeGold
+
+                                Broker_CurrencyCharDB[info[#info]] = true and value or nil
+                                Broker_Currency.generalSettings.args.iconSizeGold.name =
+                                    _G.GOLD_AMOUNT_TEXTURE:format(8, iconSize, iconSize)
+                                Broker_Currency:Update()
+                            end
+                        },
+                        color_header = {
+                            order = 100,
+                            type = "header",
+                            name = _G.COLOR
+                        },
+                        summaryColorDark = {
+                            type = "color",
+                            name = _G.BACKGROUND,
+                            order = 101,
+                            get = getColorValue,
+                            set = setColorValue,
+                            hasAlpha = true
+                        },
+                        summaryColorLight = {
+                            type = "color",
+                            name = _G.HIGHLIGHTING,
+                            order = 102,
+                            get = getColorValue,
+                            set = setColorValue,
+                            hasAlpha = true
+                        },
+                        statistics_header = {
+                            order = 200,
+                            type = "header",
+                            name = _G.STATISTICS
+                        },
+                        summaryPlayerSession = {
+                            type = "toggle",
+                            name = PlayerName,
+                            order = 201
+                        },
+                        summaryRealmToday = {
+                            type = "toggle",
+                            name = TodayLabel,
+                            order = 202
+                        },
+                        summaryRealmYesterday = {
+                            type = "toggle",
+                            name = YesterdayLabel,
+                            order = 203
+                        },
+                        summaryRealmThisWeek = {
+                            type = "toggle",
+                            name = ThisWeekLabel,
+                            order = 204
+                        },
+                        summaryRealmLastWeek = {
+                            type = "toggle",
+                            name = LastWeekLabel,
+                            order = 205
+                        }
+                    },
+                    get = function(info)
+                        return Broker_CurrencyCharDB[info[#info]]
+                    end,
+                    name = _G.GENERAL,
                     order = 1,
-                    type = "group",
+                    set = function(info, value)
+                        Broker_CurrencyCharDB[info[#info]] = true and value or nil
+                        Broker_Currency:Update()
+                    end,
+                    type = "group"
+                },
+                brokerDisplay = {
                     args = {
                         money = {
                             name = _G.MONEY,
@@ -681,12 +791,12 @@ do
                                 }
                             }
                         }
-                    }
+                    },
+                    name = _G.DISPLAY,
+                    order = 2,
+                    type = "group"
                 },
                 summaryDisplay = {
-                    type = "group",
-                    name = _G.ACHIEVEMENT_SUMMARY_CATEGORY,
-                    order = 2,
                     args = {
                         money = {
                             name = _G.MONEY,
@@ -713,143 +823,26 @@ do
                                 }
                             }
                         }
-                    }
+                    },
+                    name = _G.ACHIEVEMENT_SUMMARY_CATEGORY,
+                    order = 2,
+                    type = "group"
                 }
             },
-            name = ("%s - %s"):format(AddOnFolderName, BuildVersion),
-            type = "group",
             childGroups = "tab",
             get = function(info)
                 return Broker_CurrencyCharDB[info[#info]]
             end,
+            name = ("%s - %s"):format(AddOnFolderName, BuildVersion),
             set = function(info, value)
                 Broker_CurrencyCharDB[info[#info]] = true and value or nil
                 Broker_Currency:Update()
-            end
+            end,
+            type = "group"
         }
 
         AceConfig:RegisterOptionsTable(AddOnFolderName, Broker_Currency.options)
         Broker_Currency.menu = AceConfigDialog:AddToBlizOptions(AddOnFolderName)
-
-        Broker_Currency.deleteCharacter = {
-            name = _G.CHARACTER,
-            type = "group",
-            args = {}
-        }
-
-        AceConfig:RegisterOptionsTable("Broker_Currency_Character", Broker_Currency.deleteCharacter)
-
-        AceConfigDialog:AddToBlizOptions("Broker_Currency_Character", _G.CHARACTER, AddOnFolderName)
-
-        Broker_Currency.generalSettings = {
-            name = _G.GENERAL,
-            type = "group",
-            get = function(info)
-                return Broker_CurrencyCharDB[info[#info]]
-            end,
-            set = function(info, value)
-                Broker_CurrencyCharDB[info[#info]] = true and value or nil
-                Broker_Currency:Update()
-            end,
-            args = {
-                iconSize = {
-                    type = "range",
-                    order = 10,
-                    name = string.format(iconToken, 8, 16, 16),
-                    desc = _G.TOKENS,
-                    min = 1,
-                    max = 32,
-                    step = 1,
-                    bigStep = 1,
-                    get = function()
-                        return Broker_CurrencyCharDB.iconSize
-                    end,
-                    set = function(info, value)
-                        local iconSize = Broker_CurrencyCharDB.iconSize
-
-                        Broker_CurrencyCharDB[info[#info]] = true and value or nil
-                        Broker_Currency.generalSettings.args.iconSize.name = iconToken:format(8, iconSize, iconSize)
-                        Broker_Currency:Update()
-                    end
-                },
-                iconSizeGold = {
-                    type = "range",
-                    order = 10,
-                    name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
-                    desc = _G.MONEY,
-                    min = 1,
-                    max = 32,
-                    step = 1,
-                    bigStep = 1,
-                    get = function()
-                        return Broker_CurrencyCharDB.iconSizeGold
-                    end,
-                    set = function(info, value)
-                        local iconSize = Broker_CurrencyCharDB.iconSizeGold
-
-                        Broker_CurrencyCharDB[info[#info]] = true and value or nil
-                        Broker_Currency.generalSettings.args.iconSizeGold.name =
-                            _G.GOLD_AMOUNT_TEXTURE:format(8, iconSize, iconSize)
-                        Broker_Currency:Update()
-                    end
-                },
-                color_header = {
-                    order = 100,
-                    type = "header",
-                    name = _G.COLOR
-                },
-                summaryColorDark = {
-                    type = "color",
-                    name = _G.BACKGROUND,
-                    order = 101,
-                    get = getColorValue,
-                    set = setColorValue,
-                    hasAlpha = true
-                },
-                summaryColorLight = {
-                    type = "color",
-                    name = _G.HIGHLIGHTING,
-                    order = 102,
-                    get = getColorValue,
-                    set = setColorValue,
-                    hasAlpha = true
-                },
-                statistics_header = {
-                    order = 200,
-                    type = "header",
-                    name = _G.STATISTICS
-                },
-                summaryPlayerSession = {
-                    type = "toggle",
-                    name = PlayerName,
-                    order = 201
-                },
-                summaryRealmToday = {
-                    type = "toggle",
-                    name = TodayLabel,
-                    order = 202
-                },
-                summaryRealmYesterday = {
-                    type = "toggle",
-                    name = YesterdayLabel,
-                    order = 203
-                },
-                summaryRealmThisWeek = {
-                    type = "toggle",
-                    name = ThisWeekLabel,
-                    order = 204
-                },
-                summaryRealmLastWeek = {
-                    type = "toggle",
-                    name = LastWeekLabel,
-                    order = 205
-                }
-            }
-        }
-
-        AceConfig:RegisterOptionsTable("Broker_Currency_General", Broker_Currency.generalSettings)
-
-        AceConfigDialog:AddToBlizOptions("Broker_Currency_General", _G.GENERAL, AddOnFolderName)
 
         --------------------------------------------------------------------------------
         ---- Check or Initialize Character Database
