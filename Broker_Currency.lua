@@ -343,7 +343,21 @@ end
 
 function Broker_Currency:Update()
     local realmInfo = Broker_CurrencyDB.realmInfo[RealmName]
+
+    if not realmInfo then
+        realmInfo = {}
+
+        Broker_CurrencyDB.realmInfo[RealmName] = realmInfo
+    end
+
     local playerInfo = Broker_CurrencyDB.realm[RealmName][PlayerName]
+
+    if not playerInfo then
+        playerInfo = {}
+
+        Broker_CurrencyDB.realm[RealmName][PlayerName] = playerInfo
+    end
+
     local currentMoney = _G.GetMoney()
 
     UpdateCurrencyDescriptions()
