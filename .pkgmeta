@@ -5,6 +5,8 @@ externals:
     url: https://repos.curseforge.com/wow/ace3/trunk/AceConfig-3.0
   Libraries/AceConsole-3.0:
     url: https://repos.curseforge.com/wow/ace3/trunk/AceConsole-3.0
+  Libraries/AceBucket-3.0:
+    url: https://repos.curseforge.com/wow/ace3/trunk/AceBucket-3.0
   Libraries/AceDB-3.0:
     url: https://repos.curseforge.com/wow/ace3/trunk/AceDB-3.0
   Libraries/AceDBOptions-3.0:
