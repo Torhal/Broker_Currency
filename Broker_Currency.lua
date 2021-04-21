@@ -94,9 +94,6 @@ DatamineTooltip:SetOwner(_G.WorldFrame, "ANCHOR_NONE")
     Options are saved per character in Broker_CurrencyCharDB
     There are separate settings for display of the broker, and the summary display on the tooltip
 ]]
-local sName, title, sNotes, enabled, loadable, reason, security = GetAddOnInfo("Broker_Currency")
-local sName = GetAddOnMetadata("Broker_Currency", "X-BrokerName")
-
 local function GetKey(currencyID, isForBroker)
     return (isForBroker and "show" or "summary") .. currencyID
 end
