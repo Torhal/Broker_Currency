@@ -283,11 +283,12 @@ local function UpdateCurrencyDescriptions()
                     end
                 end
 
-                CurrencyDescriptions[currencyID] = ("%s %s"):format(description, _G.PARENS_TEMPLATE:format(_G.ITEMS))
+                CurrencyDescriptions[currencyID] = ("%s\n\n%s"):format(_G.PARENS_TEMPLATE:format(_G.ITEMS), description)
             end
         end
     end
 end
+private.UpdateCurrencyDescriptions = UpdateCurrencyDescriptions
 
 local function UpdateTokens(currencyIDList, playerInfo, realmInfo, today)
     for index = 1, #currencyIDList do
