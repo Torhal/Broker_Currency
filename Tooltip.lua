@@ -4,7 +4,11 @@
 local AddOnFolderName, private = ...
 
 local LibStub = _G.LibStub
+
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+local LibDataBroker = LibStub("LibDataBroker-1.1")
 local LibQTip = LibStub("LibQTip-1.0")
+
 local Broker_Currency = LibStub("AceAddon-3.0"):GetAddon(AddOnFolderName)
 
 local CategoryCurrencyIDs = private.CategoryCurrencyIDs
@@ -71,7 +75,7 @@ local TooltipBackdrop = {
 }
 
 local DataObject =
-    LibStub("LibDataBroker-1.1"):NewDataObject(
+    LibDataBroker:NewDataObject(
     AddOnFolderName,
     {
         icon = [[Interface\MoneyFrame\UI-GoldIcon]],

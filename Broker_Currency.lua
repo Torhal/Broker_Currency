@@ -4,7 +4,9 @@
 local AddOnFolderName, private = ...
 
 local LibStub = _G.LibStub
+
 local AceConfig = LibStub("AceConfig-3.0")
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
 local Broker_Currency =
     LibStub("AceAddon-3.0"):NewAddon(AddOnFolderName, "AceBucket-3.0", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
@@ -738,7 +740,7 @@ do
         }
 
         AceConfig:RegisterOptionsTable(AddOnFolderName, Broker_Currency.options)
-        Broker_Currency.menu = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddOnFolderName)
+        Broker_Currency.menu = AceConfigDialog:AddToBlizOptions(AddOnFolderName)
 
         Broker_Currency.deleteCharacter = {
             name = _G.CHARACTER,
@@ -748,7 +750,7 @@ do
 
         AceConfig:RegisterOptionsTable("Broker_Currency_Character", Broker_Currency.deleteCharacter)
 
-        LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency_Character", _G.CHARACTER, AddOnFolderName)
+        AceConfigDialog:AddToBlizOptions("Broker_Currency_Character", _G.CHARACTER, AddOnFolderName)
 
         Broker_Currency.generalSettings = {
             name = _G.GENERAL,
@@ -858,7 +860,7 @@ do
 
         AceConfig:RegisterOptionsTable("Broker_Currency_General", Broker_Currency.generalSettings)
 
-        LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Broker_Currency_General", _G.GENERAL, AddOnFolderName)
+        AceConfigDialog:AddToBlizOptions("Broker_Currency_General", _G.GENERAL, AddOnFolderName)
 
         --------------------------------------------------------------------------------
         ---- Check or Initialize Character Database
