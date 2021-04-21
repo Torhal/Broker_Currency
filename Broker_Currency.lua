@@ -429,7 +429,6 @@ do
     --------------------------------------------------------------------------------
     ---- Constants
     --------------------------------------------------------------------------------
-    local wtfDelay = 5 -- For stupid cases where Blizzard pretends a player has no loots, wait up to 15 seconds
     local iconToken =
         DisplayIconStringLeft ..
         _G.C_CurrencyInfo.GetCurrencyInfo(CurrencyID.CuriousCoin).iconFileID .. DisplayIconStringRight

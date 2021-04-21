@@ -224,7 +224,6 @@ end
 function DataObject:OnClick(button)
     if button == "RightButton" then
         LibStub("AceConfigDialog-3.0"):Open(AddOnFolderName)
-    -- _G.InterfaceOptionsFrame_OpenToCategory(Broker_Currency.menu)
     end
 end
 
