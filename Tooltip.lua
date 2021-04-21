@@ -16,6 +16,7 @@ local ExpansionCurrencyIDs = private.ExpansionCurrencyIDs
 
 local GetKey = private.GetKey
 local ShowOptionIcon = private.ShowOptionIcon
+local UpdateCurrencyDescriptions = private.UpdateCurrencyDescriptions
 
 local GoldIcon = private.GoldIcon
 local SilverIcon = private.SilverIcon
@@ -227,7 +228,9 @@ end
 --------------------------------------------------------------------------------
 function DataObject:OnClick(button)
     if button == "RightButton" then
-        LibStub("AceConfigDialog-3.0"):Open(AddOnFolderName)
+        UpdateCurrencyDescriptions()
+
+        AceConfigDialog:Open(AddOnFolderName)
     end
 end
 
