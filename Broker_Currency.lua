@@ -1024,5 +1024,8 @@ do
         end
 
         Broker_CurrencyDB = db
+
+        private.OptionIcons = OptionIcons
+        private.BrokerIcons = BrokerIcons
     end
 end -- do-block

@@ -42,9 +42,6 @@ local PlusToken = "+"
 local MinusToken = "-"
 local TotalToken = "="
 
-local OptionIcons = {}
-local BrokerIcons = {}
-
 local CurrencyGained = {}
 local CurrencySpent = {}
 local ProfitTable = {}
@@ -88,7 +85,7 @@ local function AddTooltipCurrencyLines(currencyIDList, currencyList, tooltipLine
     for index = 1, #currencyIDList do
         local currencyID = currencyIDList[index]
 
-        if BrokerIcons[currencyID] then
+        if private.BrokerIcons[currencyID] then
             local currencyCount = currencyList[currencyID] or 0
 
             if Broker_CurrencyCharDB[GetKey(currencyID, false)] then
@@ -106,7 +103,7 @@ local function AddTooltipHeaderColumns(currencyIDList, tooltipHeader)
     for currencyIndex = 1, #currencyIDList do
         local currencyID = currencyIDList[currencyIndex]
 
-        if OptionIcons[currencyID] and Broker_CurrencyCharDB[GetKey(currencyID, false)] then
+        if private.OptionIcons[currencyID] and Broker_CurrencyCharDB[GetKey(currencyID, false)] then
             tooltipHeader[#tooltipHeader + 1] = ShowOptionIcon(currencyID)
         end
     end
