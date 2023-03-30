@@ -63,18 +63,6 @@ local HeaderLabels = {
     [LastWeekLabel] = true
 }
 
-local TooltipBackdrop = {
-    bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
-    tile = false,
-    tileSize = 16,
-    insets = {
-        left = 0,
-        right = 0,
-        top = 2,
-        bottom = 2
-    }
-}
-
 local DataObject =
     LibDataBroker:NewDataObject(
     AddOnFolderName,
@@ -456,12 +444,8 @@ function Broker_Currency:ShowTooltip(button)
 
     local summaryColorDark = characterDB.summaryColorDark
 
-    if _G.TipTac and _G.TipTac.AddModifiedTip then
-        -- Pass true as second parameter because hooking OnHide causes C stack overflows
-        _G.TipTac:AddModifiedTip(tooltip, true)
-    elseif summaryColorDark.a > 0 then
-        tooltip:SetBackdrop(TooltipBackdrop)
-        tooltip:SetBackdropColor(summaryColorDark.r, summaryColorDark.g, summaryColorDark.b, summaryColorDark.a)
+    if summaryColorDark.a > 0 then
+        tooltip.NineSlice:SetCenterColor(summaryColorDark.r, summaryColorDark.g, summaryColorDark.b, summaryColorDark.a)
     end
 
     tooltip:SmartAnchorTo(button)
