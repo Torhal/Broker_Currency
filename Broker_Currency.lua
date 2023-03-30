@@ -82,10 +82,6 @@ local BrokerIcons = {}
 
 local CurrencyDescriptions = {}
 
-local DatamineTooltip =
-    _G.CreateFrame("GameTooltip", "Broker_CurrencyDatamineTooltip", _G.UIParent, "GameTooltipTemplate")
-DatamineTooltip:SetOwner(_G.WorldFrame, "ANCHOR_NONE")
-
 --------------------------------------------------------------------------------
 ---- Helper Functions
 --------------------------------------------------------------------------------
@@ -242,11 +238,15 @@ do
     end
 end
 
+local DatamineTooltip =
+    _G.CreateFrame("GameTooltip", "Broker_CurrencyDatamineTooltip", _G.UIParent, "GameTooltipTemplate")
+DatamineTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
+
 local function UpdateCurrencyDescriptions()
     for _, currencyID in pairs(CurrencyID) do
-        DatamineTooltip:SetCurrencyTokenByID(currencyID)
+        local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID)
 
-        CurrencyDescriptions[currencyID] = _G["Broker_CurrencyDatamineTooltipTextLeft2"]:GetText()
+        CurrencyDescriptions[currencyID] = currencyInfo.description
     end
 
     for _, currencyID in pairs(CurrencyItemID) do
