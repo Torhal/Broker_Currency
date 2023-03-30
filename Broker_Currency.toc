@@ -2,7 +2,7 @@
 ## DefaultState: enabled
 ## Interface: 100007
 ## LoadManagers: AddonLoader
-## OptionalDeps: Ace3, LibDataBroker-1.1, LibQTip-1.0, LibTextDump-1.0, TipTac
+## OptionalDeps: Ace3, LibDataBroker-1.1, LibQTip-1.0, LibTextDump-1.0
 ## SavedVariables: Broker_CurrencyDB
 ## SavedVariablesPerCharacter: Broker_CurrencyCharDB
 ## Title: Broker: Currency
