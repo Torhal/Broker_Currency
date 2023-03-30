@@ -262,7 +262,7 @@ local function UpdateCurrencyDescriptions()
                 local left3Text = left3 and left3:GetText() or nil
 
                 local left4 = _G["Broker_CurrencyDatamineTooltipTextLeft4"]
-                local left4Text = left4:GetText() or nil
+                local left4Text = left4 and left4:GetText() or nil
 
                 local description = _G.SEARCH_LOADING_TEXT
 
