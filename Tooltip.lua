@@ -3,8 +3,6 @@
 --------------------------------------------------------------------------------
 local AddOnFolderName, private = ...
 
-local LibStub = _G.LibStub
-
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local LibDataBroker = LibStub("LibDataBroker-1.1")
 local LibQTip = LibStub("LibQTip-1.0")
@@ -31,13 +29,13 @@ local LastWeekLabel = private.LastWeekLabel
 --------------------------------------------------------------------------------
 ---- Constants
 --------------------------------------------------------------------------------
-local PlayerName = _G.UnitName("player")
-local RealmName = _G.GetRealmName()
+local PlayerName = UnitName("player")
+local RealmName = GetRealmName()
 
-local FontWhite = _G.CreateFont("Broker_CurrencyFontWhite")
-local FontPlus = _G.CreateFont("Broker_CurrencyFontPlus")
-local FontMinus = _G.CreateFont("Broker_CurrencyFontMinus")
-local FontLabel = _G.CreateFont("Broker_CurrencyFontLabel")
+local FontWhite = CreateFont("Broker_CurrencyFontWhite")
+local FontPlus = CreateFont("Broker_CurrencyFontPlus")
+local FontMinus = CreateFont("Broker_CurrencyFontMinus")
+local FontLabel = CreateFont("Broker_CurrencyFontLabel")
 
 local PlusToken = "+"
 local MinusToken = "-"
@@ -66,8 +64,8 @@ local DataObject =
     AddOnFolderName,
     {
         icon = [[Interface\MoneyFrame\UI-GoldIcon]],
-        label = _G.CURRENCY,
-        text = _G.SEARCH_LOADING_TEXT, -- Loading...
+        label = CURRENCY,
+        text = SEARCH_LOADING_TEXT, -- Loading...
         type = "data source"
     }
 )
@@ -93,7 +91,7 @@ local function AddTooltipCurrencyLines(currencyIDList, currencyList, tooltipLine
                 if currencyCount == 0 then
                     tooltipLine[#tooltipLine + 1] = " "
                 else
-                    tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(currencyCount)
+                    tooltipLine[#tooltipLine + 1] = BreakUpLargeNumbers(currencyCount)
                 end
             end
         end
@@ -286,7 +284,7 @@ function DataObject:OnEnter()
 
     -- Totals
     Broker_Currency:AddLine(" ")
-    Broker_Currency:AddLine(_G.ACHIEVEMENT_SUMMARY_CATEGORY, TotalList)
+    Broker_Currency:AddLine(ACHIEVEMENT_SUMMARY_CATEGORY, TotalList)
 
     Broker_Currency:ShowTooltip(self)
 end
@@ -404,12 +402,12 @@ function Broker_Currency:ShowTooltip(button)
                 for rowValueIndex, value in ipairs(rowList) do
                     if value and type(value) == "number" then
                         if value < 0 then
-                            tooltip:SetCell(currentRow, rowValueIndex, -1 * _G.BreakUpLargeNumbers(value), FontMinus)
+                            tooltip:SetCell(currentRow, rowValueIndex, -1 * BreakUpLargeNumbers(value), FontMinus)
                         else
                             tooltip:SetCell(
                                 currentRow,
                                 rowValueIndex,
-                                value == 0 and " " or _G.BreakUpLargeNumbers(value),
+                                value == 0 and " " or BreakUpLargeNumbers(value),
                                 FontPlus
                             )
                         end
@@ -492,15 +490,15 @@ function Broker_Currency:AddLine(label, currencyList)
 
     if gold + silver + copper ~= 0 then
         if characterDB.summaryGold then
-            tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(gold)
+            tooltipLine[#tooltipLine + 1] = BreakUpLargeNumbers(gold)
         end
 
         if characterDB.summarySilver then
-            tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(silver)
+            tooltipLine[#tooltipLine + 1] = BreakUpLargeNumbers(silver)
         end
 
         if characterDB.summaryCopper then
-            tooltipLine[#tooltipLine + 1] = _G.BreakUpLargeNumbers(copper)
+            tooltipLine[#tooltipLine + 1] = BreakUpLargeNumbers(copper)
         end
     end
 end

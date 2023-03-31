@@ -3,8 +3,6 @@
 --------------------------------------------------------------------------------
 local AddOnFolderName, private = ...
 
-local LibStub = _G.LibStub
-
 local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
@@ -31,22 +29,22 @@ local CurrencyName = private.CurrencyName
 ---- Constants
 --------------------------------------------------------------------------------
 local CategoryGroupLabels = {
-    _G.PROFESSIONS_ARCHAEOLOGY, -- Archaeology
-    _G.BONUS_ROLL_TOOLTIP_TITLE, -- Bonus Loot
-    _G.COLLECTIONS, -- Collections
-    _G.CALENDAR_FILTER_HOLIDAYS, -- Holidays
-    _G.PVP -- PvP
+    PROFESSIONS_ARCHAEOLOGY, -- Archaeology
+    BONUS_ROLL_TOOLTIP_TITLE, -- Bonus Loot
+    COLLECTIONS, -- Collections
+    CALENDAR_FILTER_HOLIDAYS, -- Holidays
+    PVP -- PvP
 }
 
 local ExpansionGroupLabels = {
-    _G.EXPANSION_NAME1, -- The Burning Crusade
-    _G.EXPANSION_NAME2, -- Wrath of the Lich King
-    _G.EXPANSION_NAME3, -- Cataclysm
-    _G.EXPANSION_NAME4, -- Mists of Pandaria
-    _G.EXPANSION_NAME5, -- Warlords of Draenor
-    _G.EXPANSION_NAME6, -- Legion
-    _G.EXPANSION_NAME7, -- Battle for Azeroth
-    _G.EXPANSION_NAME8 -- Shadowlands
+    EXPANSION_NAME1, -- The Burning Crusade
+    EXPANSION_NAME2, -- Wrath of the Lich King
+    EXPANSION_NAME3, -- Cataclysm
+    EXPANSION_NAME4, -- Mists of Pandaria
+    EXPANSION_NAME5, -- Warlords of Draenor
+    EXPANSION_NAME6, -- Legion
+    EXPANSION_NAME7, -- Battle for Azeroth
+    EXPANSION_NAME8 -- Shadowlands
 }
 
 local GoldIcon = "\124TInterface\\MoneyFrame\\UI-GoldIcon:20:20\124t"
@@ -58,23 +56,23 @@ private.SilverIcon = SilverIcon
 local CopperIcon = "\124TInterface\\MoneyFrame\\UI-CopperIcon:20:20\124t"
 private.CopperIcon = CopperIcon
 
-local TodayLabel = _G.HONOR_TODAY
+local TodayLabel = HONOR_TODAY
 private.TodayLabel = TodayLabel
 
-local YesterdayLabel = _G.HONOR_YESTERDAY
+local YesterdayLabel = HONOR_YESTERDAY
 private.YesterdayLabel = YesterdayLabel
 
-local ThisWeekLabel = _G.ARENA_THIS_WEEK
+local ThisWeekLabel = ARENA_THIS_WEEK
 private.ThisWeekLabel = ThisWeekLabel
 
-local LastWeekLabel = _G.HONOR_LASTWEEK
+local LastWeekLabel = HONOR_LASTWEEK
 private.LastWeekLabel = LastWeekLabel
 
 local DisplayIconStringLeft = "%s \124T"
 local DisplayIconStringRight = ":%d:%d\124t"
 
-local PlayerName = _G.UnitName("player")
-local RealmName = _G.GetRealmName()
+local PlayerName = UnitName("player")
+local RealmName = GetRealmName()
 
 -- Populated as needed.
 local CurrencyNameCache
@@ -104,7 +102,7 @@ end
 private.ShowOptionIcon = ShowOptionIcon
 
 local function GetServerOffset()
-    local serverHour, serverMinute = _G.GetGameTime()
+    local serverHour, serverMinute = GetGameTime()
     local utcHour = tonumber(date("!%H"))
     local utcMinute = tonumber(date("!%M"))
     local ser = serverHour + serverMinute / 60
@@ -146,7 +144,7 @@ do
 
                 if count > 0 and characterDB[GetKey(currencyID, true)] then
                     concatList[#concatList + 1] =
-                        string.format(displayIcon, _G.BreakUpLargeNumbers(count), iconSize, iconSize)
+                        string.format(displayIcon, BreakUpLargeNumbers(count), iconSize, iconSize)
 
                     concatList[#concatList + 1] = "  "
                 end
@@ -181,7 +179,7 @@ do
             concatList[#concatList + 1] =
                 string.format(
                 GoldAmountTexture,
-                _G.BreakUpLargeNumbers(gold),
+                BreakUpLargeNumbers(gold),
                 characterDB.iconSizeGold,
                 characterDB.iconSizeGold
             )
@@ -193,7 +191,7 @@ do
             concatList[#concatList + 1] =
                 string.format(
                 SilverAmountTexture,
-                _G.BreakUpLargeNumbers(silver),
+                BreakUpLargeNumbers(silver),
                 characterDB.iconSizeGold,
                 characterDB.iconSizeGold
             )
@@ -205,7 +203,7 @@ do
             concatList[#concatList + 1] =
                 string.format(
                 CopperAmountTexture,
-                _G.BreakUpLargeNumbers(copper),
+                BreakUpLargeNumbers(copper),
                 characterDB.iconSizeGold,
                 characterDB.iconSizeGold
             )
@@ -234,13 +232,13 @@ do
             return 0
         end
 
-        return CurrencyItemName[currencyID] and _G.GetItemCount(currencyID, true) or
-            _G.C_CurrencyInfo.GetCurrencyInfo(currencyID).quantity
+        return CurrencyItemName[currencyID] and GetItemCount(currencyID, true) or
+            C_CurrencyInfo.GetCurrencyInfo(currencyID).quantity
     end
 end
 
 local DatamineTooltip =
-    _G.CreateFrame("GameTooltip", "Broker_CurrencyDatamineTooltip", _G.UIParent, "GameTooltipTemplate")
+    CreateFrame("GameTooltip", "Broker_CurrencyDatamineTooltip", UIParent, "GameTooltipTemplate")
 DatamineTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
 local function UpdateCurrencyDescriptions()
@@ -251,10 +249,10 @@ local function UpdateCurrencyDescriptions()
     end
 
     for _, currencyID in pairs(CurrencyItemID) do
-        local _, _, _, _, iconFileDataID = _G.GetItemInfoInstant(currencyID)
+        local _, _, _, _, iconFileDataID = GetItemInfoInstant(currencyID)
 
         if iconFileDataID and iconFileDataID ~= "" then
-            local _, itemHyperlink = _G.GetItemInfo(currencyID)
+            local _, itemHyperlink = GetItemInfo(currencyID)
 
             if itemHyperlink then
                 DatamineTooltip:SetHyperlink(itemHyperlink)
@@ -265,7 +263,7 @@ local function UpdateCurrencyDescriptions()
                 local left4 = _G["Broker_CurrencyDatamineTooltipTextLeft4"]
                 local left4Text = left4 and left4:GetText() or nil
 
-                local description = _G.SEARCH_LOADING_TEXT
+                local description = SEARCH_LOADING_TEXT
 
                 if left3Text and left3Text ~= "" then
                     if left4Text and left4Text ~= "" then
@@ -275,7 +273,7 @@ local function UpdateCurrencyDescriptions()
                     end
                 end
 
-                CurrencyDescriptions[currencyID] = ("%s\n\n%s"):format(_G.PARENS_TEMPLATE:format(_G.ITEMS), description)
+                CurrencyDescriptions[currencyID] = ("%s\n\n%s"):format(PARENS_TEMPLATE:format(ITEMS), description)
             end
         end
     end
@@ -359,7 +357,7 @@ function Broker_Currency:Update()
         Broker_CurrencyDB.realm[RealmName][PlayerName] = playerInfo
     end
 
-    local currentMoney = _G.GetMoney()
+    local currentMoney = GetMoney()
 
     UpdateCurrencyDescriptions()
 
@@ -414,19 +412,19 @@ function Broker_Currency:Update()
     ---- If you want to send id numbers for currencies which are missing, /dump
     ---- these tables while in-game.
     --------------------------------------------------------------------------------
-    _G.BROKER_CURRENCY_UNKNOWN = {}
-    _G.BROKER_CURRENCY_UNKNOWN_FORMATTED = {}
+    BROKER_CURRENCY_UNKNOWN = {}
+    BROKER_CURRENCY_UNKNOWN_FORMATTED = {}
 
     for currencyID = 1, 10000 do
-        local currencyInfo = _G.C_CurrencyInfo.GetCurrencyInfo(currencyID)
+        local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID)
         local formattedName = currencyInfo and currencyInfo.name:gsub(" ", ""):gsub("'", "") or nil
 
         if
             formattedName and formattedName ~= "" and not CurrencyName[currencyID] and
                 not tContains(IgnoredCurrencyIDs, currencyID)
          then
-            _G.BROKER_CURRENCY_UNKNOWN[currencyID] = formattedName
-            _G.BROKER_CURRENCY_UNKNOWN_FORMATTED[formattedName] = currencyID
+            BROKER_CURRENCY_UNKNOWN[currencyID] = formattedName
+            BROKER_CURRENCY_UNKNOWN_FORMATTED[formattedName] = currencyID
         end
     end
 end
@@ -437,7 +435,7 @@ do
     --------------------------------------------------------------------------------
     local iconToken =
         DisplayIconStringLeft ..
-        _G.C_CurrencyInfo.GetCurrencyInfo(CurrencyID.CuriousCoin).iconFileID .. DisplayIconStringRight
+        C_CurrencyInfo.GetCurrencyInfo(CurrencyID.CuriousCoin).iconFileID .. DisplayIconStringRight
 
     local metadataVersion = GetAddOnMetadata("Broker_Currency", "Version")
     local IsDevelopmentVersion = false
@@ -564,7 +562,7 @@ do
                 order = index * 3 + 1,
                 type = "execute",
                 width = "half",
-                name = _G.DELETE,
+                name = DELETE,
                 desc = playerName,
                 func = DeletePlayer
             }
@@ -579,7 +577,7 @@ do
     end
 
     local function SetCacheValuesFromCurrency(currencyID)
-        local currencyInfo = _G.C_CurrencyInfo.GetCurrencyInfo(currencyID)
+        local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID)
         local currencyName = currencyInfo.name
 
         if currencyName and currencyName ~= "" then
@@ -595,10 +593,10 @@ do
     end
 
     local function SetCacheValuesFromItem(currencyID)
-        local _, _, _, _, iconFileDataID = _G.GetItemInfoInstant(currencyID)
+        local _, _, _, _, iconFileDataID = GetItemInfoInstant(currencyID)
 
         if iconFileDataID and iconFileDataID ~= "" then
-            local itemName = _G.GetItemInfo(currencyID)
+            local itemName = GetItemInfo(currencyID)
 
             if itemName then
                 CurrencyNameCache[currencyID] = itemName
@@ -669,7 +667,7 @@ do
                 deleteCharacter = {
                     args = {},
                     order = 4,
-                    name = _G.CHARACTER,
+                    name = CHARACTER,
                     type = "group"
                 },
                 generalSettings = {
@@ -678,7 +676,7 @@ do
                             type = "range",
                             order = 10,
                             name = string.format(iconToken, 8, 16, 16),
-                            desc = _G.TOKENS,
+                            desc = TOKENS,
                             min = 1,
                             max = 32,
                             step = 1,
@@ -698,8 +696,8 @@ do
                         iconSizeGold = {
                             type = "range",
                             order = 10,
-                            name = string.format(_G.GOLD_AMOUNT_TEXTURE, 8, 16, 16),
-                            desc = _G.MONEY,
+                            name = string.format(GOLD_AMOUNT_TEXTURE, 8, 16, 16),
+                            desc = MONEY,
                             min = 1,
                             max = 32,
                             step = 1,
@@ -712,18 +710,18 @@ do
 
                                 Broker_CurrencyCharDB[info[#info]] = true and value or nil
                                 Broker_Currency.generalSettings.args.iconSizeGold.name =
-                                    _G.GOLD_AMOUNT_TEXTURE:format(8, iconSize, iconSize)
+                                    GOLD_AMOUNT_TEXTURE:format(8, iconSize, iconSize)
                                 Broker_Currency:Update()
                             end
                         },
                         color_header = {
                             order = 100,
                             type = "header",
-                            name = _G.COLOR
+                            name = COLOR
                         },
                         summaryColorDark = {
                             type = "color",
-                            name = _G.BACKGROUND,
+                            name = BACKGROUND,
                             order = 101,
                             get = getColorValue,
                             set = setColorValue,
@@ -731,7 +729,7 @@ do
                         },
                         summaryColorLight = {
                             type = "color",
-                            name = _G.HIGHLIGHTING,
+                            name = HIGHLIGHTING,
                             order = 102,
                             get = getColorValue,
                             set = setColorValue,
@@ -740,7 +738,7 @@ do
                         statistics_header = {
                             order = 200,
                             type = "header",
-                            name = _G.STATISTICS
+                            name = STATISTICS
                         },
                         summaryPlayerSession = {
                             type = "toggle",
@@ -771,7 +769,7 @@ do
                     get = function(info)
                         return Broker_CurrencyCharDB[info[#info]]
                     end,
-                    name = _G.GENERAL,
+                    name = GENERAL,
                     order = 1,
                     set = function(info, value)
                         Broker_CurrencyCharDB[info[#info]] = true and value or nil
@@ -782,24 +780,24 @@ do
                 brokerDisplay = {
                     args = {
                         money = {
-                            name = _G.MONEY,
+                            name = MONEY,
                             order = 1,
                             type = "group",
                             args = {
                                 showGold = {
-                                    name = ("%s %s"):format(GoldIcon, _G.GOLD_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+                                    name = ("%s %s"):format(GoldIcon, GOLD_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 1,
                                     type = "toggle",
                                     width = "full"
                                 },
                                 showSilver = {
-                                    name = ("%s %s"):format(SilverIcon, _G.SILVER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+                                    name = ("%s %s"):format(SilverIcon, SILVER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 2,
                                     type = "toggle",
                                     width = "full"
                                 },
                                 showCopper = {
-                                    name = ("%s %s"):format(CopperIcon, _G.COPPER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+                                    name = ("%s %s"):format(CopperIcon, COPPER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 3,
                                     type = "toggle",
                                     width = "full"
@@ -807,31 +805,31 @@ do
                             }
                         }
                     },
-                    name = _G.DISPLAY,
+                    name = DISPLAY,
                     order = 2,
                     type = "group"
                 },
                 summaryDisplay = {
                     args = {
                         money = {
-                            name = _G.MONEY,
+                            name = MONEY,
                             order = 1,
                             type = "group",
                             args = {
                                 summaryGold = {
-                                    name = ("%s %s"):format(GoldIcon, _G.GOLD_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+                                    name = ("%s %s"):format(GoldIcon, GOLD_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 1,
                                     type = "toggle",
                                     width = "full"
                                 },
                                 summarySilver = {
-                                    name = ("%s %s"):format(SilverIcon, _G.SILVER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+                                    name = ("%s %s"):format(SilverIcon, SILVER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 2,
                                     type = "toggle",
                                     width = "full"
                                 },
                                 summaryCopper = {
-                                    name = ("%s %s"):format(CopperIcon, _G.COPPER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
+                                    name = ("%s %s"):format(CopperIcon, COPPER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 3,
                                     type = "toggle",
                                     width = "full"
@@ -839,7 +837,7 @@ do
                             }
                         }
                     },
-                    name = _G.ACHIEVEMENT_SUMMARY_CATEGORY,
+                    name = ACHIEVEMENT_SUMMARY_CATEGORY,
                     order = 2,
                     type = "group"
                 }
@@ -945,7 +943,7 @@ do
         UpdatePlayerAndLastCounts(ExpansionCurrencyIDs, playerInfo)
 
         -- Initialize statistics
-        self.last.money = _G.GetMoney()
+        self.last.money = GetMoney()
         self.lastTime = GetToday()
 
         local lastWeek = self.lastTime - 13
