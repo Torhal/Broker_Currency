@@ -76,8 +76,12 @@ local RealmName = GetRealmName()
 
 -- Populated as needed.
 local CurrencyNameCache
+
 local OptionIcons = {}
+private.OptionIcons = OptionIcons
+
 local BrokerIcons = {}
+private.BrokerIcons = BrokerIcons
 
 local CurrencyDescriptions = {}
 
@@ -1021,8 +1025,5 @@ do
         end
 
         Broker_CurrencyDB = db
-
-        private.OptionIcons = OptionIcons
-        private.BrokerIcons = BrokerIcons
     end
 end -- do-block
