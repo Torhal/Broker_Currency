@@ -25,7 +25,7 @@ local CurrencyItemID = {
     PrimalSargerite = 151568,
     PrimalSpirit = 120945,
     PolishedPetCharm = 163036,
-    VesselOfHorrificVisions = 173363
+    VesselOfHorrificVisions = 173363,
 }
 
 private.CurrencyItemID = CurrencyItemID

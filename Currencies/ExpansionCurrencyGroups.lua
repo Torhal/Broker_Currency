@@ -18,14 +18,14 @@ local ExpansionCurrencyGroups = {
         CurrencyItemID.ApexisShard,
         CurrencyItemID.HalaaBattleToken,
         CurrencyItemID.HalaaResearchToken,
-        CurrencyID.SpiritShard
+        CurrencyID.SpiritShard,
     },
     --------------------------------------------------------------------------------
     ---- Wrath of the Lich King
     --------------------------------------------------------------------------------
     {
         CurrencyID.ChampionsSeal,
-        CurrencyID.DalaranJewelcraftersToken
+        CurrencyID.DalaranJewelcraftersToken,
     },
     --------------------------------------------------------------------------------
     ---- Cataclysm
@@ -34,7 +34,7 @@ local ExpansionCurrencyGroups = {
         CurrencyID.EssenceOfCorruptedDeathwing,
         CurrencyID.IllustriousJewelcraftersToken,
         CurrencyID.MarkOfTheWorldTree,
-        CurrencyID.MoteOfDarkness
+        CurrencyID.MoteOfDarkness,
     },
     --------------------------------------------------------------------------------
     ---- Mists of Pandaria
@@ -49,7 +49,7 @@ local ExpansionCurrencyGroups = {
         CurrencyItemID.LionsLandingCommission,
         CurrencyID.MoguRuneOfFate,
         CurrencyID.TimelessCoin,
-        CurrencyID.WarforgedSeal
+        CurrencyID.WarforgedSeal,
     },
     --------------------------------------------------------------------------------
     ---- Warlords of Draenor
@@ -71,7 +71,7 @@ local ExpansionCurrencyGroups = {
         CurrencyID.SecretOfDraenorJewelcrafting,
         CurrencyID.SecretOfDraenorLeatherworking,
         CurrencyID.SecretOfDraenorTailoring,
-        CurrencyID.TimewarpedBadge
+        CurrencyID.TimewarpedBadge,
     },
     --------------------------------------------------------------------------------
     ---- Legion
@@ -96,7 +96,7 @@ local ExpansionCurrencyGroups = {
         CurrencyID.TimewornArtifact,
         CurrencyID.VeiledArgunite,
         CurrencyID.WakeningEssence,
-        CurrencyID.WrithingEssence
+        CurrencyID.WrithingEssence,
     },
     --------------------------------------------------------------------------------
     ---- Battle for Azeroth
@@ -115,7 +115,7 @@ local ExpansionCurrencyGroups = {
         CurrencyID.WarResources,
         CurrencyID.TitanResiduum,
         CurrencyItemID.VesselOfHorrificVisions,
-        CurrencyID.WarSupplies
+        CurrencyID.WarSupplies,
     },
     --------------------------------------------------------------------------------
     ---- Shadowlands
@@ -131,8 +131,8 @@ local ExpansionCurrencyGroups = {
         CurrencyID.SinstoneFragments,
         CurrencyID.SoulAsh,
         CurrencyID.Stygia,
-        CurrencyID.Valor
-    }
+        CurrencyID.Valor,
+    },
 }
 
 private.ExpansionCurrencyGroups = ExpansionCurrencyGroups

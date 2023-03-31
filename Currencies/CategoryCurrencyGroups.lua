@@ -33,7 +33,7 @@ local CategoryCurrencyGroups = {
         CurrencyID.TolvirArchaeologyFragment,
         CurrencyID.TrollArchaeologyFragment,
         CurrencyID.VrykulArchaeologyFragment,
-        CurrencyID.ZandalariArchaeologyFragment
+        CurrencyID.ZandalariArchaeologyFragment,
     },
     -------------------------------------------------------------------------------
     ---- Bonus Loot
@@ -46,14 +46,14 @@ local CategoryCurrencyGroups = {
         CurrencyID.SealOfInevitableFate,
         CurrencyID.SealOfTemperedFate,
         CurrencyID.SealOfWartornFate,
-        CurrencyID.WarforgedSeal
+        CurrencyID.WarforgedSeal,
     },
     -------------------------------------------------------------------------------
     ---- Collections
     -------------------------------------------------------------------------------
     {
         CurrencyItemID.PolishedPetCharm,
-        CurrencyItemID.ShinyPetCharm
+        CurrencyItemID.ShinyPetCharm,
     },
     -------------------------------------------------------------------------------
     ---- Holidays
@@ -63,7 +63,7 @@ local CategoryCurrencyGroups = {
         CurrencyItemID.CoinOfAncestry,
         CurrencyID.DarkmoonPrizeTicket,
         CurrencyItemID.LoveToken,
-        CurrencyID.TrialOfStyleToken
+        CurrencyID.TrialOfStyleToken,
     },
     --------------------------------------------------------------------------------
     ----  PvP
@@ -79,8 +79,8 @@ local CategoryCurrencyGroups = {
         CurrencyID.Honor,
         CurrencyID.SightlessEye,
         CurrencyID.SpiritShard,
-        CurrencyID.TolBaradCommendation
-    }
+        CurrencyID.TolBaradCommendation,
+    },
 }
 
 private.CategoryCurrencyGroups = CategoryCurrencyGroups

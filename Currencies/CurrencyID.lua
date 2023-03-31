@@ -100,7 +100,7 @@ local CurrencyID = {
     MedallionOfService = 1819,
     InfusedRuby = 1820,
     SoulAsh = 1828,
-    GratefulOffering = 1885
+    GratefulOffering = 1885,
 }
 
 private.CurrencyID = CurrencyID

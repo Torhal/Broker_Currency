@@ -33,7 +33,7 @@ local CategoryGroupLabels = {
     BONUS_ROLL_TOOLTIP_TITLE, -- Bonus Loot
     COLLECTIONS, -- Collections
     CALENDAR_FILTER_HOLIDAYS, -- Holidays
-    PVP -- PvP
+    PVP, -- PvP
 }
 
 local ExpansionGroupLabels = {
@@ -44,7 +44,7 @@ local ExpansionGroupLabels = {
     EXPANSION_NAME5, -- Warlords of Draenor
     EXPANSION_NAME6, -- Legion
     EXPANSION_NAME7, -- Battle for Azeroth
-    EXPANSION_NAME8 -- Shadowlands
+    EXPANSION_NAME8, -- Shadowlands
 }
 
 local GoldIcon = "\124TInterface\\MoneyFrame\\UI-GoldIcon:20:20\124t"
@@ -176,8 +176,7 @@ do
         local gold = math.floor(money / 100)
 
         if characterDB.showGold and gold > 0 then
-            concatList[#concatList + 1] =
-                string.format(
+            concatList[#concatList + 1] = string.format(
                 GoldAmountTexture,
                 BreakUpLargeNumbers(gold),
                 characterDB.iconSizeGold,
@@ -188,8 +187,7 @@ do
         end
 
         if characterDB.showSilver and gold + silver > 0 then
-            concatList[#concatList + 1] =
-                string.format(
+            concatList[#concatList + 1] = string.format(
                 SilverAmountTexture,
                 BreakUpLargeNumbers(silver),
                 characterDB.iconSizeGold,
@@ -200,8 +198,7 @@ do
         end
 
         if characterDB.showCopper and gold + silver + copper > 0 then
-            concatList[#concatList + 1] =
-                string.format(
+            concatList[#concatList + 1] = string.format(
                 CopperAmountTexture,
                 BreakUpLargeNumbers(copper),
                 characterDB.iconSizeGold,
@@ -232,13 +229,12 @@ do
             return 0
         end
 
-        return CurrencyItemName[currencyID] and GetItemCount(currencyID, true) or
-            C_CurrencyInfo.GetCurrencyInfo(currencyID).quantity
+        return CurrencyItemName[currencyID] and GetItemCount(currencyID, true)
+            or C_CurrencyInfo.GetCurrencyInfo(currencyID).quantity
     end
 end
 
-local DatamineTooltip =
-    CreateFrame("GameTooltip", "Broker_CurrencyDatamineTooltip", UIParent, "GameTooltipTemplate")
+local DatamineTooltip = CreateFrame("GameTooltip", "Broker_CurrencyDatamineTooltip", UIParent, "GameTooltipTemplate")
 DatamineTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
 local function UpdateCurrencyDescriptions()
@@ -295,8 +291,9 @@ local function UpdateTokens(currencyIDList, playerInfo, realmInfo, today)
                 if lastCount < count then
                     Broker_Currency.gained[currencyID] = (Broker_Currency.gained[currencyID] or 0) + count - lastCount
 
-                    playerInfo.gained[today][currencyID] =
-                        (playerInfo.gained[today][currencyID] or 0) + count - lastCount
+                    playerInfo.gained[today][currencyID] = (playerInfo.gained[today][currencyID] or 0)
+                        + count
+                        - lastCount
 
                     realmInfo.gained[today][currencyID] = (realmInfo.gained[today][currencyID] or 0) + count - lastCount
                 elseif lastCount > count then
@@ -327,7 +324,7 @@ local UpdateEventNames = {
     "PLAYER_TRADE_MONEY",
     "SEND_MAIL_COD_CHANGED",
     "SEND_MAIL_MONEY_CHANGED",
-    "TRADE_MONEY_CHANGED"
+    "TRADE_MONEY_CHANGED",
 }
 
 function Broker_Currency:OnEnable()
@@ -378,10 +375,10 @@ function Broker_Currency:Update()
         playerInfo.spent[cutoffDay] = nil
         realmInfo.gained[cutoffDay] = nil
         realmInfo.spent[cutoffDay] = nil
-        playerInfo.gained[today] = playerInfo.gained[today] or {money = 0}
-        playerInfo.spent[today] = playerInfo.spent[today] or {money = 0}
-        realmInfo.gained[today] = realmInfo.gained[today] or {money = 0}
-        realmInfo.spent[today] = realmInfo.spent[today] or {money = 0}
+        playerInfo.gained[today] = playerInfo.gained[today] or { money = 0 }
+        playerInfo.spent[today] = playerInfo.spent[today] or { money = 0 }
+        realmInfo.gained[today] = realmInfo.gained[today] or { money = 0 }
+        realmInfo.spent[today] = realmInfo.spent[today] or { money = 0 }
         self.lastTime = today
     end
 
@@ -420,9 +417,11 @@ function Broker_Currency:Update()
         local formattedName = currencyInfo and currencyInfo.name:gsub(" ", ""):gsub("'", "") or nil
 
         if
-            formattedName and formattedName ~= "" and not CurrencyName[currencyID] and
-                not tContains(IgnoredCurrencyIDs, currencyID)
-         then
+            formattedName
+            and formattedName ~= ""
+            and not CurrencyName[currencyID]
+            and not tContains(IgnoredCurrencyIDs, currencyID)
+        then
             BROKER_CURRENCY_UNKNOWN[currencyID] = formattedName
             BROKER_CURRENCY_UNKNOWN_FORMATTED[formattedName] = currencyID
         end
@@ -433,9 +432,9 @@ do
     --------------------------------------------------------------------------------
     ---- Constants
     --------------------------------------------------------------------------------
-    local iconToken =
-        DisplayIconStringLeft ..
-        C_CurrencyInfo.GetCurrencyInfo(CurrencyID.CuriousCoin).iconFileID .. DisplayIconStringRight
+    local iconToken = DisplayIconStringLeft
+        .. C_CurrencyInfo.GetCurrencyInfo(CurrencyID.CuriousCoin).iconFileID
+        .. DisplayIconStringRight
 
     local metadataVersion = GetAddOnMetadata("Broker_Currency", "Version")
     local IsDevelopmentVersion = false
@@ -449,9 +448,9 @@ do
     IsAlphaVersion = true
     --@end-alpha@
 
-    local BuildVersion =
-        IsDevelopmentVersion and "Development Version" or (IsAlphaVersion and metadataVersion .. "-Alpha") or
-        metadataVersion
+    local BuildVersion = IsDevelopmentVersion and "Development Version"
+        or (IsAlphaVersion and metadataVersion .. "-Alpha")
+        or metadataVersion
 
     --------------------------------------------------------------------------------
     ---- Helper Functions
@@ -484,7 +483,7 @@ do
             set = function(_, value)
                 Broker_CurrencyCharDB[sectionName] = true and value or nil
                 Broker_Currency:Update()
-            end
+            end,
         }
     end
 
@@ -514,14 +513,14 @@ do
                 name = groupLabels[groupListIndex],
                 order = groupListIndex + offset,
                 type = "group",
-                args = {}
+                args = {},
             }
 
             summaryDisplay[optionGroupName] = {
                 name = groupLabels[groupListIndex],
                 order = groupListIndex + offset,
                 type = "group",
-                args = {}
+                args = {},
             }
 
             for groupIndex = 1, #group do
@@ -555,7 +554,7 @@ do
                 type = "description",
                 width = "half",
                 name = playerName,
-                fontSize = "medium"
+                fontSize = "medium",
             }
 
             deleteOptions[playerName] = {
@@ -564,14 +563,14 @@ do
                 width = "half",
                 name = DELETE,
                 desc = playerName,
-                func = DeletePlayer
+                func = DeletePlayer,
             }
 
             deleteOptions[playerName .. "Spacer"] = {
                 order = index * 3 + 2,
                 type = "description",
                 width = "full",
-                name = ""
+                name = "",
             }
         end
     end
@@ -645,9 +644,8 @@ do
         --------------------------------------------------------------------------------
         ---- Set Defaults
         --------------------------------------------------------------------------------
-        Broker_CurrencyCharDB =
-            Broker_CurrencyCharDB or
-            {
+        Broker_CurrencyCharDB = Broker_CurrencyCharDB
+            or {
                 showCopper = true,
                 showSilver = true,
                 showGold = true,
@@ -655,8 +653,8 @@ do
                 showYesterday = true,
                 showLastWeek = true,
                 summaryGold = true,
-                summaryColorDark = {r = 0, g = 0, b = 0, a = 0},
-                summaryColorLight = {r = 1, g = 1, b = 1, a = .3}
+                summaryColorDark = { r = 0, g = 0, b = 0, a = 0 },
+                summaryColorLight = { r = 1, g = 1, b = 1, a = 0.3 },
             }
 
         --------------------------------------------------------------------------------
@@ -668,7 +666,7 @@ do
                     args = {},
                     order = 4,
                     name = CHARACTER,
-                    type = "group"
+                    type = "group",
                 },
                 generalSettings = {
                     args = {
@@ -691,7 +689,7 @@ do
                                 Broker_Currency.generalSettings.args.iconSize.name =
                                     iconToken:format(8, iconSize, iconSize)
                                 Broker_Currency:Update()
-                            end
+                            end,
                         },
                         iconSizeGold = {
                             type = "range",
@@ -712,12 +710,12 @@ do
                                 Broker_Currency.generalSettings.args.iconSizeGold.name =
                                     GOLD_AMOUNT_TEXTURE:format(8, iconSize, iconSize)
                                 Broker_Currency:Update()
-                            end
+                            end,
                         },
                         color_header = {
                             order = 100,
                             type = "header",
-                            name = COLOR
+                            name = COLOR,
                         },
                         summaryColorDark = {
                             type = "color",
@@ -725,7 +723,7 @@ do
                             order = 101,
                             get = getColorValue,
                             set = setColorValue,
-                            hasAlpha = true
+                            hasAlpha = true,
                         },
                         summaryColorLight = {
                             type = "color",
@@ -733,38 +731,38 @@ do
                             order = 102,
                             get = getColorValue,
                             set = setColorValue,
-                            hasAlpha = true
+                            hasAlpha = true,
                         },
                         statistics_header = {
                             order = 200,
                             type = "header",
-                            name = STATISTICS
+                            name = STATISTICS,
                         },
                         summaryPlayerSession = {
                             type = "toggle",
                             name = PlayerName,
-                            order = 201
+                            order = 201,
                         },
                         summaryRealmToday = {
                             type = "toggle",
                             name = TodayLabel,
-                            order = 202
+                            order = 202,
                         },
                         summaryRealmYesterday = {
                             type = "toggle",
                             name = YesterdayLabel,
-                            order = 203
+                            order = 203,
                         },
                         summaryRealmThisWeek = {
                             type = "toggle",
                             name = ThisWeekLabel,
-                            order = 204
+                            order = 204,
                         },
                         summaryRealmLastWeek = {
                             type = "toggle",
                             name = LastWeekLabel,
-                            order = 205
-                        }
+                            order = 205,
+                        },
                     },
                     get = function(info)
                         return Broker_CurrencyCharDB[info[#info]]
@@ -775,7 +773,7 @@ do
                         Broker_CurrencyCharDB[info[#info]] = true and value or nil
                         Broker_Currency:Update()
                     end,
-                    type = "group"
+                    type = "group",
                 },
                 brokerDisplay = {
                     args = {
@@ -788,26 +786,26 @@ do
                                     name = ("%s %s"):format(GoldIcon, GOLD_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 1,
                                     type = "toggle",
-                                    width = "full"
+                                    width = "full",
                                 },
                                 showSilver = {
                                     name = ("%s %s"):format(SilverIcon, SILVER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 2,
                                     type = "toggle",
-                                    width = "full"
+                                    width = "full",
                                 },
                                 showCopper = {
                                     name = ("%s %s"):format(CopperIcon, COPPER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 3,
                                     type = "toggle",
-                                    width = "full"
-                                }
-                            }
-                        }
+                                    width = "full",
+                                },
+                            },
+                        },
                     },
                     name = DISPLAY,
                     order = 2,
-                    type = "group"
+                    type = "group",
                 },
                 summaryDisplay = {
                     args = {
@@ -820,27 +818,27 @@ do
                                     name = ("%s %s"):format(GoldIcon, GOLD_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 1,
                                     type = "toggle",
-                                    width = "full"
+                                    width = "full",
                                 },
                                 summarySilver = {
                                     name = ("%s %s"):format(SilverIcon, SILVER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 2,
                                     type = "toggle",
-                                    width = "full"
+                                    width = "full",
                                 },
                                 summaryCopper = {
                                     name = ("%s %s"):format(CopperIcon, COPPER_AMOUNT:gsub("%%d", ""):gsub(" ", "")),
                                     order = 3,
                                     type = "toggle",
-                                    width = "full"
-                                }
-                            }
-                        }
+                                    width = "full",
+                                },
+                            },
+                        },
                     },
                     name = ACHIEVEMENT_SUMMARY_CATEGORY,
                     order = 2,
-                    type = "group"
-                }
+                    type = "group",
+                },
             },
             childGroups = "tab",
             get = function(info)
@@ -851,7 +849,7 @@ do
                 Broker_CurrencyCharDB[info[#info]] = true and value or nil
                 Broker_Currency:Update()
             end,
-            type = "group"
+            type = "group",
         }
 
         AceConfig:RegisterOptionsTable(AddOnFolderName, Broker_Currency.options)
@@ -871,11 +869,11 @@ do
         end
 
         if not characterDB.summaryColorDark then
-            characterDB.summaryColorDark = {r = 0, g = 0, b = 0, a = 0}
+            characterDB.summaryColorDark = { r = 0, g = 0, b = 0, a = 0 }
         end
 
         if not characterDB.summaryColorLight then
-            characterDB.summaryColorLight = {r = 1, g = 1, b = 1, a = .3}
+            characterDB.summaryColorLight = { r = 1, g = 1, b = 1, a = 0.3 }
         end
 
         Broker_CurrencyCharDB = characterDB
@@ -975,35 +973,35 @@ do
         for i = self.lastTime - 13, self.lastTime do
             if not playerInfo.gained[i] or type(playerInfo.gained[i]) ~= "table" then
                 playerInfo.gained[i] = {
-                    money = 0
+                    money = 0,
                 }
             end
 
             if not playerInfo.spent[i] or type(playerInfo.spent[i]) ~= "table" then
                 playerInfo.spent[i] = {
-                    money = 0
+                    money = 0,
                 }
             end
 
             if not realmInfo.gained[i] or type(realmInfo.gained[i]) ~= "table" then
                 realmInfo.gained[i] = {
-                    money = 0
+                    money = 0,
                 }
             end
 
             if not realmInfo.spent[i] or type(realmInfo.spent[i]) ~= "table" then
                 realmInfo.spent[i] = {
-                    money = 0
+                    money = 0,
                 }
             end
         end
 
         self.gained = {
-            money = 0
+            money = 0,
         }
 
         self.spent = {
-            money = 0
+            money = 0,
         }
 
         self.sessionTime = time()

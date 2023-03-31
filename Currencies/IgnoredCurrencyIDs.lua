@@ -46,5 +46,5 @@ private.IgnoredCurrencyIDs = {
     1812, -- zzoldSanctum Anima Weaver
     1850, --Choofa
     1878, --Stitchmasters
-    1884 --The Avowed
+    1884, --The Avowed
 }

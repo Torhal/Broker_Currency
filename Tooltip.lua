@@ -56,19 +56,15 @@ local HeaderLabels = {
     [TodayLabel] = true,
     [YesterdayLabel] = true,
     [ThisWeekLabel] = true,
-    [LastWeekLabel] = true
+    [LastWeekLabel] = true,
 }
 
-local DataObject =
-    LibDataBroker:NewDataObject(
-    AddOnFolderName,
-    {
-        icon = [[Interface\MoneyFrame\UI-GoldIcon]],
-        label = CURRENCY,
-        text = SEARCH_LOADING_TEXT, -- Loading...
-        type = "data source"
-    }
-)
+local DataObject = LibDataBroker:NewDataObject(AddOnFolderName, {
+    icon = [[Interface\MoneyFrame\UI-GoldIcon]],
+    label = CURRENCY,
+    text = SEARCH_LOADING_TEXT, -- Loading...
+    type = "data source",
+})
 
 private.DataObject = DataObject
 
@@ -150,11 +146,11 @@ local function UpdateGainedAndSpent(currencyIDList, gained, gainedReference, spe
     for index = 1, #currencyIDList do
         local currencyID = currencyIDList[index]
 
-        gainedReference[currencyID] =
-            (gainedReference[currencyID] or 0) + (gained[index] and gained[index][currencyID] or 0)
+        gainedReference[currencyID] = (gainedReference[currencyID] or 0)
+            + (gained[index] and gained[index][currencyID] or 0)
 
-        spentReference[currencyID] =
-            (spentReference[currencyID] or 0) + (spent[index] and spent[index][currencyID] or 0)
+        spentReference[currencyID] = (spentReference[currencyID] or 0)
+            + (spent[index] and spent[index][currencyID] or 0)
     end
 end
 
