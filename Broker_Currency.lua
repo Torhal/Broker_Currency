@@ -8,6 +8,7 @@ local LibStub = _G.LibStub
 local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
+---@class Broker_Currency: AceAddon, AceAddon-3.0, AceBucket-3.0, AceConsole-3.0, AceEvent-3.0, AceTimer-3.0
 local Broker_Currency =
     LibStub("AceAddon-3.0"):NewAddon(AddOnFolderName, "AceBucket-3.0", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
 

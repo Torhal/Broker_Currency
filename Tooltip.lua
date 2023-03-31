@@ -9,6 +9,7 @@ local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local LibDataBroker = LibStub("LibDataBroker-1.1")
 local LibQTip = LibStub("LibQTip-1.0")
 
+---@class Broker_Currency
 local Broker_Currency = LibStub("AceAddon-3.0"):GetAddon(AddOnFolderName)
 
 local CategoryCurrencyIDs = private.CategoryCurrencyIDs
