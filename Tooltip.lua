@@ -232,7 +232,7 @@ function DataObject:OnEnter()
             playerLineIndex = i
         end
 
-        Broker_Currency:AddLine(string.format("%s: ", data.player_name), data.player_info, FontWhite)
+        Broker_Currency:AddLine(string.format("%s: ", data.player_name), data.player_info)
 
         -- Add counts from player_info to totalList according to the summary settings this character is interested in
         for summaryName in pairs(charDB) do
