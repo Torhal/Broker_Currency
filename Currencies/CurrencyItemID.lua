@@ -26,6 +26,19 @@ local CurrencyItemID = {
     PrimalSpirit = 120945,
     PolishedPetCharm = 163036,
     VesselOfHorrificVisions = 173363,
+    SparkOfIngenuity = 190453,
+    ZskeraVaultKey = 202196,
+    DormantPrimordialFragment = 204215,
+    SparkOfShadowflame = 204440,
+    WhelplingsShadowflameCrestFragment = 204075,
+    DrakesShadowflameCrestFragment = 204076,
+    WyrmsShadowflameCrestFragment = 204077,
+    AspectsShadowflameCrestFragment = 204078,
+    WhelplingsShadowflameCrest = 204193,
+    AspectsShadowflameCrest = 204194,
+    DrakesShadowflameCrest = 204195,
+    WyrmsShadowflameCrest = 204196,
+    BarterBrick = 204985,
 }
 
 private.CurrencyItemID = CurrencyItemID
