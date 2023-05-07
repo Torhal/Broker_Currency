@@ -45,6 +45,7 @@ local ExpansionGroupLabels = {
     EXPANSION_NAME6, -- Legion
     EXPANSION_NAME7, -- Battle for Azeroth
     EXPANSION_NAME8, -- Shadowlands
+    EXPANSION_NAME9, -- Dragonflight
 }
 
 local GoldIcon = "\124TInterface\\MoneyFrame\\UI-GoldIcon:20:20\124t"

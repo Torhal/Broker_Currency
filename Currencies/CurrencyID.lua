@@ -101,6 +101,12 @@ local CurrencyID = {
     InfusedRuby = 1820,
     SoulAsh = 1828,
     GratefulOffering = 1885,
+    ElementalOverflow = 2118,
+    DragonIslesSupplies = 2003,
+    StormSigil = 2122,
+    BloodyTokens = 2123,
+    CatalystCharges = 2167,
+    Flightstones = 2245,
 }
 
 private.CurrencyID = CurrencyID

@@ -131,7 +131,33 @@ local ExpansionCurrencyGroups = {
         CurrencyID.SinstoneFragments,
         CurrencyID.SoulAsh,
         CurrencyID.Stygia,
+    },
+    --------------------------------------------------------------------------------
+    ---- Dragonflight
+    --------------------------------------------------------------------------------
+    {
+        CurrencyID.BloodyTokens,
+        CurrencyID.CatalystCharges,
+        CurrencyID.DragonIslesSupplies,
+        CurrencyID.ElementalOverflow,
+        CurrencyID.StormSigil,
         CurrencyID.Valor,
+        CurrencyItemID.SparkOfIngenuity,
+        -- 10.0.7
+        CurrencyItemID.DormantPrimordialFragment,
+        CurrencyItemID.ZskeraVaultKey,
+        -- 10.1.0
+        CurrencyItemID.BarterBrick,
+        CurrencyID.Flightstones,
+        CurrencyItemID.SparkOfShadowflame,
+        CurrencyItemID.WhelplingsShadowflameCrestFragment,
+        CurrencyItemID.DrakesShadowflameCrestFragment,
+        CurrencyItemID.WyrmsShadowflameCrestFragment,
+        CurrencyItemID.AspectsShadowflameCrestFragment,
+        CurrencyItemID.WhelplingsShadowflameCrest,
+        CurrencyItemID.DrakesShadowflameCrest,
+        CurrencyItemID.WyrmsShadowflameCrest,
+        CurrencyItemID.AspectsShadowflameCrest,
     },
 }
 
