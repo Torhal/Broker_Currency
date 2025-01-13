@@ -26,6 +26,7 @@ local ExpansionCurrencyGroups = {
     {
         CurrencyID.ChampionsSeal,
         CurrencyID.DalaranJewelcraftersToken,
+        CurrencyID.StoneKeepersShard,
     },
     --------------------------------------------------------------------------------
     ---- Cataclysm
@@ -132,6 +133,27 @@ local ExpansionCurrencyGroups = {
         CurrencyID.SoulAsh,
         CurrencyID.Stygia,
         CurrencyID.Valor,
+    },
+    --------------------------------------------------------------------------------
+    ---- Dragonflight
+    --------------------------------------------------------------------------------
+    {
+        CurrencyID.DragonIslesSupplies,
+    },
+    --------------------------------------------------------------------------------
+    ---- The War Within
+    --------------------------------------------------------------------------------
+    {
+        CurrencyID.CarvedHarbingerCrest,
+        CurrencyID.FlameBlessedIron,
+        CurrencyID.Kej,
+        CurrencyID.NerubarFinery,
+        CurrencyID.ResonanceCrystals,
+        CurrencyID.RestoredCofferKey,
+        CurrencyID.RunedHarbingerCrest,
+        CurrencyID.Undercoin,
+        CurrencyID.Valorstones,
+        CurrencyID.WeatheredHarbingerCrest,
     },
 }
 

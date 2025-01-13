@@ -9,13 +9,18 @@ local _, private = ...
 local CurrencyID = {
     DalaranJewelcraftersToken = 61,
     EpicuriansAward = 81,
+    StoneKeepersShard = 161,
     ChampionsSeal = 241,
     IllustriousJewelcraftersToken = 361,
     DwarfArchaeologyFragment = 384,
     TrollArchaeologyFragment = 385,
+    ConquestPoints = Constants and Constants.CurrencyConsts
+        and Constants.CurrencyConsts.CLASSIC_CONQUEST_CURRENCY_ID or 390,
     TolBaradCommendation = 391,
     FossilArchaeologyFragment = 393,
     NightelfArchaeologyFragment = 394,
+    JusticePoints = 395,
+    ValorPoints = 396,
     OrcArchaeologyFragment = 397,
     DraeneiArchaeologyFragment = 398,
     VrykulArchaeologyFragment = 399,
@@ -101,6 +106,20 @@ local CurrencyID = {
     InfusedRuby = 1820,
     SoulAsh = 1828,
     GratefulOffering = 1885,
+    HonorPoints = Constants and Constants.CurrencyConsts
+        and Constants.CurrencyConsts.CLASSIC_HONOR_CURRENCY_ID or 1901,
+    DragonIslesSupplies = 2003,
+    BloodyTokens = 2123,
+    CarvedHarbingerCrest = 2915,
+    FlameBlessedIron = 3090,
+    Kej = 3056,
+    NerubarFinery = 3093,
+    ResonanceCrystals = 2815,
+    RestoredCofferKey = 3028,
+    RunedHarbingerCrest = 2916,
+    Undercoin = 2803,
+    Valorstones = 3008,
+    WeatheredHarbingerCrest = 2914,
 }
 
 private.CurrencyID = CurrencyID

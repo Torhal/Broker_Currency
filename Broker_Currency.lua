@@ -25,26 +25,33 @@ local CurrencyItemID = private.CurrencyItemID
 local CurrencyItemName = private.CurrencyItemName
 local CurrencyName = private.CurrencyName
 
+local C_AddOns = _G.C_AddOns or _G
+local C_CurrencyInfo = _G.C_CurrencyInfo or _G
+local C_Item = _G.C_Item or _G
+
 --------------------------------------------------------------------------------
 ---- Constants
 --------------------------------------------------------------------------------
 local CategoryGroupLabels = {
-    PROFESSIONS_ARCHAEOLOGY, -- Archaeology
-    BONUS_ROLL_TOOLTIP_TITLE, -- Bonus Loot
-    COLLECTIONS, -- Collections
-    CALENDAR_FILTER_HOLIDAYS, -- Holidays
-    PVP, -- PvP
+    PROFESSIONS_ARCHAEOLOGY or "Archaeology",
+    BONUS_ROLL_TOOLTIP_TITLE or "Bonus Loot",
+    COLLECTIONS or "Collections",
+    DUNGEONS or "Dungeons",
+    CALENDAR_FILTER_HOLIDAYS or "Holidays",
+    PVP or "PvP",
 }
 
 local ExpansionGroupLabels = {
-    EXPANSION_NAME1, -- The Burning Crusade
-    EXPANSION_NAME2, -- Wrath of the Lich King
-    EXPANSION_NAME3, -- Cataclysm
-    EXPANSION_NAME4, -- Mists of Pandaria
-    EXPANSION_NAME5, -- Warlords of Draenor
-    EXPANSION_NAME6, -- Legion
-    EXPANSION_NAME7, -- Battle for Azeroth
-    EXPANSION_NAME8, -- Shadowlands
+    EXPANSION_NAME1 or "The Burning Crusade",
+    EXPANSION_NAME2 or "Wrath of the Lich King",
+    EXPANSION_NAME3 or "Cataclysm",
+    EXPANSION_NAME4 or "Mists of Pandaria",
+    EXPANSION_NAME5 or "Warlords of Draenor",
+    EXPANSION_NAME6 or "Legion",
+    EXPANSION_NAME7 or "Battle for Azeroth",
+    EXPANSION_NAME8 or "Shadowlands",
+    EXPANSION_NAME9 or "Dragonflight",
+    EXPANSION_NAME10 or "The War Within",
 }
 
 local GoldIcon = "\124TInterface\\MoneyFrame\\UI-GoldIcon:20:20\124t"
@@ -233,7 +240,7 @@ do
             return 0
         end
 
-        return CurrencyItemName[currencyID] and GetItemCount(currencyID, true)
+        return CurrencyItemName[currencyID] and C_Item.GetItemCount(currencyID, true)
             or C_CurrencyInfo.GetCurrencyInfo(currencyID).quantity
     end
 end
@@ -245,14 +252,14 @@ local function UpdateCurrencyDescriptions()
     for _, currencyID in pairs(CurrencyID) do
         local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID)
 
-        CurrencyDescriptions[currencyID] = currencyInfo.description
+        CurrencyDescriptions[currencyID] = currencyInfo and currencyInfo.description or ""
     end
 
     for _, currencyID in pairs(CurrencyItemID) do
-        local _, _, _, _, iconFileDataID = GetItemInfoInstant(currencyID)
+        local _, _, _, _, iconFileDataID = C_Item.GetItemInfoInstant(currencyID)
 
         if iconFileDataID and iconFileDataID ~= "" then
-            local _, itemHyperlink = GetItemInfo(currencyID)
+            local _, itemHyperlink = C_Item.GetItemInfo(currencyID)
 
             if itemHyperlink then
                 DatamineTooltip:SetHyperlink(itemHyperlink)
@@ -436,11 +443,13 @@ do
     --------------------------------------------------------------------------------
     ---- Constants
     --------------------------------------------------------------------------------
-    local iconToken = DisplayIconStringLeft
-        .. C_CurrencyInfo.GetCurrencyInfo(CurrencyID.CuriousCoin).iconFileID
-        .. DisplayIconStringRight
+    local iconSource = C_CurrencyInfo.GetCurrencyInfo(CurrencyID.CuriousCoin)
+        or C_CurrencyInfo.GetCurrencyInfo(CurrencyID.DalaranJewelcraftersToken)
+    local iconToken = DisplayIconStringLeft .. (
+        iconSource and iconSource.iconFileID or Constants.CurrencyConsts.QUESTIONMARK_INV_ICON
+    ) .. DisplayIconStringRight
 
-    local metadataVersion = GetAddOnMetadata("Broker_Currency", "Version")
+    local metadataVersion = C_AddOns.GetAddOnMetadata("Broker_Currency", "Version")
     local IsDevelopmentVersion = false
     local IsAlphaVersion = false
 
@@ -581,6 +590,7 @@ do
 
     local function SetCacheValuesFromCurrency(currencyID)
         local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID)
+        if not currencyInfo then return end
         local currencyName = currencyInfo.name
 
         if currencyName and currencyName ~= "" then
@@ -596,10 +606,10 @@ do
     end
 
     local function SetCacheValuesFromItem(currencyID)
-        local _, _, _, _, iconFileDataID = GetItemInfoInstant(currencyID)
+        local _, _, _, _, iconFileDataID = C_Item.GetItemInfoInstant(currencyID)
 
         if iconFileDataID and iconFileDataID ~= "" then
-            local itemName = GetItemInfo(currencyID)
+            local itemName = C_Item.GetItemInfo(currencyID)
 
             if itemName then
                 CurrencyNameCache[currencyID] = itemName
@@ -690,7 +700,7 @@ do
                                 local iconSize = Broker_CurrencyCharDB.iconSize
 
                                 Broker_CurrencyCharDB[info[#info]] = true and value or nil
-                                Broker_Currency.generalSettings.args.iconSize.name =
+                                Broker_Currency.options.args.generalSettings.args.iconSize.name =
                                     iconToken:format(8, iconSize, iconSize)
                                 Broker_Currency:Update()
                             end,
@@ -711,7 +721,7 @@ do
                                 local iconSize = Broker_CurrencyCharDB.iconSizeGold
 
                                 Broker_CurrencyCharDB[info[#info]] = true and value or nil
-                                Broker_Currency.generalSettings.args.iconSizeGold.name =
+                                Broker_Currency.options.args.generalSettings.args.iconSizeGold.name =
                                     GOLD_AMOUNT_TEXTURE:format(8, iconSize, iconSize)
                                 Broker_Currency:Update()
                             end,
